@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    // Target latest version of ECMAScript.
+    "target": "esnext",
+    // Search under node_modules for non-relative imports.
+    "module": "esnext",
+    "moduleResolution": "node",
+    // Process & infer types from .js files.
+    "allowJs": true,
+    // Don't emit; allow Babel to transform files.
+    "noEmit": true,
+    // Enable strictest settings like strictNullChecks & noImplicitAny.
+    "strict": false,
+    // Disallow features that require cross-file information for emit.
+    //"isolatedModules": true,
+    // Import non-ES modules as default imports.
+    "noErrorTruncation": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["./src/*"],
+      "test/*": ["./test/*"]
+    },
+    "typeRoots": ["node_modules/@types", "typings"]
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": []
+}
