@@ -1,20 +1,25 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent, act, RenderResult } from 'tests/utils';
 
 import App from 'src/components/App';
 
-test('App Renders', () => {
-  const { container } = render(<App />);
+test('App Renders', async () => {
+  let result: RenderResult;
 
-  expect(container.firstChild).toBeTruthy();
+  await act(async () => {
+    result = render(<App />);
+  });
+
+  expect(result.container.firstChild).toBeTruthy();
 });
 
 test('That the new sample modal pops up when hitting the create sample button', async () => {
-  const { getByText, getByTestId } = render(<App />);
+  let result: RenderResult;
 
   await act(async () => {
-    fireEvent.click(getByText('Create new Sample'));
+    result = render(<App />);
+    fireEvent.click(result.getByText('Create new Sample'));
   });
 
-  expect(getByTestId('sampleForm')).toBeTruthy();
+  expect(result.getByTestId('sampleForm')).toBeTruthy();
 });

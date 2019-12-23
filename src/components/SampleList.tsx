@@ -1,7 +1,7 @@
 import React from 'react';
 import { Heading, Box, Text, Menu, DataTable } from 'grommet';
 
-import { SampleDoc, deleteSample } from 'src/db/sample';
+import { SampleDoc } from 'src/db/sample';
 
 interface SampleListProps {
   samples: SampleDoc[];

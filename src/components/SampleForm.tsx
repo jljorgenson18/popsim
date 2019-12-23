@@ -29,9 +29,7 @@ function SampleForm(props: SampleFormProps) {
       onSubmit(values);
     }
   });
-  console.log(formik);
   const currentModel = formik.values.model;
-  console.log(currentModel);
   return (
     <Box pad="medium" gap="small" width="medium" data-testid="sampleForm">
       <Form onSubmit={formik.handleSubmit}>

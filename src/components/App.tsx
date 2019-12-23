@@ -27,6 +27,7 @@ function App(props: AppProps): JSX.Element {
         setFetching(false);
         setAllSamples(samples);
       } catch (err) {
+        if (cancelled) return;
         console.error(err);
         setFetching(false);
       }
