@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Main, Heading, Button, Footer, Header, Layer } from 'grommet';
+import { Main, Heading, Button, Footer, Header, Layer, Box, Text } from 'grommet';
 import Skeleton from 'react-loading-skeleton';
 
-import { getAllSamples, Sample } from 'src/db/sample';
+import db from 'src/db';
+import { getAllSamples, createSample, SamplePayload, SampleDoc, deleteSample } from 'src/db/sample';
 import SampleList from './SampleList';
 import SampleForm from './SampleForm';
+import DeleteSamplePrompt from './DeleteSamplePromp';
 
 interface AppProps {}
 
 function App(props: AppProps): JSX.Element {
-  const [allSamples, setAllSamples] = useState<Sample[]>(null);
+  const [allSamples, setAllSamples] = useState<SampleDoc[]>(null);
   const [fetching, setFetching] = useState<boolean>(false);
+  const [changeCount, setChangeCount] = useState<number>(0);
   const [showingNewSampleModal, setShowingNewSampleModal] = useState<boolean>(false);
+  const [deletingSample, setDeletingSample] = useState<SampleDoc>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,7 +32,30 @@ function App(props: AppProps): JSX.Element {
       }
     })();
     return () => (cancelled = true);
+  }, [changeCount]);
+
+  useEffect(() => {
+    let count = 0;
+    const changes = db
+      .changes({
+        since: 'now',
+        live: true
+      })
+      .on('change', change => {
+        count++;
+        setChangeCount(count);
+      });
+    return () => changes.cancel();
   }, []);
+
+  async function handleNewSampleSubmit(values: SamplePayload) {
+    await createSample(values);
+    setShowingNewSampleModal(false);
+  }
+
+  function handleDeleteSample(sample: SampleDoc) {
+    setDeletingSample(sample);
+  }
 
   return (
     <>
@@ -37,8 +64,10 @@ function App(props: AppProps): JSX.Element {
         <Button onClick={() => setShowingNewSampleModal(true)} label={'Create new Sample'} />
       </Header>
       <Main pad="large">
-        {fetching ? <Skeleton count={5} /> : null}
-        {allSamples ? <SampleList samples={allSamples} /> : null}
+        {fetching && !allSamples ? <Skeleton count={5} /> : null}
+        {allSamples ? (
+          <SampleList samples={allSamples} onDeleteSample={handleDeleteSample} />
+        ) : null}
       </Main>
       {showingNewSampleModal ? (
         <Layer
@@ -48,13 +77,13 @@ function App(props: AppProps): JSX.Element {
           onEsc={() => setShowingNewSampleModal(false)}
           onClickOutside={() => setShowingNewSampleModal(false)}>
           <SampleForm
-            onSubmit={vals => {
-              console.log(vals);
-              setShowingNewSampleModal(false);
-            }}
+            onSubmit={handleNewSampleSubmit}
             onCancel={() => setShowingNewSampleModal(false)}
           />
         </Layer>
+      ) : null}
+      {deletingSample ? (
+        <DeleteSamplePrompt sample={deletingSample} onClear={() => setDeletingSample(null)} />
       ) : null}
       <Footer background="brand" pad="medium"></Footer>
     </>

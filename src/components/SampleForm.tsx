@@ -1,35 +1,29 @@
 import React from 'react';
 import { Box, Button, Form, FormField, Heading, Select } from 'grommet';
 import { useFormik } from 'formik';
+import { SamplePayload } from 'src/db/sample';
 
 interface SampleFormProps {
   onCancel: () => void;
   onSubmit: (payload: SamplePayload) => void;
 }
 
-interface Model1Payload {
-  model: 'model 1';
-}
-
-interface Model2Payload {
-  model: 'model 2';
-}
-
-interface Model3Payload {
-  model: 'model 3';
-}
-
-interface Model4Payload {
-  model: 'model 4';
-}
-
-export type SamplePayload = Model1Payload | Model2Payload | Model3Payload | Model4Payload;
-
 function SampleForm(props: SampleFormProps) {
   const { onSubmit, onCancel } = props;
   const formik = useFormik({
     initialValues: {
+      name: '',
       model: ''
+    },
+    validate(values) {
+      const errors: { [fieldName: string]: string } = {};
+      if (!values.model) {
+        errors.model = 'Required';
+      }
+      if (!values.name) {
+        errors.name = 'Required';
+      }
+      return errors;
     },
     onSubmit(values: SamplePayload) {
       onSubmit(values);
@@ -42,7 +36,18 @@ function SampleForm(props: SampleFormProps) {
     <Box pad="medium" gap="small" width="medium">
       <Form onSubmit={formik.handleSubmit}>
         <Heading level={3}>New Sample</Heading>
-        <FormField label="Model" htmlFor="model-select" required>
+        <FormField
+          label="Name"
+          name="name"
+          placeholder="My sample name"
+          error={(formik.touched.name || formik.submitCount > 0) && formik.errors.name}
+          value={formik.values.name}
+          onChange={formik.handleChange}
+        />
+        <FormField
+          label="Model"
+          htmlFor="model-select"
+          error={(formik.touched.model || formik.submitCount > 0) && formik.errors.model}>
           <Select
             id="model-select"
             placeholder="Select a model"
@@ -53,8 +58,13 @@ function SampleForm(props: SampleFormProps) {
             }}
             value={formik.values.model}></Select>
         </FormField>
-        <Box direction="row" justify="between">
-          <Button label={'Submit'} primary gap="small" type="submit"></Button>
+        <Box direction="row" gap="medium">
+          <Button
+            label={'Submit'}
+            primary
+            gap="small"
+            type="submit"
+            disabled={!formik.isValid && formik.submitCount > 0}></Button>
           <Button label={'Cancel'} onClick={onCancel} gap="small"></Button>
         </Box>
       </Form>
