@@ -12,8 +12,12 @@
     "format": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
     "check-types": "tsc",
     "check-types:watch": "tsc --watch",
-    "test": "jest",
-    "pre-commit": "npm run check-types && npm run linter && npm test"
+    "test": "jest"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run check-types && npm run linter && npm test"
+    }
   },
   "repository": {
     "type": "git",
