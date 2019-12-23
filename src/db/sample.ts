@@ -34,6 +34,7 @@ export type SampleDoc = SamplePayload & {
 
 export async function createSample(payload: SamplePayload): Promise<SampleDoc> {
   const id = uuid();
+  // Call to math goes here
   await db.put<PartialBy<SampleDoc, '_rev'>>({
     ...payload,
     createdAt: Date.now(),
