@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Main, Heading, Button, Footer, Header, Layer, Box, Text } from 'grommet';
+import { Main, Heading, Button, Footer, Header, Layer } from 'grommet';
 import Skeleton from 'react-loading-skeleton';
 
 import db from 'src/db';
-import { getAllSamples, createSample, SamplePayload, SampleDoc, deleteSample } from 'src/db/sample';
+import { getAllSamples, createSample, SamplePayload, SampleDoc } from 'src/db/sample';
 import SampleList from './SampleList';
 import SampleForm from './SampleForm';
 import DeleteSamplePrompt from './DeleteSamplePromp';
@@ -41,7 +41,7 @@ function App(props: AppProps): JSX.Element {
         since: 'now',
         live: true
       })
-      .on('change', change => {
+      .on('change', () => {
         count++;
         setChangeCount(count);
       });

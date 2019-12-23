@@ -33,7 +33,7 @@ function SampleForm(props: SampleFormProps) {
   const currentModel = formik.values.model;
   console.log(currentModel);
   return (
-    <Box pad="medium" gap="small" width="medium">
+    <Box pad="medium" gap="small" width="medium" data-testid="sampleForm">
       <Form onSubmit={formik.handleSubmit}>
         <Heading level={3}>New Sample</Heading>
         <FormField
