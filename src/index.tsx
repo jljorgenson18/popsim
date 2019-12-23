@@ -4,6 +4,6 @@ import ReactDOM from 'react-dom';
 
 import './Polyfills';
 
-import Root from './containers/Root';
+import Root from './components/Root';
 
 ReactDOM.render(<Root />, document.getElementById('app'));
