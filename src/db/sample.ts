@@ -6,22 +6,56 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 interface BaseSample {
   name: string;
+  N: number; // Number of monomers (int)
+  tstop: number; // Time to stop simulation. Could also do a total number of steps to generate
+  // OPTIONAL
+  V: number; // System volume. Defaults to 1
 }
+
+// For the optional things, maybe a checkbox or two.
+// We can hammer that out way later though
 
 interface Model1Payload extends BaseSample {
   model: 'Becker-Doring';
+  a: number; // Addition rate constant (float)
+  b: number; // Subtraction rate constant (float)
+  // OPTIONAL //
+  nc: number; // Critical nucleus size. Defaults to 2
+  kn: number; // Nucleation rate constant. Defaults to kn = a
 }
 
 interface Model2Payload extends BaseSample {
   model: 'Knowles';
+  ka: number; // Association rate constant
+  b: number; // Subtraction rate constant
+  // OPTIONAL //
+  a: number; // Addition rate constant. Defaults to a = ka if empty
+  nc: number; // Critical nucleus size. Defaults to 2
+  kn: number; // Nucleation rate constant. Defaults to kn = a
 }
 
 interface Model3Payload extends BaseSample {
   model: 'Smoluchowsi';
+  ka: number; // Association
+  kb: number; // Dissociation
+  // OPTIONAL //
+  a: number; // Addition. Defaults to a = ka
+  b: number; // Subtraction. Defaults to b = kb
+  nc: number; // Critical nucleus size. Defaults to 2
+  kn: number; // Nucleation rate constant. Defaults to kn = a
 }
 
+// BACKBURNER
 interface Model4Payload extends BaseSample {
   model: 'BD-nucleation';
+  ka: number; // Growth-phase association
+  kb: number; // Growth-phase dissociation
+  na: number; // Nucleation-phase addition rate constant
+  nb: number; // Nucleation-phase subtraction rate constant
+  nc: number; // Critical nucleus size. Defines nucleation vs growth phase
+  // OPTIONAL //
+  a: number; // Growth-phase addition. Not sure if defaults to na or ka
+  b: number; // Growth-phase subtraction. ditto nb or kb
 }
 
 export type SamplePayload = Model1Payload | Model2Payload | Model3Payload | Model4Payload;
