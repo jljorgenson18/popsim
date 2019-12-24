@@ -19,11 +19,12 @@ function SampleList(props: SampleListProps): JSX.Element {
   }
   return (
     <DataTable
+      primaryKey="_id"
+      sortable
       columns={[
         {
           property: 'name',
-          header: <Text>Name</Text>,
-          primary: true
+          header: <Text>Name</Text>
         },
         {
           property: 'createdAt',
@@ -42,7 +43,8 @@ function SampleList(props: SampleListProps): JSX.Element {
                 items={[{ label: 'Delete', onClick: () => onDeleteSample(sample) }]}
               />
             );
-          }
+          },
+          sortable: false
         }
       ]}
       data={samples}></DataTable>
