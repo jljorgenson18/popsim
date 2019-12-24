@@ -25,7 +25,7 @@ export function createSpecies(initialState: ModelState, newVal: any): ModelState
 export function removeSpecies(initialState: ModelState, index: number): ModelState {
   const finalState: ModelState = {
     t: initialState.t,
-    s: initialState.s.filter((spec, ind) => ind != index)
+    s: initialState.s.filter((spec, ind) => ind !== index)
   };
   return finalState;
 }
