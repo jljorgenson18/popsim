@@ -9,19 +9,19 @@ interface BaseSample {
 }
 
 interface Model1Payload extends BaseSample {
-  model: 'model 1';
+  model: 'Becker-Doring';
 }
 
 interface Model2Payload extends BaseSample {
-  model: 'model 2';
+  model: 'Knowles';
 }
 
 interface Model3Payload extends BaseSample {
-  model: 'model 3';
+  model: 'Smoluchowsi';
 }
 
 interface Model4Payload extends BaseSample {
-  model: 'model 4';
+  model: 'BD-nucleation';
 }
 
 export type SamplePayload = Model1Payload | Model2Payload | Model3Payload | Model4Payload;
