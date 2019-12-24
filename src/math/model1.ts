@@ -1,10 +1,9 @@
 import { SamplePayload } from 'src/db/sample';
+// WTF
+// import { ModelState } from 'src/math/common';
 
 // Test code, definitely doesn't work... yet
-interface ModelState {
-  x: number;
-  y: number;
-}
+
 export default function model1(payload: SamplePayload): any {
   const { name, model } = payload;
   let state = {
