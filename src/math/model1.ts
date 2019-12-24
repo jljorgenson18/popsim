@@ -1,8 +1,8 @@
 import { SamplePayload } from 'src/db/sample';
-// WTF
-// import { ModelState } from 'src/math/common';
 
 // Test code, definitely doesn't work... yet
+
+
 
 export default function model1(payload: SamplePayload): any {
   const { name, model } = payload;
