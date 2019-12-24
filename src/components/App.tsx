@@ -74,6 +74,7 @@ function App(props: AppProps): JSX.Element {
         <Layer
           position="center"
           modal
+          responsive={false}
           animation="fadeIn"
           onEsc={() => setShowingNewSampleModal(false)}
           onClickOutside={() => setShowingNewSampleModal(false)}>
