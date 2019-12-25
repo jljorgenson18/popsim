@@ -6,7 +6,7 @@ import db from 'src/db';
 import { getAllSamples, createSample, SamplePayload, SampleDoc } from 'src/db/sample';
 import SampleList from './SampleList';
 import SampleForm from './SampleForm';
-import DeleteSamplePrompt from './DeleteSamplePromp';
+import DeleteSamplePrompt from './DeleteSamplePrompt';
 
 interface AppProps {}
 
@@ -57,6 +57,8 @@ function App(props: AppProps): JSX.Element {
   function handleDeleteSample(sample: SampleDoc) {
     setDeletingSample(sample);
   }
+
+  console.log('All Samples', allSamples);
 
   return (
     <>

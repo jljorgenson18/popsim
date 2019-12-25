@@ -11,7 +11,7 @@ interface DeleteSamplePromptProps {
 function DeleteSamplePrompt(props: DeleteSamplePromptProps) {
   const { sample, onClear } = props;
   return (
-    <Layer position="center" modal onClickOutside={onClear} onEsc={onClear}>
+    <Layer position="center" modal onClickOutside={onClear} onEsc={onClear} responsive={false}>
       <Box pad="medium" gap="small" width="medium">
         <Heading level={3} margin="none">
           Confirm
