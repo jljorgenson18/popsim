@@ -1,8 +1,7 @@
 import uuid from 'uuid/v4';
-import PromiseWorker from 'promise-worker';
 
 import db from './index';
-import Worker from '../math/index.worker';
+import { getSampleData } from 'src/math/index';
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -69,18 +68,13 @@ export type SampleDoc = SamplePayload & {
 };
 
 // TODO: Build out what the sample data looks like
-type SampleData = any;
+export type SampleData = any;
 
 export const modelTypes = ['Becker-Doring', 'Knowles', 'Smoluchowsi', 'BD-nucleation'];
 
-const worker = new PromiseWorker(new Worker());
-
 export async function createSample(payload: SamplePayload): Promise<SampleDoc> {
   const id = uuid();
-  const sampleData = await worker.postMessage<SampleData>({
-    method: 'createSample',
-    params: payload
-  });
+  const sampleData = await getSampleData(payload);
 
   // Call to math goes here
   await db.put<PartialBy<SampleDoc, '_rev'>>({
