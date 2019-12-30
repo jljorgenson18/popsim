@@ -2,7 +2,7 @@ import { BeckerDoringPayload } from 'src/db/sample';
 import {
   Species,
   ModelState,
-  Model,
+  getProbabilitiesFunc,
   createSpecies,
   removeSpecies,
   changeSpeciesValue,
@@ -37,35 +37,25 @@ function subtraction(state: ModelState, ind: number, nc: number): ModelState {
   return newState;
 }
 
-export function buildModel(inp: BeckerDoringPayload): Model {
-  const model: Model = {
-    params: inp,
-    getProbabilities: function(state: ModelState) {
-      // This right here seems gratuitous and obese
-      const nc: number = this.params.nc;
-      const kn: number = this.params.kn;
-      const a: number = this.params.a;
-      const b: number = this.inp.b;
-      const possibleStates: { P: number; s: ModelState }[] = [];
+export function buildModel(params: BeckerDoringPayload): getProbabilitiesFunc {
+  const { a, b, nc = 2, kn = a } = params;
+  return function(state: ModelState) {
+    const possibleStates: { P: number; s: ModelState }[] = [];
 
-      if (state.r > nc) {
-        let P = 0.5 * kn;
-        for (let j = 0; j < nc; j++) {
-          P = P * (state.r - j);
-        }
-        possibleStates.push({ P: P, s: nucleate(state, nc) });
+    if (state.r > nc) {
+      let P = 0.5 * kn;
+      for (let j = 0; j < nc; j++) {
+        P = P * (state.r - j);
       }
-      let index = 0;
-      for (const i in state.s) {
-        const Pa = a * state.r;
-        possibleStates.push({ P: Pa, s: addition(state, index) });
-        const Pb = b;
-        possibleStates.push({ P: Pb, s: subtraction(state, index, nc) });
-        index++;
-      }
-
-      return possibleStates;
+      possibleStates.push({ P: P, s: nucleate(state, nc) });
     }
+    state.s.forEach((s, index) => {
+      const Pa = a * state.r;
+      possibleStates.push({ P: Pa, s: addition(state, index) });
+      const Pb = b;
+      possibleStates.push({ P: Pb, s: subtraction(state, index, nc) });
+    });
+
+    return possibleStates;
   };
-  return model;
 }

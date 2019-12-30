@@ -1,5 +1,3 @@
-import { BaseSample } from 'src/db/sample';
-
 export interface Species {
   n: number; // Number of species
   val?: any; // Species identifier
@@ -11,12 +9,7 @@ export interface ModelState {
   r?: number; // Resource pool
 }
 
-export interface Model {
-  // Models run through all possible next states and generate their probabilities.
-  // Return a list of those next states and the probability associated with them.
-  params: BaseSample; // Parameter array
-  getProbabilities: (s: ModelState) => { P: number; s: ModelState }[];
-}
+export type getProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState }[];
 
 // Creating and modifying the state
 
