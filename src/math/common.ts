@@ -9,6 +9,10 @@ export interface ModelState {
   r?: any[]; // Resource pool
 }
 
+export interface Model {
+  params: number[]; // Parameter array
+}
+
 // Creating and modifying the state
 
 export function createInitialState(N: Species[]): ModelState {
