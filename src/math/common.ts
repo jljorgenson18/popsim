@@ -1,12 +1,17 @@
+export interface Species {
+    n: number; // Number of species
+    val?: any; // Species identifier 
+}
+
 export interface ModelState {
-  t?: number; // Time
-  s?: any[]; // Species
-  // r?: any[] // Resource pool
+  t: number; // Time
+  s: Species[]; // Species
+  r?: any[] // Resource pool
 }
 
 // Creating and modifying the state
 
-export function createInitialState(N: any[]): ModelState {
+export function createInitialState(N: Species[]): ModelState {
   const state: ModelState = { t: 0, s: N };
   return state;
 }
@@ -16,7 +21,7 @@ export function advanceTime(dt: number, initialState: ModelState): ModelState {
   return finalState;
 }
 
-export function createSpecies(initialState: ModelState, newVal: any): ModelState {
+export function createSpecies(initialState: ModelState, newVal: Species): ModelState {
   const finalState: ModelState = initialState;
   finalState.s.push(newVal);
   return finalState;
@@ -30,8 +35,14 @@ export function removeSpecies(initialState: ModelState, index: number): ModelSta
   return finalState;
 }
 
-export function changeSpecies(initialState: ModelState, index: number, newVal: any): ModelState {
+export function changeSpeciesValue(initialState: ModelState, index: number, newVal: any): ModelState {
   const finalState: ModelState = initialState;
-  finalState.s[index] = newVal;
+  finalState.s[index].val = newVal;
   return finalState;
+}
+
+export function changeSpeciesNumber(initialState: ModelState, index: number, newNum: any): ModelState {
+    const finalState: ModelState = initialState;
+    finalState.s[index].n = newNum;
+    return finalState;
 }
