@@ -9,7 +9,7 @@ export interface ModelState {
   r?: number; // Resource pool
 }
 
-export type getProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState }[];
+export type GetProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState }[];
 
 // Creating and modifying the state
 

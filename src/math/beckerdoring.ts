@@ -2,7 +2,7 @@ import { BeckerDoringPayload } from 'src/db/sample';
 import {
   Species,
   ModelState,
-  getProbabilitiesFunc,
+  GetProbabilitiesFunc,
   createSpecies,
   removeSpecies,
   changeSpeciesValue,
@@ -37,7 +37,7 @@ function subtraction(state: ModelState, ind: number, nc: number): ModelState {
   return newState;
 }
 
-export function buildModel(params: BeckerDoringPayload): getProbabilitiesFunc {
+export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
   const { a, b, nc = 2, kn = a } = params;
   return function(state: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
