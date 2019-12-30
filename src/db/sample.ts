@@ -5,7 +5,7 @@ import { getSampleData } from 'src/math/index';
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-interface BaseSample {
+export interface BaseSample {
   name: string;
   N: number; // Number of monomers (int)
   tstop: number; // Time to stop simulation. Could also do a total number of steps to generate
