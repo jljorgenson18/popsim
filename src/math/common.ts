@@ -1,4 +1,4 @@
-import BaseSample from 'src/db/sample';
+import { BaseSample } from 'src/db/sample';
 
 export interface Species {
   n: number; // Number of species
