@@ -24,11 +24,13 @@ export function advanceTime(initialState: ModelState, dt: number): ModelState {
   };
 }
 
-// TODO: Make immutable
 export function createSpecies(initialState: ModelState, newVal: Species): ModelState {
-  const finalState: ModelState = initialState;
-  finalState.s.push(newVal);
-  return finalState;
+  const newSpecies = initialState.s.slice(0);
+  newSpecies.push(newVal);
+  return {
+    ...initialState,
+    s: newSpecies
+  };
 }
 
 export function updateResource(initialState: ModelState, val: number): ModelState {
@@ -42,24 +44,34 @@ export function removeSpecies(initialState: ModelState, index: number): ModelSta
   };
 }
 
-// TODO: Make immutable
 export function changeSpeciesValue(
   initialState: ModelState,
   index: number,
   newVal: any
 ): ModelState {
-  const finalState: ModelState = initialState;
-  finalState.s[index].val = newVal;
-  return finalState;
+  const newSpecies = initialState.s.slice(0);
+  newSpecies[index] = {
+    ...newSpecies[index],
+    val: newVal
+  };
+  return {
+    ...initialState,
+    s: newSpecies
+  };
 }
 
-// TODO: Make immutable
 export function changeSpeciesNumber(
   initialState: ModelState,
   index: number,
   newNum: number
 ): ModelState {
-  const finalState: ModelState = initialState;
-  finalState.s[index].n = newNum;
-  return finalState;
+  const newSpecies = initialState.s.slice(0);
+  newSpecies[index] = {
+    ...newSpecies[index],
+    n: newNum
+  };
+  return {
+    ...initialState,
+    s: newSpecies
+  };
 }
