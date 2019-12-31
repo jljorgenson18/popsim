@@ -13,28 +13,23 @@ import {
 function nucleate(state: ModelState, nc: number): ModelState {
   const n: number = state.r - nc;
   const nucleus: Species = { n: 1, val: nc };
-  const newState: ModelState = updateResource(createSpecies(state, nucleus), n);
-  return newState;
+  return updateResource(createSpecies(state, nucleus), n);
 }
 
 function addition(state: ModelState, ind: number): ModelState {
   const n = state.r - 1;
   const newVal = state.s[ind].val + 1;
-  const newState = updateResource(changeSpeciesValue(state, ind, newVal), n);
-  return newState;
+  return updateResource(changeSpeciesValue(state, ind, newVal), n);
 }
 
 function subtraction(state: ModelState, ind: number, nc: number): ModelState {
-  let newState = state;
   if (state.s[ind].val > nc) {
     const n = state.r + 1;
     const newVal = state.s[ind].val - 1;
-    newState = updateResource(changeSpeciesValue(state, ind, newVal), n);
-  } else {
-    const n = state.r + nc;
-    newState = updateResource(removeSpecies(state, ind), n);
+    return updateResource(changeSpeciesValue(state, ind, newVal), n);
   }
-  return newState;
+  const n = state.r + nc;
+  return updateResource(removeSpecies(state, ind), n);
 }
 
 export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
