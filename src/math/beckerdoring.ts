@@ -4,32 +4,57 @@ import {
   ModelState,
   GetProbabilitiesFunc,
   createSpecies,
-  removeSpecies,
-  changeSpeciesValue,
-  changeSpeciesNumber,
-  updateResource
+  removeSpecies
 } from 'src/math/common';
 
 function nucleate(state: ModelState, nc: number): ModelState {
-  const n: number = state.r - nc;
-  const nucleus: Species = { n: 1, val: nc };
-  return updateResource(createSpecies(state, nucleus), n);
+  const newState = state;
+  newState[1] = state[1] - nc;
+  newState[nc] = state[nc] + 1;
+  return newState;
 }
 
-function addition(state: ModelState, ind: number): ModelState {
-  const n = state.r - 1;
-  const newVal = state.s[ind].val + 1;
-  return updateResource(changeSpeciesValue(state, ind, newVal), n);
-}
-
-function subtraction(state: ModelState, ind: number, nc: number): ModelState {
-  if (state.s[ind].val > nc) {
-    const n = state.r + 1;
-    const newVal = state.s[ind].val - 1;
-    return updateResource(changeSpeciesValue(state, ind, newVal), n);
+function addition(state: ModelState, id: number): ModelState {
+  const newState = state;
+  newState[1] = state[1] - 1;
+  newState[id] = state[id] - 1;
+  if (newState[id] === 0) {
+    removeSpecies(newState, id);
   }
-  const n = state.r + nc;
-  return updateResource(removeSpecies(state, ind), n);
+  if (id in newState) {
+    newState[id + 1] = state[id + 1] + 1;
+  } else {
+    newState[id + 1] = 1;
+  }
+  return newState;
+}
+
+function subtraction(state: ModelState, id: number, nc: number): ModelState {
+  const newState = state;
+  // Check if the polymer is bigger than a nucleus
+  if (state[id] > nc) {
+    newState[1] = state[1] + 1; // Add monomer back
+    if (id - 1 in newState) {
+      // Gain one (r-1)-mer
+      newState[id - 1] = state[id - 1] + 1;
+    } else {
+      newState[id - 1] = 1;
+    }
+    newState[id] = state[id] - 1; // Lost one r-mer
+    if (newState[id] === 0) {
+      // Handle if population hits 0
+      removeSpecies(newState, id);
+    }
+    return newState;
+  } else {
+    // If polymer is a nucleus, it dissolves
+    newState[1] = state[1] + nc;
+    newState[nc] = state[nc] - 1;
+    if (newState[nc] === 0) {
+      removeSpecies(newState, nc);
+    }
+    return newState;
+  }
 }
 
 export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
@@ -37,18 +62,20 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
   return function(state: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
 
-    if (state.r > nc) {
+    if (state[1] >= nc) {
       let P = 0.5 * kn;
       for (let j = 0; j < nc; j++) {
-        P = P * (state.r - j);
+        P = P * (state[1] - j);
       }
       possibleStates.push({ P: P, s: nucleate(state, nc) });
     }
-    state.s.forEach((s, index) => {
-      const Pa = a * state.r;
-      possibleStates.push({ P: Pa, s: addition(state, index) });
-      const Pb = b;
-      possibleStates.push({ P: Pb, s: subtraction(state, index, nc) });
+    Object.keys(state).forEach(key => {
+      if (+key !== 1) {
+        const Pa = a * state[1] * state[+key];
+        possibleStates.push({ P: Pa, s: addition(state, +key) });
+        const Pb = b * state[+key];
+        possibleStates.push({ P: Pb, s: subtraction(state, +key, nc) });
+      }
     });
 
     return possibleStates;
