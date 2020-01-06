@@ -15,11 +15,11 @@ function nucleate(state: ModelState, nc: number): ModelState {
 }
 
 function addition(state: ModelState, id: number): ModelState {
-  const newState = state;
+  let newState = state;
   newState[1] = state[1] - 1;
   newState[id] = state[id] - 1;
   if (newState[id] === 0) {
-    removeSpecies(newState, id);
+    newState = removeSpecies(newState, id);
   }
   if (id in newState) {
     newState[id + 1] = state[id + 1] + 1;
@@ -30,7 +30,7 @@ function addition(state: ModelState, id: number): ModelState {
 }
 
 function subtraction(state: ModelState, id: number, nc: number): ModelState {
-  const newState = state;
+  let newState = state;
   // Check if the polymer is bigger than a nucleus
   if (state[id] > nc) {
     newState[1] = state[1] + 1; // Add monomer back
@@ -43,7 +43,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     newState[id] = state[id] - 1; // Lost one r-mer
     if (newState[id] === 0) {
       // Handle if population hits 0
-      removeSpecies(newState, id);
+      newState = removeSpecies(newState, id);
     }
     return newState;
   } else {
@@ -51,7 +51,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     newState[1] = state[1] + nc;
     newState[nc] = state[nc] - 1;
     if (newState[nc] === 0) {
-      removeSpecies(newState, nc);
+      newState = removeSpecies(newState, nc);
     }
     return newState;
   }
