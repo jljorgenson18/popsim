@@ -18,12 +18,15 @@ interface TimeSeries {
 
 export type GetProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState }[];
 
+export const deepClone = (s: ModelState): ModelState => {
+  return JSON.parse(JSON.stringify(s));
+};
 // Creating and modifying the state
 
 export function fillSpecies(s: SpeciesPair[]): Species {
-  let spec: Species;
-  Object.keys(s).forEach(key => {
-    spec[s[key].id] = spec[key].n;
+  const spec: Species = {};
+  s.forEach(pair => {
+    spec[pair.id] = pair.n;
   });
   return spec;
 }
@@ -51,7 +54,7 @@ export function advanceTime(initialState: ModelState, dt: number): ModelState {
 // }
 
 export function removeSpecies(initialState: ModelState, id: number): ModelState {
-  const newState = { ...initialState };
+  const newState = deepClone(initialState);
   delete newState.s[id];
   return newState;
 }
@@ -79,8 +82,9 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   });
   const R = u1 * PP; // Determines which state is selected
   const dt = (1 / PP) * Math.log(1 / u2); // Generate the time step
-  const newState = possibleStates.find((state, index) => R < summedProbabilities[index]);
-
+  const newState = possibleStates.find((state, index) => {
+    return R < summedProbabilities[index];
+  });
   if (!newState) {
     // if it makes it here its broken dawg
     throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
@@ -122,5 +126,5 @@ export function Simulate(
   // Average data
   binnedSeries = averageData(binnedSeries, runs);
 
-  return binnedSeries;
+  return tSeries;
 }

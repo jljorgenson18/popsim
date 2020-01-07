@@ -1,22 +1,27 @@
 import { BeckerDoringPayload } from 'src/db/sample';
-import { ModelState, GetProbabilitiesFunc, removeSpecies } from 'src/math/common';
+import { ModelState, GetProbabilitiesFunc, removeSpecies, deepClone } from 'src/math/common';
 
 function nucleate(state: ModelState, nc: number): ModelState {
-  const newState = state;
-  newState.s[1] = state.s[1] - nc;
-  newState.s[nc] = state.s[nc] + 1;
+  const newState = deepClone(state);
+  newState.s[1] = newState.s[1] - nc;
+  if (!newState.s[nc]) {
+    newState.s[nc] = 1;
+  } else {
+    newState.s[nc] = newState.s[nc] + 1;
+  }
   return newState;
 }
 
 function addition(state: ModelState, id: number): ModelState {
-  let newState = state;
-  newState.s[1] = state.s[1] - 1;
-  newState.s[id] = state.s[id] - 1;
+  let newState = deepClone(state);
+  newState.s[1] = newState.s[1] - 1;
+  newState.s[id] = newState.s[id] - 1;
   if (newState.s[id] === 0) {
     newState = removeSpecies(newState, id);
   }
-  if (id in newState.s) {
-    newState.s[id + 1] = state.s[id + 1] + 1;
+
+  if (newState.s[id + 1] != null) {
+    newState.s[id + 1] = newState.s[id + 1] + 1;
   } else {
     newState.s[id + 1] = 1;
   }
@@ -24,17 +29,17 @@ function addition(state: ModelState, id: number): ModelState {
 }
 
 function subtraction(state: ModelState, id: number, nc: number): ModelState {
-  let newState = state;
+  let newState = deepClone(state);
   // Check if the polymer is bigger than a nucleus
-  if (state.s[id] > nc) {
-    newState.s[1] = state.s[1] + 1; // Add monomer back
+  if (newState.s[id] > nc) {
+    newState.s[1] = newState.s[1] + 1; // Add monomer back
     if (id - 1 in newState.s) {
       // Gain one (r-1)-mer
-      newState.s[id - 1] = state.s[id - 1] + 1;
+      newState.s[id - 1] = newState.s[id - 1] + 1;
     } else {
       newState.s[id - 1] = 1;
     }
-    newState.s[id] = state.s[id] - 1; // Lost one r-mer
+    newState.s[id] = newState.s[id] - 1; // Lost one r-mer
     if (newState.s[id] === 0) {
       // Handle if population hits 0
       newState = removeSpecies(newState, id);
@@ -42,11 +47,8 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     return newState;
   } else {
     // If polymer is a nucleus, it dissolves
-    newState.s[1] = state.s[1] + nc;
-    newState.s[nc] = state.s[nc] - 1;
-    if (newState.s[nc] === 0) {
-      newState = removeSpecies(newState, nc);
-    }
+    newState.s[1] = newState.s[1] + nc;
+    newState = removeSpecies(newState, nc);
     return newState;
   }
 }
@@ -72,7 +74,6 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
         possibleStates.push({ P: Pb, s: subtraction(state, speciesIdx, nc) });
       }
     });
-
     return possibleStates;
   };
 }
