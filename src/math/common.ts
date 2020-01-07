@@ -1,12 +1,15 @@
 export interface Species {
-  id: number; // Species identifier
-  n: number; // Number of species
+  [species: number]: number; // Species
+}
+
+export interface SpeciesPair {
+  id: number;
+  n: number;
 }
 
 export interface ModelState {
+  s: Species;
   t: number; // Time
-  r?: number; // Resource pool,
-  [species: number]: number; // Species
 }
 
 interface TimeSeries {
@@ -17,11 +20,16 @@ export type GetProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState
 
 // Creating and modifying the state
 
-export function createInitialState(N: Species[]): ModelState {
-  const state: ModelState = { t: 0 };
-  for (const i of N) {
-    state[i.id] = i.n;
-  }
+export function fillSpecies(s: SpeciesPair[]): Species {
+  let spec: Species;
+  Object.keys(s).forEach(key => {
+    spec[s[key].id] = spec[key].n;
+  });
+  return spec;
+}
+
+export function createInitialState(N: SpeciesPair[]): ModelState {
+  const state: ModelState = { t: 0, s: fillSpecies(N) };
   return state;
 }
 
@@ -32,11 +40,11 @@ export function advanceTime(initialState: ModelState, dt: number): ModelState {
   };
 }
 
-export function createSpecies(initialState: ModelState, newSpecies: Species): ModelState {
-  const newState = { ...initialState };
-  newState[newSpecies.id] = newSpecies.n;
-  return newState;
-}
+// export function createSpecies(initialState: ModelState, newSpecies: Species): ModelState {
+//   const newState = { ...initialState };
+//   newState[newSpecies.id] = newSpecies.n;
+//   return newState;
+// }
 
 // export function updateResource(initialState: ModelState, val: number): ModelState {
 //   return { ...initialState, r: val };
@@ -44,7 +52,7 @@ export function createSpecies(initialState: ModelState, newSpecies: Species): Mo
 
 export function removeSpecies(initialState: ModelState, id: number): ModelState {
   const newState = { ...initialState };
-  delete newState[id];
+  delete newState.s[id];
   return newState;
 }
 
