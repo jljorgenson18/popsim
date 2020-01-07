@@ -1,4 +1,3 @@
-import isString from 'lodash/isString';
 import { BeckerDoringPayload } from 'src/db/sample';
 import { ModelState, GetProbabilitiesFunc, removeSpecies } from 'src/math/common';
 
@@ -63,13 +62,14 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
       }
       possibleStates.push({ P: P, s: nucleate(state, nc) });
     }
-    Object.keys(state).forEach((key: string | number) => {
-      if (isString(key)) return;
-      if (key !== 1) {
-        const Pa = a * state[1] * state[+key];
-        possibleStates.push({ P: Pa, s: addition(state, +key) });
-        const Pb = b * state[+key];
-        possibleStates.push({ P: Pb, s: subtraction(state, +key, nc) });
+    Object.keys(state).forEach(key => {
+      const speciesIdx = parseInt(key, 10);
+      if (Number.isNaN(speciesIdx)) return;
+      if (speciesIdx !== 1) {
+        const Pa = a * state[1] * state[speciesIdx];
+        possibleStates.push({ P: Pa, s: addition(state, speciesIdx) });
+        const Pb = b * state[speciesIdx];
+        possibleStates.push({ P: Pb, s: subtraction(state, speciesIdx, nc) });
       }
     });
 

@@ -63,7 +63,6 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   const u2 = Math.random();
 
   const possibleStates = getProbabilities(initialState);
-
   const summedProbabilities: number[] = [0];
   let PP = 0; // Probability amplitude
   possibleStates.forEach((state, index) => {
