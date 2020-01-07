@@ -33,7 +33,7 @@ export function advanceTime(initialState: ModelState, dt: number): ModelState {
 }
 
 export function createSpecies(initialState: ModelState, newSpecies: Species): ModelState {
-  const newState = initialState;
+  const newState = { ...initialState };
   newState[newSpecies.id] = newSpecies.n;
   return newState;
 }
@@ -43,13 +43,9 @@ export function createSpecies(initialState: ModelState, newSpecies: Species): Mo
 // }
 
 export function removeSpecies(initialState: ModelState, id: number): ModelState {
-  const newState = initialState;
-  delete initialState[id];
+  const newState = { ...initialState };
+  delete newState[id];
   return newState;
-}
-
-function writeData(series: TimeSeries) {
-  // Do something with data storage or whatever
 }
 
 function binData(data: TimeSeries, newData: TimeSeries): TimeSeries {
@@ -74,13 +70,12 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   });
   const R = u1 * PP; // Determines which state is selected
   const dt = (1 / PP) * Math.log(1 / u2); // Generate the time step
-  possibleStates.forEach((state, index) => {
-    if (R < summedProbabilities[index]) {
-      return advanceTime(state.s, dt);
-    }
-  });
-  // if it makes it here its broken dawg
-  throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
+  const newState = possibleStates.find((state, index) => R < summedProbabilities[index]);
+  if (!newState) {
+    // if it makes it here its broken dawg
+    throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
+  }
+  return advanceTime(newState.s, dt);
 }
 
 function simRun(
@@ -104,11 +99,11 @@ export function Simulate(
   t_end: number,
   getProbabilities: GetProbabilitiesFunc,
   runs: number
-) {
+): TimeSeries {
   let tSeries: TimeSeries;
   let binnedSeries: TimeSeries;
   // Run simulation however many times is needed
-  for (let i; i < runs; i++) {
+  for (let i = 0; i < runs; i++) {
     // Generate new time series
     tSeries = simRun(initialState, t_end, getProbabilities);
     // Bin the new time series
@@ -116,6 +111,6 @@ export function Simulate(
   }
   // Average data
   binnedSeries = averageData(binnedSeries, runs);
-  // Write data
-  writeData(binnedSeries);
+
+  return binnedSeries;
 }

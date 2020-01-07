@@ -1,11 +1,5 @@
 import { BeckerDoringPayload } from 'src/db/sample';
-import {
-  Species,
-  ModelState,
-  GetProbabilitiesFunc,
-  createSpecies,
-  removeSpecies
-} from 'src/math/common';
+import { ModelState, GetProbabilitiesFunc, removeSpecies } from 'src/math/common';
 
 function nucleate(state: ModelState, nc: number): ModelState {
   const newState = state;
