@@ -102,7 +102,7 @@ function dissociate(state: ModelState, id1: number, id2: number, nc: number): Mo
   return newState;
 }
 
-function randomInt(min, max) {
+function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
@@ -143,7 +143,7 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
           if (Number.isNaN(subIdx)) return;
           if (subKey === key) {
             // adding to self. must be at least 2 polymers of same size
-            if (state.s[key] > 1) {
+            if (state.s[speciesIdx] > 1) {
               const Pco = 0.5 * ka * state.s[speciesIdx] * (state.s[speciesIdx] - 1);
               possibleStates.push({ P: Pco, s: coagulate(state, speciesIdx, speciesIdx) });
             }

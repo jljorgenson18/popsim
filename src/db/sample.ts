@@ -57,7 +57,7 @@ export interface BDNucleationPayload extends BaseSample {
 export type SamplePayload =
   | BeckerDoringPayload
   | KnowlesPayload
-  | SmoluchowsiPayload
+  | SmoluchowskiPayload
   | BDNucleationPayload;
 
 export type SampleDoc = SamplePayload & {

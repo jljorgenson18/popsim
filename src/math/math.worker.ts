@@ -2,7 +2,7 @@ import {
   SamplePayload,
   BeckerDoringPayload,
   KnowlesPayload,
-  SmoluchowsiPayload,
+  SmoluchowskiPayload,
   BDNucleationPayload,
   SampleData
 } from 'src/db/sample';
@@ -28,7 +28,7 @@ export const getSampleData = (payload: SamplePayload): SampleData => {
     // knowlesModel(params as KnowlesPayload)
     return [];
   }
-  if (model === 'Smoluchowsi') {
+  if (model === 'Smoluchowski') {
     // smoluchowsiModel(params as SmoluchowsiPayload)
     return [];
   }

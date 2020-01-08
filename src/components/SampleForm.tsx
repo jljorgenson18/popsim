@@ -6,7 +6,7 @@ import {
   modelTypes,
   BeckerDoringPayload,
   KnowlesPayload,
-  SmoluchowsiPayload,
+  SmoluchowskiPayload,
   BDNucleationPayload
 } from 'src/db/sample';
 
@@ -44,7 +44,7 @@ const validate = (values: Partial<SamplePayload>) => {
       errors.b = 'Required';
     }
     return errors;
-  } else if (values.model === 'Smoluchowsi') {
+  } else if (values.model === 'Smoluchowski') {
     if (values.ka == null) {
       errors.kb = 'Required';
     }
@@ -185,7 +185,7 @@ function KnowlesFields(props: { formik: KnowlesFormik }) {
 }
 
 // Just here for the types
-const SmoluchowsiFormikFunc = (params: any) => useFormik<SmoluchowsiPayload>(params);
+const SmoluchowsiFormikFunc = (params: any) => useFormik<SmoluchowskiPayload>(params);
 type SmoluchowsiFormik = ReturnType<typeof SmoluchowsiFormikFunc>;
 function SmoluchowsiFields(props: { formik: SmoluchowsiFormik }) {
   const { formik } = props;
@@ -348,7 +348,7 @@ function SampleForm(props: SampleFormProps) {
           {formik.values.model === 'Knowles' ? (
             <KnowlesFields formik={formik as KnowlesFormik} />
           ) : null}
-          {formik.values.model === 'Smoluchowsi' ? (
+          {formik.values.model === 'Smoluchowski' ? (
             <SmoluchowsiFields formik={formik as SmoluchowsiFormik} />
           ) : null}
           {formik.values.model === 'BD-nucleation' ? (
