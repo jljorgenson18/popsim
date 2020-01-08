@@ -97,11 +97,12 @@ function simRun(
   t_end: number,
   getProbabilities: GetProbabilitiesFunc
 ): TimeSeries {
-  let state = initialState;
+  let state = deepClone(initialState);
   const t_series: TimeSeries = { states: [initialState] };
   // simulate until end time is reached
   while (state.t < t_end) {
     state = simStep(state, getProbabilities);
+    console.log(JSON.stringify(state, null, '  '));
     t_series.states.push(state);
     // gotta have some kind of break here or maybe not idk
   }
