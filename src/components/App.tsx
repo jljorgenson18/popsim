@@ -11,11 +11,11 @@ import DeleteSamplePrompt from './DeleteSamplePrompt';
 interface AppProps {}
 
 function App(props: AppProps): JSX.Element {
-  const [allSamples, setAllSamples] = useState<SampleDoc[]>(null);
+  const [allSamples, setAllSamples] = useState<SampleDoc[] | null>(null);
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
   const [showingNewSampleModal, setShowingNewSampleModal] = useState<boolean>(false);
-  const [deletingSample, setDeletingSample] = useState<SampleDoc>(null);
+  const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +32,9 @@ function App(props: AppProps): JSX.Element {
         setFetching(false);
       }
     })();
-    return () => (cancelled = true);
+    return () => {
+      cancelled = true;
+    };
   }, [changeCount]);
 
   useEffect(() => {
