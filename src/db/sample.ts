@@ -32,8 +32,8 @@ export interface KnowlesPayload extends BaseSample {
   kn?: number; // Nucleation rate constant. Defaults to kn = a
 }
 
-export interface SmoluchowsiPayload extends BaseSample {
-  model: 'Smoluchowsi';
+export interface SmoluchowskiPayload extends BaseSample {
+  model: 'Smoluchowski';
   ka: number; // Association
   kb: number; // Dissociation
   a?: number; // Addition. Defaults to a = ka

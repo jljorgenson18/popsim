@@ -33,7 +33,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
   // Check if the polymer is bigger than a nucleus
   if (newState.s[id] > nc) {
     newState.s[1] = newState.s[1] + 1; // Add monomer back
-    if (id - 1 in newState.s) {
+    if (newState.s[id - 1] != null) {
       // Gain one (r-1)-mer
       newState.s[id - 1] = newState.s[id - 1] + 1;
     } else {
@@ -48,7 +48,10 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
   } else {
     // If polymer is a nucleus, it dissolves
     newState.s[1] = newState.s[1] + nc;
-    newState = removeSpecies(newState, nc);
+    newState.s[nc] = newState.s[nc] - 1;
+    if (newState.s[nc] === 0) {
+      newState = removeSpecies(newState, nc);
+    }
     return newState;
   }
 }
@@ -68,8 +71,10 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
       const speciesIdx = parseInt(key, 10);
       if (Number.isNaN(speciesIdx)) return;
       if (speciesIdx !== 1) {
-        const Pa = a * state.s[1] * state.s[speciesIdx];
-        possibleStates.push({ P: Pa, s: addition(state, speciesIdx) });
+        if (state.s[1] !== 0) {
+          const Pa = a * state.s[1] * state.s[speciesIdx];
+          possibleStates.push({ P: Pa, s: addition(state, speciesIdx) });
+        }
         const Pb = b * state.s[speciesIdx];
         possibleStates.push({ P: Pb, s: subtraction(state, speciesIdx, nc) });
       }

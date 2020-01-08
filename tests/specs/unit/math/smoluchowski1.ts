@@ -1,16 +1,18 @@
-import { buildModel } from 'src/math/beckerdoring';
-import { BeckerDoringPayload } from 'src/db/sample';
+import { buildModel } from 'src/math/smoluchowski';
+import { SmoluchowskiPayload } from 'src/db/sample';
 import { Simulate, createInitialState } from 'src/math/common';
 
-let mockPayload: BeckerDoringPayload;
+let mockPayload: SmoluchowskiPayload;
 beforeEach(() => {
   mockPayload = {
     name: 'Some Sample',
-    model: 'Becker-Doring',
+    model: 'Smoluchowski',
     N: 100,
     tstop: 2,
     a: 1,
-    b: 1
+    b: 1,
+    ka: 1,
+    kb: 1
   };
 });
 
@@ -21,7 +23,7 @@ it('should generate a time series from beckerdoring', async () => {
     buildModel(mockPayload),
     1
   );
-  //console.log(JSON.stringify(result, null, '  '));
+  console.log(JSON.stringify(result, null, '  '));
 
   expect(result).toBeTruthy();
 });

@@ -82,9 +82,11 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   });
   const R = u1 * PP; // Determines which state is selected
   const dt = (1 / PP) * Math.log(1 / u2); // Generate the time step
+  console.log(initialState);
   const newState = possibleStates.find((state, index) => {
     return R < summedProbabilities[index];
   });
+
   if (!newState) {
     // if it makes it here its broken dawg
     throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
@@ -97,11 +99,12 @@ function simRun(
   t_end: number,
   getProbabilities: GetProbabilitiesFunc
 ): TimeSeries {
-  let state = initialState;
+  let state = deepClone(initialState);
   const t_series: TimeSeries = { states: [initialState] };
   // simulate until end time is reached
   while (state.t < t_end) {
     state = simStep(state, getProbabilities);
+    //console.log(JSON.stringify(state, null, '  '));
     t_series.states.push(state);
     // gotta have some kind of break here or maybe not idk
   }
