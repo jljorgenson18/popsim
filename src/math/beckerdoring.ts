@@ -33,7 +33,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
   // Check if the polymer is bigger than a nucleus
   if (newState.s[id] > nc) {
     newState.s[1] = newState.s[1] + 1; // Add monomer back
-    if (id - 1 in newState.s) {
+    if (newState.s[id - 1] != null) {
       // Gain one (r-1)-mer
       newState.s[id - 1] = newState.s[id - 1] + 1;
     } else {
