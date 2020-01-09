@@ -4,7 +4,8 @@ import {
   GetProbabilitiesFunc,
   removeSpecies,
   deepClone,
-  catchNull
+  catchNull,
+  catchNeg
 } from 'src/math/common';
 
 function nucleate(state: ModelState, nc: number): ModelState {
@@ -16,12 +17,13 @@ function nucleate(state: ModelState, nc: number): ModelState {
     newState.s[nc] = newState.s[nc] + 1;
   }
   catchNull(newState, 'nucleate');
+  catchNeg(newState, 'nucleate');
   return newState;
 }
 
 function addition(state: ModelState, id: number): ModelState {
   let newState = deepClone(state);
-  console.log(id);
+  //console.log(id);
   newState.s[1] = newState.s[1] - 1;
   newState.s[id] = newState.s[id] - 1;
   if (newState.s[id] === 0) {
@@ -34,6 +36,7 @@ function addition(state: ModelState, id: number): ModelState {
     newState.s[id + 1] = 1;
   }
   catchNull(newState, 'addition');
+  catchNeg(newState, 'addition');
   return newState;
 }
 
@@ -54,6 +57,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
       newState = removeSpecies(newState, id);
     }
     catchNull(newState, 'subtraction from polymer > nc');
+    catchNeg(newState, 'subtraction from polymer > nc');
     return newState;
   } else {
     // If polymer is a nucleus, it dissolves
@@ -64,6 +68,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     }
     // console.log(JSON.stringify(newState, null, '  '));
     catchNull(newState, 'subtraction from polymer = nc');
+    catchNeg(newState, 'subtraction from polymer = nc');
     return newState;
   }
 }
@@ -84,6 +89,7 @@ function coagulate(state: ModelState, id1: number, id2: number): ModelState {
     newState.s[id1 + id2] = 1;
   }
   catchNull(newState, 'coagulation');
+  catchNeg(newState, 'coagulation');
   return newState;
 }
 
@@ -114,6 +120,7 @@ function dissociate(state: ModelState, id1: number, id2: number, nc: number): Mo
   }
   //console.log(JSON.stringify(newState, null, '  '));
   catchNull(newState, 'dissociate');
+  catchNeg(newState, 'dissociate');
   return newState;
 }
 

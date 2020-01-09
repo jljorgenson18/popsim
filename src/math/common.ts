@@ -23,7 +23,23 @@ export const deepClone = (s: ModelState): ModelState => {
 };
 // Creating and modifying the state
 
-export function catchNull(state: ModelState, label: string) {
+export function catchNeg(state: ModelState, label: string, initialState?: ModelState) {
+  console.log(JSON.stringify(state, null, '  '));
+  if (initialState) {
+    console.log(JSON.stringify(initialState, null, '  '));
+  }
+  Object.keys(state.s).forEach(key => {
+    if (state.s[+key] < 0) {
+      throw new Error('Negative caught in ' + label);
+    }
+  });
+}
+
+export function catchNull(state: ModelState, label: string, initialState?: ModelState) {
+  console.log(JSON.stringify(state, null, '  '));
+  if (initialState) {
+    console.log(JSON.stringify(initialState, null, '  '));
+  }
   Object.keys(state.s).forEach(key => {
     if (state.s[+key] == null) {
       throw new Error('Null caught in ' + label);
@@ -112,7 +128,7 @@ function simRun(
   // simulate until end time is reached
   while (state.t < t_end) {
     state = simStep(state, getProbabilities);
-    console.log(JSON.stringify(state, null, '  '));
+    //console.log(JSON.stringify(state, null, '  '));
     t_series.states.push(state);
     // gotta have some kind of break here or maybe not idk
   }
