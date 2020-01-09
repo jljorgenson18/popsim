@@ -23,6 +23,14 @@ export const deepClone = (s: ModelState): ModelState => {
 };
 // Creating and modifying the state
 
+export function catchNull(state: ModelState, label: string) {
+  Object.keys(state.s).forEach(key => {
+    if (state.s[+key] == null) {
+      throw new Error('Null caught in ' + label);
+    }
+  });
+}
+
 export function fillSpecies(s: SpeciesPair[]): Species {
   const spec: Species = {};
   s.forEach(pair => {
@@ -72,8 +80,8 @@ function averageData(data: TimeSeries, runs: number): TimeSeries {
 function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFunc): ModelState {
   const u1 = Math.random();
   const u2 = Math.random();
-
-  const possibleStates = getProbabilities(initialState);
+  const iState = deepClone(initialState);
+  const possibleStates = getProbabilities(iState);
   const summedProbabilities: number[] = [0];
   let PP = 0; // Probability amplitude
   possibleStates.forEach((state, index) => {
@@ -82,11 +90,11 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   });
   const R = u1 * PP; // Determines which state is selected
   const dt = (1 / PP) * Math.log(1 / u2); // Generate the time step
-  console.log(initialState);
+  //console.log(initialState);
   const newState = possibleStates.find((state, index) => {
     return R < summedProbabilities[index];
   });
-
+  catchNull(newState.s, 'simStep');
   if (!newState) {
     // if it makes it here its broken dawg
     throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
@@ -104,7 +112,7 @@ function simRun(
   // simulate until end time is reached
   while (state.t < t_end) {
     state = simStep(state, getProbabilities);
-    //console.log(JSON.stringify(state, null, '  '));
+    console.log(JSON.stringify(state, null, '  '));
     t_series.states.push(state);
     // gotta have some kind of break here or maybe not idk
   }

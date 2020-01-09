@@ -1,5 +1,11 @@
 import { SmoluchowskiPayload } from 'src/db/sample';
-import { ModelState, GetProbabilitiesFunc, removeSpecies, deepClone } from 'src/math/common';
+import {
+  ModelState,
+  GetProbabilitiesFunc,
+  removeSpecies,
+  deepClone,
+  catchNull
+} from 'src/math/common';
 
 function nucleate(state: ModelState, nc: number): ModelState {
   const newState = deepClone(state);
@@ -9,11 +15,13 @@ function nucleate(state: ModelState, nc: number): ModelState {
   } else {
     newState.s[nc] = newState.s[nc] + 1;
   }
+  catchNull(newState, 'nucleate');
   return newState;
 }
 
 function addition(state: ModelState, id: number): ModelState {
   let newState = deepClone(state);
+  console.log(id);
   newState.s[1] = newState.s[1] - 1;
   newState.s[id] = newState.s[id] - 1;
   if (newState.s[id] === 0) {
@@ -25,6 +33,7 @@ function addition(state: ModelState, id: number): ModelState {
   } else {
     newState.s[id + 1] = 1;
   }
+  catchNull(newState, 'addition');
   return newState;
 }
 
@@ -44,6 +53,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
       // Handle if population hits 0
       newState = removeSpecies(newState, id);
     }
+    catchNull(newState, 'subtraction from polymer > nc');
     return newState;
   } else {
     // If polymer is a nucleus, it dissolves
@@ -52,6 +62,8 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     if (newState.s[nc] === 0) {
       newState = removeSpecies(newState, nc);
     }
+    // console.log(JSON.stringify(newState, null, '  '));
+    catchNull(newState, 'subtraction from polymer = nc');
     return newState;
   }
 }
@@ -71,6 +83,7 @@ function coagulate(state: ModelState, id1: number, id2: number): ModelState {
   } else {
     newState.s[id1 + id2] = 1;
   }
+  catchNull(newState, 'coagulation');
   return newState;
 }
 
@@ -99,6 +112,8 @@ function dissociate(state: ModelState, id1: number, id2: number, nc: number): Mo
   } else {
     newState.s[1] = newState.s[1] + id1 - id2;
   }
+  //console.log(JSON.stringify(newState, null, '  '));
+  catchNull(newState, 'dissociate');
   return newState;
 }
 
@@ -108,8 +123,9 @@ function randomInt(min: number, max: number): number {
 
 export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
   const { ka, kb, a = ka, b = kb, nc = 2, kn = a } = params;
-  return function(state: ModelState) {
+  return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
+    const state = deepClone(initialState);
     // nucleate
     if (state.s[1] >= nc) {
       let P = 0.5 * kn;
