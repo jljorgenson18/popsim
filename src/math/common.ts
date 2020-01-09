@@ -23,25 +23,29 @@ export const deepClone = (s: ModelState): ModelState => {
 };
 // Creating and modifying the state
 
+export function simpleCatch(msg: string) {
+  throw new Error(msg);
+}
+
 export function catchNeg(state: ModelState, label: string, initialState?: ModelState) {
-  console.log(JSON.stringify(state, null, '  '));
-  if (initialState) {
-    console.log(JSON.stringify(initialState, null, '  '));
-  }
   Object.keys(state.s).forEach(key => {
     if (state.s[+key] < 0) {
+      console.log(JSON.stringify(state, null, '  '));
+      if (initialState) {
+        console.log(JSON.stringify(initialState, null, '  '));
+      }
       throw new Error('Negative caught in ' + label);
     }
   });
 }
 
 export function catchNull(state: ModelState, label: string, initialState?: ModelState) {
-  console.log(JSON.stringify(state, null, '  '));
-  if (initialState) {
-    console.log(JSON.stringify(initialState, null, '  '));
-  }
   Object.keys(state.s).forEach(key => {
     if (state.s[+key] == null) {
+      console.log(JSON.stringify(state, null, '  '));
+      if (initialState) {
+        console.log(JSON.stringify(initialState, null, '  '));
+      }
       throw new Error('Null caught in ' + label);
     }
   });
@@ -97,6 +101,7 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   const u1 = Math.random();
   const u2 = Math.random();
   const iState = deepClone(initialState);
+  catchNeg(iState, 'simStep');
   const possibleStates = getProbabilities(iState);
   const summedProbabilities: number[] = [0];
   let PP = 0; // Probability amplitude

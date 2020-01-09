@@ -5,7 +5,8 @@ import {
   removeSpecies,
   deepClone,
   catchNull,
-  catchNeg
+  catchNeg,
+  simpleCatch
 } from 'src/math/common';
 
 function nucleate(state: ModelState, nc: number): ModelState {
@@ -36,7 +37,7 @@ function addition(state: ModelState, id: number): ModelState {
     newState.s[id + 1] = 1;
   }
   catchNull(newState, 'addition');
-  catchNeg(newState, 'addition');
+  catchNeg(newState, 'addition', state);
   return newState;
 }
 
