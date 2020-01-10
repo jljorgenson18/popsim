@@ -12,7 +12,8 @@ beforeEach(() => {
     a: 1,
     b: 1,
     ka: 1,
-    kb: 1
+    kb: 1,
+    kn: 1
   };
 });
 

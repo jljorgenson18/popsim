@@ -31,7 +31,7 @@ function addition(state: ModelState, id: number): ModelState {
 function subtraction(state: ModelState, id: number, nc: number): ModelState {
   let newState = deepClone(state);
   // Check if the polymer is bigger than a nucleus
-  if (newState.s[id] > nc) {
+  if (id > nc) {
     newState.s[1] = newState.s[1] + 1; // Add monomer back
     if (newState.s[id - 1] != null) {
       // Gain one (r-1)-mer

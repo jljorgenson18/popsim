@@ -101,7 +101,6 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   const u1 = Math.random();
   const u2 = Math.random();
   const iState = deepClone(initialState);
-  catchNeg(iState, 'simStep');
   const possibleStates = getProbabilities(iState);
   const summedProbabilities: number[] = [0];
   let PP = 0; // Probability amplitude
@@ -115,7 +114,7 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   const newState = possibleStates.find((state, index) => {
     return R < summedProbabilities[index];
   });
-  catchNull(newState.s, 'simStep');
+
   if (!newState) {
     // if it makes it here its broken dawg
     throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
