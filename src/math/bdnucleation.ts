@@ -24,7 +24,7 @@ function addition(state: ModelState, id: number): ModelState {
   //console.log(id);
   newState.s[1] = newState.s[1] - 1;
   newState.s[id] = newState.s[id] - 1;
-  if (newState.s[id] === 0) {
+  if (newState.s[id] === 0 && id !== 1) {
     newState = removeSpecies(newState, id);
   }
 
@@ -121,7 +121,8 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);
-
+    console.log(JSON.stringify(state, null, '  '));
+    catchNeg(state, 'buildModel');
     const keys = Object.keys(state.s);
     keys.forEach((key, idx) => {
       const speciesIdx = parseInt(key, 10);
@@ -129,7 +130,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
       if (speciesIdx === 1 && state.s[1] > 1) {
         const Pan = na * state.s[1] * (state.s[1] - 1);
         possibleStates.push({ P: Pan, s: addition(state, 1) });
-      } else if (speciesIdx < nc) {
+      } else if (speciesIdx > 1 && speciesIdx < nc) {
         if (state.s[1] !== 0) {
           const Pan = a * state.s[1] * state.s[speciesIdx];
           possibleStates.push({ P: Pan, s: addition(state, speciesIdx) });

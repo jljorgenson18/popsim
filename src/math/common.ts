@@ -134,7 +134,7 @@ function simRun(
   // simulate until end time is reached
   while (state.t < t_end) {
     state = simStep(state, getProbabilities);
-    //console.log(JSON.stringify(state, null, '  '));
+    // console.log(JSON.stringify(state, null, '  '));
     t_series.states.push(state);
     // gotta have some kind of break here or maybe not idk
   }
