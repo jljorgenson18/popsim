@@ -24,7 +24,7 @@ it('should generate a time series from beckerdoring', async () => {
     buildModel(mockPayload),
     1
   );
-  console.log(JSON.stringify(result, null, '  '));
+  //console.log(JSON.stringify(result, null, '  '));
 
   expect(result).toBeTruthy();
 });
