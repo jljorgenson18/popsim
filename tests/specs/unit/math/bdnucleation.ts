@@ -1,17 +1,22 @@
-import { buildModel } from 'src/math/beckerdoring';
-import { BeckerDoringPayload } from 'src/db/sample';
+import { buildModel } from 'src/math/bdnucleation';
+import { BDNucleationPayload } from 'src/db/sample';
 import { Simulate, createInitialState } from 'src/math/common';
 
-let mockPayload: BeckerDoringPayload;
+let mockPayload: BDNucleationPayload;
 beforeEach(() => {
   mockPayload = {
     name: 'Some Sample',
-    model: 'Becker-Doring',
+    model: 'BD-nucleation',
     N: 100,
     tstop: 2,
     runs: 1,
+    nc: 2,
     a: 1,
-    b: 1
+    na: 1,
+    b: 1,
+    nb: 1,
+    ka: 1,
+    kb: 1
   };
 });
 

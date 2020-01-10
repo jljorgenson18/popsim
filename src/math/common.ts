@@ -1,3 +1,5 @@
+import { SamplePayload } from 'src/db/sample';
+
 export interface Species {
   [species: number]: number; // Species
 }
@@ -141,10 +143,11 @@ function simRun(
 
 export function Simulate(
   initialState: ModelState,
-  t_end: number,
-  getProbabilities: GetProbabilitiesFunc,
-  runs: number
+  payload: SamplePayload,
+  getProbabilities: GetProbabilitiesFunc
 ): TimeSeries {
+  const t_end = payload.tstop;
+  const runs = payload.runs;
   let tSeries: TimeSeries;
   let binnedSeries: TimeSeries;
   // Run simulation however many times is needed

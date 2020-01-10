@@ -9,6 +9,7 @@ beforeEach(() => {
     model: 'Smoluchowski',
     N: 100,
     tstop: 2,
+    runs: 1,
     a: 1,
     b: 1,
     ka: 1,
@@ -20,9 +21,8 @@ beforeEach(() => {
 it('should generate a time series from beckerdoring', async () => {
   const result = Simulate(
     createInitialState([{ id: 1, n: mockPayload.N }]),
-    mockPayload.tstop,
-    buildModel(mockPayload),
-    1
+    mockPayload,
+    buildModel(mockPayload)
   );
   //console.log(JSON.stringify(result, null, '  '));
 
