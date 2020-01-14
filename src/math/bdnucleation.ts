@@ -121,7 +121,6 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);
-    console.log(JSON.stringify(state, null, '  '));
     catchNeg(state, 'buildModel');
     const keys = Object.keys(state.s);
     keys.forEach((key, idx) => {

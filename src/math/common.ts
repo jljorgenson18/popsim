@@ -18,6 +18,12 @@ interface TimeSeries {
   states: ModelState[];
 }
 
+interface BinnedTimeSeries {
+  [bins: number]: ModelState;
+  dt?: number;
+  t_end?: number;
+}
+
 export type GetProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState }[];
 
 export const deepClone = (s: ModelState): ModelState => {
@@ -89,13 +95,58 @@ export function removeSpecies(initialState: ModelState, id: number): ModelState 
   return newState;
 }
 
-function binData(data: TimeSeries, newData: TimeSeries): TimeSeries {
-  // bin the data somehow
+function fillBin(data: BinnedTimeSeries, bin: number): BinnedTimeSeries {
+  if (!data[bin]) {
+    data[bin] = data[bin - 1];
+  } else {
+    for (const spec in data[bin - 1].s) {
+      if (data[bin].s[+spec] != null) {
+        data[bin].s[+spec] += data[bin - 1].s[+spec];
+      } else {
+        data[bin].s[+spec] = data[bin - 1].s[+spec];
+      }
+    }
+  }
   return data;
 }
 
-function averageData(data: TimeSeries, runs: number): TimeSeries {
-  // Average the data
+function binData(
+  data: BinnedTimeSeries,
+  newData: TimeSeries,
+  t_end: number,
+  bins = 100
+): BinnedTimeSeries {
+  const dt = t_end / bins;
+  let t = dt;
+  let bin = 0;
+  for (const state of newData.states) {
+    while (state.t > t) {
+      t = t + dt;
+      bin = bin + 1;
+      data = fillBin(data, bin);
+    }
+    // console.log(bin);
+    if (!data[bin]) {
+      data[bin] = state;
+    } else {
+      for (const spec in state.s) {
+        if (data[bin].s[+spec] != null) {
+          data[bin].s[+spec] += state.s[+spec];
+        } else {
+          data[bin].s[+spec] = state.s[+spec];
+        }
+      }
+    }
+  }
+  return data;
+}
+
+function averageData(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
+  for (const bin in data) {
+    for (const sumState in data[bin].s) {
+      data[bin].s[+sumState] = data[bin].s[+sumState] / runs;
+    }
+  }
   return data;
 }
 
@@ -130,6 +181,7 @@ function simRun(
   getProbabilities: GetProbabilitiesFunc
 ): TimeSeries {
   let state = deepClone(initialState);
+  console.log('here');
   const t_series: TimeSeries = { states: [initialState] };
   // simulate until end time is reached
   while (state.t < t_end) {
@@ -145,20 +197,20 @@ export function Simulate(
   initialState: ModelState,
   payload: SamplePayload,
   getProbabilities: GetProbabilitiesFunc
-): TimeSeries {
+): BinnedTimeSeries {
   const t_end = payload.tstop;
   const runs = payload.runs;
   let tSeries: TimeSeries;
-  let binnedSeries: TimeSeries;
+  let binnedSeries: BinnedTimeSeries = {};
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
     tSeries = simRun(initialState, t_end, getProbabilities);
     // Bin the new time series
-    binnedSeries = binData(binnedSeries, tSeries);
+    binnedSeries = binData(binnedSeries, tSeries, t_end);
   }
   // Average data
-  binnedSeries = averageData(binnedSeries, runs);
-
-  return tSeries;
+  const data = averageData(binnedSeries, runs);
+  //console.log(data);
+  return data;
 }
