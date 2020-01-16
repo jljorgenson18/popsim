@@ -64,36 +64,41 @@ function binData(
   bins = 100
 ): BinnedTimeSeries {
   const dt = t_end / bins;
-  let t = 0;
-  let bin = 0;
-  let store = true;
-  let previousState: ModelState;
+  let t = dt;
+  let idx = 0;
 
-  const keys = Object.keys(newData.states);
-  keys.forEach(key => {
-    const id = parseInt(key, 10);
-    if (newData.states[id].t > t + dt) {
-      // check if new bin is entered
-      store = true;
-      t = t + dt;
-      bin = bin + 1;
+  for (let i = 0; i < bins; i++) {
+    fillBin(data, newData.states[idx], i);
+    while (newData.states[idx].t < t) {
+      idx = idx + 1;
     }
-    if (store) {
-      store = false;
-      while (newData.states[id].t > t + dt) {
-        // fill bins with last state until we get to the current bin
-        fillBin(data, newData.states[id - 1], bin);
-        bin = bin + 1;
-        t = t + dt;
-      }
-      if (newData.states[id].t < t + dt) {
-        // fill current bin
-        fillBin(data, newData.states[id], bin);
-        bin = bin + 1;
-        t = t + dt;
-      }
-    }
-  });
+    t = t + dt;
+  }
+  // const keys = Object.keys(newData.states);
+  // keys.forEach(key => {
+  //   const id = parseInt(key, 10);
+  //   if (newData.states[id].t > t + dt) {
+  //     // check if new bin is entered
+  //     store = true;
+  //     t = t + dt;
+  //     bin = bin + 1;
+  //   }
+  //   if (store) {
+  //     store = false;
+  //     while (newData.states[id].t > t + dt) {
+  //       // fill bins with last state until we get to the current bin
+  //       fillBin(data, newData.states[id - 1], bin);
+  //       bin = bin + 1;
+  //       t = t + dt;
+  //     }
+  //     if (newData.states[id].t < t + dt) {
+  //       // fill current bin
+  //       fillBin(data, newData.states[id], bin);
+  //       // bin = bin + 1;
+  //       t = t + dt;
+  //     }
+  //   }
+  // });
   return data;
 }
 
@@ -101,12 +106,14 @@ function averageData(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
   const keys = Object.keys(data);
   keys.forEach(key => {
     const bin = parseInt(key, 10);
-    const specKeys = Object.keys(data[bin]);
+    const specKeys = Object.keys(data[bin].s);
     specKeys.forEach(specKey => {
       const spec = parseInt(specKey, 10);
+      //console.log(data[bin].s[spec]);
       data[bin].s[spec] = data[bin].s[spec] / runs;
+      //console.log(data[bin].s[spec]);
     });
-    checkConserved(data[bin], 100);
+    //checkConserved(data[bin], 100);
   });
   return data;
 }
@@ -175,7 +182,7 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
 
 export function simulate(payload: SamplePayload): BinnedTimeSeries {
   console.log('Simulating...', payload);
-  const initialState = createInitialState([{ id: 1, n: payload.N }]);
+  // const initialState = createInitialState([{ id: 1, n: payload.N }]);
   const getProbabilities = buildModel(payload);
   const t_end = payload.tstop;
   const runs = payload.runs;
@@ -183,7 +190,7 @@ export function simulate(payload: SamplePayload): BinnedTimeSeries {
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
-    const iState = deepClone(initialState);
+    const iState = createInitialState([{ id: 1, n: payload.N }]);
     const tSeries = simRun(iState, t_end, getProbabilities);
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series

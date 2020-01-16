@@ -1,6 +1,6 @@
 import { ModelState } from './types';
 
-export const deepClone = (s: ModelState): ModelState => {
+export const deepClone = (s: any): any => {
   return JSON.parse(JSON.stringify(s));
 };
 // Creating and modifying the state

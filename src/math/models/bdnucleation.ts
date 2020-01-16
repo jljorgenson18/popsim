@@ -27,36 +27,38 @@ function addition(state: ModelState, id: number): ModelState {
   } else {
     newState.s[id + 1] = 1;
   }
+  catchNeg(newState, 'nucleate');
   return newState;
 }
 
 function subtraction(state: ModelState, id: number, nc: number): ModelState {
   let newState = deepClone(state);
   // Check if the polymer is bigger than a nucleus
-  if (id > nc) {
-    newState.s[1] = newState.s[1] + 1; // Add monomer back
-    if (newState.s[id - 1] != null) {
-      // Gain one (r-1)-mer
-      newState.s[id - 1] = newState.s[id - 1] + 1;
-    } else {
-      newState.s[id - 1] = 1;
-    }
-    newState.s[id] = newState.s[id] - 1; // Lost one r-mer
-    if (newState.s[id] === 0) {
-      // Handle if population hits 0
-      newState = removeSpecies(newState, id);
-    }
-    return newState;
+  // if (id > nc) {
+  newState.s[1] = newState.s[1] + 1; // Add monomer back
+  if (newState.s[id - 1] != null) {
+    // Gain one (r-1)-mer
+    newState.s[id - 1] = newState.s[id - 1] + 1;
   } else {
-    // If polymer is a nucleus, it dissolves
-    newState.s[1] = newState.s[1] + nc;
-    newState.s[nc] = newState.s[nc] - 1;
-    if (newState.s[id] === 0) {
-      newState = removeSpecies(newState, nc);
-    }
-    // console.log(JSON.stringify(newState, null, '  '));
-    return newState;
+    newState.s[id - 1] = 1;
   }
+  newState.s[id] = newState.s[id] - 1; // Lost one r-mer
+  if (newState.s[id] === 0) {
+    // Handle if population hits 0
+    newState = removeSpecies(newState, id);
+  }
+  catchNeg(newState, 'sub');
+  return newState;
+  // } else {
+  //   // If polymer is a nucleus, it dissolves
+  //   newState.s[1] = newState.s[1] + nc;
+  //   newState.s[nc] = newState.s[nc] - 1;
+  //   if (newState.s[nc] === 0) {
+  //     newState = removeSpecies(newState, nc);
+  //   }
+  // console.log(JSON.stringify(newState, null, '  '));
+  // catchNeg(newState, 'sub = nc');
+  // return newState;}
 }
 
 function coagulate(state: ModelState, id1: number, id2: number): ModelState {
@@ -74,6 +76,7 @@ function coagulate(state: ModelState, id1: number, id2: number): ModelState {
   } else {
     newState.s[id1 + id2] = 1;
   }
+  catchNeg(newState, 'coagulate');
   return newState;
 }
 
@@ -103,6 +106,7 @@ function dissociate(state: ModelState, id1: number, id2: number, nc: number): Mo
     newState.s[1] = newState.s[1] + id1 - id2;
   }
   //console.log(JSON.stringify(newState, null, '  '));
+  catchNeg(newState, 'dissociate');
   return newState;
 }
 
