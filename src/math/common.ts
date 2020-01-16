@@ -95,15 +95,15 @@ export function removeSpecies(initialState: ModelState, id: number): ModelState 
   return newState;
 }
 
-function fillBin(data: BinnedTimeSeries, bin: number): BinnedTimeSeries {
+function fillBin(data: BinnedTimeSeries, prevState: ModelState, bin: number): BinnedTimeSeries {
   if (!data[bin]) {
-    data[bin] = data[bin - 1];
+    data[bin] = prevState;
   } else {
-    for (const spec in data[bin - 1].s) {
+    for (const spec in prevState.s) {
       if (data[bin].s[+spec] != null) {
-        data[bin].s[+spec] += data[bin - 1].s[+spec];
+        data[bin].s[+spec] += prevState.s[+spec];
       } else {
-        data[bin].s[+spec] = data[bin - 1].s[+spec];
+        data[bin].s[+spec] = prevState.s[+spec];
       }
     }
   }
@@ -119,13 +119,15 @@ function binData(
   const dt = t_end / bins;
   let t = dt;
   let bin = 0;
+  let previousState: ModelState;
   for (const state of newData.states) {
     while (state.t > t) {
       // fill bins with previous state
       t = t + dt;
       bin = bin + 1;
-      data = fillBin(data, bin);
+      data = fillBin(data, previousState, bin);
     }
+    previousState = state;
     // console.log(bin);
     if (!data[bin]) {
       // create bin
@@ -209,10 +211,10 @@ export function Simulate(
     // Generate new time series
     const iState = deepClone(initialState);
     const tSeries = simRun(iState, t_end, getProbabilities);
-    // console.log(JSON.stringify(tSeries, null, '  '));
+    console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
     binnedSeries = binData(binnedSeries, tSeries, t_end);
-    console.log(JSON.stringify(binnedSeries, null, '  '));
+    // console.log(JSON.stringify(binnedSeries, null, '  '));
   }
   // Average data
   const data = averageData(binnedSeries, runs);
