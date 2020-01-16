@@ -4,7 +4,7 @@ import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
 
-import { deepClone } from './common';
+import { deepClone, stateMoment, checkConserved } from './common';
 
 interface TimeSeries {
   states: ModelState[];
@@ -36,17 +36,23 @@ function advanceTime(initialState: ModelState, dt: number): ModelState {
   };
 }
 
-function fillBin(data: BinnedTimeSeries, prevState: ModelState, bin: number): BinnedTimeSeries {
+function fillBin(data: BinnedTimeSeries, inputState: ModelState, bin: number): BinnedTimeSeries {
+  const state = deepClone(inputState);
   if (!data[bin]) {
-    data[bin] = prevState;
+    // check if that bin exists
+    data[bin] = state;
   } else {
-    for (const spec in prevState.s) {
-      if (data[bin].s[+spec] != null) {
-        data[bin].s[+spec] += prevState.s[+spec];
+    const keys = Object.keys(state.s);
+    keys.forEach(key => {
+      const id = parseInt(key, 10);
+      if (!data[bin].s[id]) {
+        // if bin does not have that species
+        data[bin].s[id] = state.s[id];
       } else {
-        data[bin].s[+spec] = prevState.s[+spec];
+        // if bin does have that species
+        data[bin].s[id] += state.s[id];
       }
-    }
+    });
   }
   return data;
 }
@@ -58,41 +64,50 @@ function binData(
   bins = 100
 ): BinnedTimeSeries {
   const dt = t_end / bins;
-  let t = dt;
+  let t = 0;
   let bin = 0;
+  let store = true;
   let previousState: ModelState;
-  for (const state of newData.states) {
-    while (state.t > t) {
-      // fill bins with previous state
+
+  const keys = Object.keys(newData.states);
+  keys.forEach(key => {
+    const id = parseInt(key, 10);
+    if (newData.states[id].t > t + dt) {
+      // check if new bin is entered
+      store = true;
       t = t + dt;
       bin = bin + 1;
-      data = fillBin(data, previousState, bin);
     }
-    previousState = state;
-    // console.log(bin);
-    if (!data[bin]) {
-      // create bin
-      data[bin] = state;
-    } else {
-      for (const spec in state.s) {
-        // combine values
-        if (data[bin].s[+spec] != null) {
-          data[bin].s[+spec] += state.s[+spec];
-        } else {
-          data[bin].s[+spec] = state.s[+spec];
-        }
+    if (store) {
+      store = false;
+      while (newData.states[id].t > t + dt) {
+        // fill bins with last state until we get to the current bin
+        fillBin(data, newData.states[id - 1], bin);
+        bin = bin + 1;
+        t = t + dt;
+      }
+      if (newData.states[id].t < t + dt) {
+        // fill current bin
+        fillBin(data, newData.states[id], bin);
+        bin = bin + 1;
+        t = t + dt;
       }
     }
-  }
+  });
   return data;
 }
 
 function averageData(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
-  for (const bin in data) {
-    for (const sumState in data[bin].s) {
-      data[bin].s[+sumState] = data[bin].s[+sumState] / runs;
-    }
-  }
+  const keys = Object.keys(data);
+  keys.forEach(key => {
+    const bin = parseInt(key, 10);
+    const specKeys = Object.keys(data[bin]);
+    specKeys.forEach(specKey => {
+      const spec = parseInt(specKey, 10);
+      data[bin].s[spec] = data[bin].s[spec] / runs;
+    });
+    checkConserved(data[bin], 100);
+  });
   return data;
 }
 
@@ -177,6 +192,6 @@ export function simulate(payload: SamplePayload): BinnedTimeSeries {
   }
   // Average data
   const data = averageData(binnedSeries, runs);
-  //console.log(data);
+  console.log(data);
   return data;
 }
