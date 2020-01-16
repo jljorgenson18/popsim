@@ -25,14 +25,14 @@ export interface BeckerDoringPayload extends BaseSample {
   kn?: number; // Nucleation rate constant. Defaults to kn = a
 }
 
-export interface KnowlesPayload extends BaseSample {
-  model: 'Knowles';
-  ka: number; // Association rate constant
-  b: number; // Subtraction rate constant
-  a?: number; // Addition rate constant. Defaults to a = ka if empty
-  nc?: number; // Critical nucleus size. Defaults to 2
-  kn?: number; // Nucleation rate constant. Defaults to kn = a
-}
+// export interface KnowlesPayload extends BaseSample {
+//   model: 'Knowles';
+//   ka: number; // Association rate constant
+//   b: number; // Subtraction rate constant
+//   a?: number; // Addition rate constant. Defaults to a = ka if empty
+//   nc?: number; // Critical nucleus size. Defaults to 2
+//   kn?: number; // Nucleation rate constant. Defaults to kn = a
+// }
 
 export interface SmoluchowskiPayload extends BaseSample {
   model: 'Smoluchowski';
@@ -56,11 +56,7 @@ export interface BDNucleationPayload extends BaseSample {
   b?: number; // Growth-phase subtraction. ditto nb or kb
 }
 
-export type SamplePayload =
-  | BeckerDoringPayload
-  | KnowlesPayload
-  | SmoluchowskiPayload
-  | BDNucleationPayload;
+export type SamplePayload = BeckerDoringPayload | SmoluchowskiPayload | BDNucleationPayload;
 
 export type SampleDoc = SamplePayload & {
   _id: string;

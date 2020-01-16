@@ -153,7 +153,7 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
       getProbabilities = smoluchowskiBuildModel(payload);
       break;
     default:
-      throw new Error('Invalid model type! ' + payload.model);
+      throw new Error('Invalid model type!');
   }
   return getProbabilities;
 };

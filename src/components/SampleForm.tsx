@@ -5,7 +5,6 @@ import {
   SamplePayload,
   modelTypes,
   BeckerDoringPayload,
-  KnowlesPayload,
   SmoluchowskiPayload,
   BDNucleationPayload
 } from 'src/db/sample';
@@ -36,15 +35,17 @@ const validate = (values: Partial<SamplePayload>) => {
     if (values.b == null) {
       errors.b = 'Required';
     }
-  } else if (values.model === 'Knowles') {
-    if (values.ka == null) {
-      errors.ka = 'Required';
-    }
-    if (values.b == null) {
-      errors.b = 'Required';
-    }
-    return errors;
-  } else if (values.model === 'Smoluchowski') {
+  }
+  // else if (values.model === 'Knowles') {
+  //   if (values.ka == null) {
+  //     errors.ka = 'Required';
+  //   }
+  //   if (values.b == null) {
+  //     errors.b = 'Required';
+  //   }
+  //   return errors;
+  // }
+  else if (values.model === 'Smoluchowski') {
     if (values.ka == null) {
       errors.kb = 'Required';
     }
@@ -144,45 +145,45 @@ function BeckerDoringFields(props: { formik: BeckerDoringFormik }) {
 }
 
 // Just here for the types
-const KnowlesFormikFunc = (params: any) => useFormik<KnowlesPayload>(params);
-type KnowlesFormik = ReturnType<typeof KnowlesFormikFunc>;
-function KnowlesFields(props: { formik: KnowlesFormik }) {
-  const { formik } = props;
-  return (
-    <>
-      <InitialConditionField
-        formik={formik}
-        label="Association rate constant (ka)"
-        name="ka"
-        required
-      />
-      <InitialConditionField
-        formik={formik}
-        label="Subtraction rate constant (b)"
-        name="b"
-        required
-      />
-      <InitialConditionField
-        formik={formik}
-        label="Addition rate constant (a)"
-        name="a"
-        help="Defaults to a = ka"
-      />
-      <InitialConditionField
-        formik={formik}
-        label="Critical nucleus size (nc)"
-        name="nc"
-        help="Defaults to 2"
-      />
-      <InitialConditionField
-        formik={formik}
-        label="Nucleation rate constant (kn)"
-        name="kn"
-        help="Defaults to kn = a"
-      />
-    </>
-  );
-}
+// const KnowlesFormikFunc = (params: any) => useFormik<KnowlesPayload>(params);
+// type KnowlesFormik = ReturnType<typeof KnowlesFormikFunc>;
+// function KnowlesFields(props: { formik: KnowlesFormik }) {
+//   const { formik } = props;
+//   return (
+//     <>
+//       <InitialConditionField
+//         formik={formik}
+//         label="Association rate constant (ka)"
+//         name="ka"
+//         required
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Subtraction rate constant (b)"
+//         name="b"
+//         required
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Addition rate constant (a)"
+//         name="a"
+//         help="Defaults to a = ka"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Critical nucleus size (nc)"
+//         name="nc"
+//         help="Defaults to 2"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Nucleation rate constant (kn)"
+//         name="kn"
+//         help="Defaults to kn = a"
+//       />
+//     </>
+//   );
+// }
 
 // Just here for the types
 const SmoluchowsiFormikFunc = (params: any) => useFormik<SmoluchowskiPayload>(params);
@@ -345,9 +346,9 @@ function SampleForm(props: SampleFormProps) {
           {formik.values.model === 'Becker-Doring' ? (
             <BeckerDoringFields formik={formik as BeckerDoringFormik} />
           ) : null}
-          {formik.values.model === 'Knowles' ? (
+          {/* {formik.values.model === 'Knowles' ? (
             <KnowlesFields formik={formik as KnowlesFormik} />
-          ) : null}
+          ) : null} */}
           {formik.values.model === 'Smoluchowski' ? (
             <SmoluchowsiFields formik={formik as SmoluchowsiFormik} />
           ) : null}
