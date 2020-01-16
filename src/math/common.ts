@@ -121,15 +121,18 @@ function binData(
   let bin = 0;
   for (const state of newData.states) {
     while (state.t > t) {
+      // fill bins with previous state
       t = t + dt;
       bin = bin + 1;
       data = fillBin(data, bin);
     }
     // console.log(bin);
     if (!data[bin]) {
+      // create bin
       data[bin] = state;
     } else {
       for (const spec in state.s) {
+        // combine values
         if (data[bin].s[+spec] != null) {
           data[bin].s[+spec] += state.s[+spec];
         } else {
