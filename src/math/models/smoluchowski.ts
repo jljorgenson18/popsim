@@ -1,12 +1,6 @@
-import { BDNucleationPayload } from 'src/db/sample';
-import {
-  ModelState,
-  GetProbabilitiesFunc,
-  removeSpecies,
-  deepClone,
-  catchNull,
-  catchNeg
-} from 'src/math/common';
+import { SmoluchowskiPayload } from 'src/db/sample';
+import { removeSpecies, deepClone, catchNull, catchNeg } from 'src/math/common';
+import { ModelState, GetProbabilitiesFunc } from '../types';
 
 function nucleate(state: ModelState, nc: number): ModelState {
   const newState = deepClone(state);
@@ -24,7 +18,7 @@ function addition(state: ModelState, id: number): ModelState {
   //console.log(id);
   newState.s[1] = newState.s[1] - 1;
   newState.s[id] = newState.s[id] - 1;
-  if (newState.s[id] === 0 && id !== 1) {
+  if (newState.s[id] === 0) {
     newState = removeSpecies(newState, id);
   }
 
@@ -116,35 +110,32 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
-  const { ka, kb, a = ka, b = kb, nc = 2, na = a, nb = a } = params;
+export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
+  const { ka, kb, a = ka, b = kb, nc = 2, kn = a } = params;
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);
-    catchNeg(state, 'buildModel');
+    // nucleate
+    if (state.s[1] >= nc) {
+      let P = 0.5 * kn;
+      for (let j = 0; j < nc; j++) {
+        P = P * (state.s[1] - j);
+      }
+      possibleStates.push({ P: P, s: nucleate(state, nc) });
+    }
     const keys = Object.keys(state.s);
     keys.forEach((key, idx) => {
       const speciesIdx = parseInt(key, 10);
       if (Number.isNaN(speciesIdx)) return;
-      if (speciesIdx === 1 && state.s[1] > 1) {
-        const Pan = na * state.s[1] * (state.s[1] - 1);
-        possibleStates.push({ P: Pan, s: addition(state, 1) });
-      } else if (speciesIdx > 1 && speciesIdx < nc) {
-        if (state.s[1] !== 0) {
-          const Pan = a * state.s[1] * state.s[speciesIdx];
-          possibleStates.push({ P: Pan, s: addition(state, speciesIdx) });
-        }
-        const Pbn = nb * state.s[speciesIdx];
-        possibleStates.push({ P: Pbn, s: subtraction(state, speciesIdx, nc) });
-      } else if (speciesIdx >= nc) {
+      if (speciesIdx !== 1) {
         // add
         if (state.s[1] !== 0) {
-          const Pag = a * state.s[1] * state.s[speciesIdx];
-          possibleStates.push({ P: Pag, s: addition(state, speciesIdx) });
+          const Pa = a * state.s[1] * state.s[speciesIdx];
+          possibleStates.push({ P: Pa, s: addition(state, speciesIdx) });
         }
         // subtract
-        const Pbg = b * state.s[speciesIdx];
-        possibleStates.push({ P: Pbg, s: subtraction(state, speciesIdx, nc) });
+        const Pb = b * state.s[speciesIdx];
+        possibleStates.push({ P: Pb, s: subtraction(state, speciesIdx, nc) });
         // break
         if (speciesIdx > 3) {
           const Pbr = kb * state.s[speciesIdx] * (speciesIdx - 3); // key - 3 accounts for multiple break points

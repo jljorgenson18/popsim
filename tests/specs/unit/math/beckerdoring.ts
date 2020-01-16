@@ -1,6 +1,5 @@
-import { buildModel } from 'src/math/beckerdoring';
 import { BeckerDoringPayload } from 'src/db/sample';
-import { Simulate, createInitialState } from 'src/math/common';
+import { simulate } from 'src/math/main';
 
 let mockPayload: BeckerDoringPayload;
 beforeEach(() => {
@@ -16,11 +15,7 @@ beforeEach(() => {
 });
 
 it('should generate a time series from beckerdoring', async () => {
-  const result = Simulate(
-    createInitialState([{ id: 1, n: mockPayload.N }]),
-    mockPayload,
-    buildModel(mockPayload)
-  );
+  const result = simulate(mockPayload);
   //console.log(JSON.stringify(result, null, '  '));
 
   expect(result).toBeTruthy();

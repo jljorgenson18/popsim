@@ -1,5 +1,6 @@
 import { BeckerDoringPayload } from 'src/db/sample';
-import { ModelState, GetProbabilitiesFunc, removeSpecies, deepClone } from 'src/math/common';
+import { removeSpecies, deepClone } from 'src/math/common';
+import { ModelState, GetProbabilitiesFunc } from '../types';
 
 function nucleate(state: ModelState, nc: number): ModelState {
   const newState = deepClone(state);

@@ -1,11 +1,6 @@
-import {
-  SamplePayload,
-  BeckerDoringPayload,
-  KnowlesPayload,
-  SmoluchowskiPayload,
-  BDNucleationPayload,
-  SampleData
-} from 'src/db/sample';
+import { SamplePayload } from 'src/db/sample';
+
+import { simulate } from './main';
 
 const ctx: Worker = self as any;
 
@@ -14,29 +9,6 @@ export interface PostMessageData<B = any> {
   type: 'getSampleData';
   body: B;
 }
-
-export const getSampleData = (payload: SamplePayload): SampleData => {
-  console.log('Getting sample data?', payload);
-
-  const { model } = payload;
-  if (model === 'Becker-Doring') {
-    // Call Becker-Doring model
-    // beckerDoringModel(params as BeckerDoringPayload)
-    return [];
-  }
-  if (model === 'Knowles') {
-    // knowlesModel(params as KnowlesPayload)
-    return [];
-  }
-  if (model === 'Smoluchowski') {
-    // smoluchowsiModel(params as SmoluchowsiPayload)
-    return [];
-  }
-  if (model === 'BD-nucleation') {
-    // bdNucleationPayload(params as BDNucleationPayload)
-    return [];
-  }
-};
 
 const respondToMain = (originalMessage: PostMessageData, responseBody: any) => {
   ctx.postMessage({
@@ -50,7 +22,7 @@ ctx.addEventListener('message', evt => {
   if (!evt.data) return;
   const messageData = evt.data as PostMessageData;
   if (messageData.type === 'getSampleData') {
-    respondToMain(messageData, getSampleData(messageData.body as SamplePayload));
+    respondToMain(messageData, simulate(messageData.body as SamplePayload));
   }
 });
 
