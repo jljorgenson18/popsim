@@ -51,7 +51,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     // If polymer is a nucleus, it dissolves
     newState.s[1] = newState.s[1] + nc;
     newState.s[nc] = newState.s[nc] - 1;
-    if (newState.s[id] === nc) {
+    if (newState.s[id] === 0) {
       newState = removeSpecies(newState, nc);
     }
     // console.log(JSON.stringify(newState, null, '  '));

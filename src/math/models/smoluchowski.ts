@@ -1,5 +1,5 @@
 import { SmoluchowskiPayload } from 'src/db/sample';
-import { removeSpecies, deepClone, catchNull, catchNeg } from 'src/math/common';
+import { removeSpecies, deepClone, catchNull, catchNeg, checkConserved } from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc } from '../types';
 
 function nucleate(state: ModelState, nc: number): ModelState {
@@ -10,6 +10,7 @@ function nucleate(state: ModelState, nc: number): ModelState {
   } else {
     newState.s[nc] = newState.s[nc] + 1;
   }
+  // checkConserved(newState, 100);
   return newState;
 }
 
@@ -27,6 +28,7 @@ function addition(state: ModelState, id: number): ModelState {
   } else {
     newState.s[id + 1] = 1;
   }
+  // checkConserved(newState, 100);
   return newState;
 }
 
@@ -46,15 +48,19 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
       // Handle if population hits 0
       newState = removeSpecies(newState, id);
     }
+    // checkConserved(newState, 100);
     return newState;
   } else {
     // If polymer is a nucleus, it dissolves
     newState.s[1] = newState.s[1] + nc;
     newState.s[nc] = newState.s[nc] - 1;
-    if (newState.s[id] === nc) {
+    if (newState.s[id] === 0) {
       newState = removeSpecies(newState, nc);
     }
     // console.log(JSON.stringify(newState, null, '  '));
+    console.log(state);
+    console.log(newState);
+    // checkConserved(newState, 100);
     return newState;
   }
 }
@@ -74,6 +80,7 @@ function coagulate(state: ModelState, id1: number, id2: number): ModelState {
   } else {
     newState.s[id1 + id2] = 1;
   }
+  // checkConserved(newState, 100);
   return newState;
 }
 
@@ -103,6 +110,7 @@ function dissociate(state: ModelState, id1: number, id2: number, nc: number): Mo
     newState.s[1] = newState.s[1] + id1 - id2;
   }
   //console.log(JSON.stringify(newState, null, '  '));
+  // checkConserved(newState, 100);
   return newState;
 }
 

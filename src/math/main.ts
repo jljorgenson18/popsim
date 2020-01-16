@@ -170,7 +170,7 @@ export function simulate(payload: SamplePayload): BinnedTimeSeries {
     // Generate new time series
     const iState = deepClone(initialState);
     const tSeries = simRun(iState, t_end, getProbabilities);
-    console.log(JSON.stringify(tSeries, null, '  '));
+    // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
     binnedSeries = binData(binnedSeries, tSeries, t_end);
     // console.log(JSON.stringify(binnedSeries, null, '  '));

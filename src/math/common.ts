@@ -33,6 +33,36 @@ export function catchNull(state: ModelState, label: string, initialState?: Model
   });
 }
 
+export function stateMoment(state: ModelState, moment = 1): number {
+  const keys = Object.keys(state.s);
+  let sum = 0;
+  keys.forEach(key => {
+    const id = parseInt(key);
+    if (Number.isNaN(id)) return;
+    sum = sum + Math.pow(id, moment) * state.s[id];
+  });
+  return sum;
+}
+
+export function checkConserved(
+  state: ModelState,
+  expSum: number,
+  moment = 1,
+  prevState?: ModelState
+) {
+  const sum = stateMoment(state, moment);
+  if (sum !== expSum) {
+    console.log(moment);
+    console.log(sum);
+    console.log(expSum);
+    if (prevState) {
+      console.log(prevState);
+      console.log(state);
+    }
+    throw new Error('The moment is not conserved');
+  }
+}
+
 // export function createSpecies(initialState: ModelState, newSpecies: Species): ModelState {
 //   const newState = { ...initialState };
 //   newState[newSpecies.id] = newSpecies.n;
