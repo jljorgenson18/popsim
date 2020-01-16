@@ -159,9 +159,9 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
 };
 
 export function simulate(payload: SamplePayload): BinnedTimeSeries {
+  console.log('Simulating...', payload);
   const initialState = createInitialState([{ id: 1, n: payload.N }]);
   const getProbabilities = buildModel(payload);
-  //getProbabilities: GetProbabilitiesFunc
   const t_end = payload.tstop;
   const runs = payload.runs;
   let binnedSeries: BinnedTimeSeries = {};

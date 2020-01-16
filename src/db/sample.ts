@@ -68,7 +68,7 @@ export type SampleDoc = SamplePayload & {
 // TODO: Build out what the sample data looks like
 export type SampleData = BinnedTimeSeries;
 
-export const modelTypes = ['Becker-Doring', 'Knowles', 'Smoluchowsi', 'BD-nucleation'];
+export const modelTypes = ['Becker-Doring', 'Smoluchowsi', 'BD-nucleation'];
 
 export async function createSample(payload: SamplePayload): Promise<SampleDoc> {
   const id = uuid();

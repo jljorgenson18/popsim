@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Form, FormField, Heading, Select, Text, Grid } from 'grommet';
-import { useFormik, FormikValues } from 'formik';
+import { useFormik } from 'formik';
 import {
   SamplePayload,
   modelTypes,
@@ -320,6 +320,15 @@ function SampleForm(props: SampleFormProps) {
             onChange={formik.handleChange}
           />
           <FormFieldLabel
+            label="Runs"
+            name="runs"
+            type="number"
+            required
+            error={(formik.touched.runs || submitted) && formik.errors.runs}
+            value={formik.values.runs || ''}
+            onChange={formik.handleChange}
+          />
+          <FormFieldLabel
             label="System volume (V)"
             name="V"
             type="number"
@@ -346,9 +355,6 @@ function SampleForm(props: SampleFormProps) {
           {formik.values.model === 'Becker-Doring' ? (
             <BeckerDoringFields formik={formik as BeckerDoringFormik} />
           ) : null}
-          {/* {formik.values.model === 'Knowles' ? (
-            <KnowlesFields formik={formik as KnowlesFormik} />
-          ) : null} */}
           {formik.values.model === 'Smoluchowski' ? (
             <SmoluchowsiFields formik={formik as SmoluchowsiFormik} />
           ) : null}
