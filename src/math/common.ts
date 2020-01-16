@@ -200,14 +200,16 @@ export function Simulate(
 ): BinnedTimeSeries {
   const t_end = payload.tstop;
   const runs = payload.runs;
-  let tSeries: TimeSeries;
   let binnedSeries: BinnedTimeSeries = {};
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
-    tSeries = simRun(initialState, t_end, getProbabilities);
+    const iState = deepClone(initialState);
+    const tSeries = simRun(iState, t_end, getProbabilities);
+    // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
     binnedSeries = binData(binnedSeries, tSeries, t_end);
+    console.log(JSON.stringify(binnedSeries, null, '  '));
   }
   // Average data
   const data = averageData(binnedSeries, runs);
