@@ -58,8 +58,6 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
       newState = removeSpecies(newState, nc);
     }
     // console.log(JSON.stringify(newState, null, '  '));
-    console.log(state);
-    console.log(newState);
     // checkConserved(newState, 100);
     return newState;
   }
