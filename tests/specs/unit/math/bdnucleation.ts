@@ -9,6 +9,7 @@ beforeEach(() => {
     N: 100,
     tstop: 2,
     runs: 2,
+    ind_runs: 0,
     nc: 3,
     a: 1,
     na: 1,

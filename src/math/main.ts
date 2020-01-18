@@ -6,7 +6,7 @@ import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
 
 import { deepClone, stateMoment, checkConserved } from './common';
 
-interface TimeSeries {
+export interface TimeSeries {
   states: ModelState[];
 }
 
@@ -14,6 +14,16 @@ export interface BinnedTimeSeries {
   [bins: number]: ModelState;
   dt?: number;
   t_end?: number;
+}
+
+export interface IndividualRuns {
+  [run: number]: TimeSeries;
+}
+
+export interface Data {
+  series?: BinnedTimeSeries;
+  variance?: BinnedTimeSeries;
+  runs?: IndividualRuns;
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {
@@ -74,35 +84,11 @@ function binData(
     }
     t = t + dt;
   }
-  // const keys = Object.keys(newData.states);
-  // keys.forEach(key => {
-  //   const id = parseInt(key, 10);
-  //   if (newData.states[id].t > t + dt) {
-  //     // check if new bin is entered
-  //     store = true;
-  //     t = t + dt;
-  //     bin = bin + 1;
-  //   }
-  //   if (store) {
-  //     store = false;
-  //     while (newData.states[id].t > t + dt) {
-  //       // fill bins with last state until we get to the current bin
-  //       fillBin(data, newData.states[id - 1], bin);
-  //       bin = bin + 1;
-  //       t = t + dt;
-  //     }
-  //     if (newData.states[id].t < t + dt) {
-  //       // fill current bin
-  //       fillBin(data, newData.states[id], bin);
-  //       // bin = bin + 1;
-  //       t = t + dt;
-  //     }
-  //   }
-  // });
   return data;
 }
 
-function averageData(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
+function averageData(inputData: BinnedTimeSeries, runs: number, moment = 1): BinnedTimeSeries {
+  const data = deepClone(inputData);
   const keys = Object.keys(data);
   keys.forEach(key => {
     const bin = parseInt(key, 10);
@@ -110,12 +96,27 @@ function averageData(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
     specKeys.forEach(specKey => {
       const spec = parseInt(specKey, 10);
       //console.log(data[bin].s[spec]);
-      data[bin].s[spec] = data[bin].s[spec] / runs;
+      data[bin].s[spec] = Math.pow(data[bin].s[spec], moment) / runs;
       //console.log(data[bin].s[spec]);
     });
     //checkConserved(data[bin], 100);
   });
   return data;
+}
+
+function getVariance(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
+  const avgData = averageData(data, runs);
+  const avgDataSq = averageData(data, runs, 2);
+  const keys = Object.keys(avgData);
+  keys.forEach(key => {
+    const bin = parseInt(key, 10);
+    const subKeys = Object.keys(avgData[bin].s);
+    subKeys.forEach(subKey => {
+      const spec = parseInt(subKey, 10);
+      avgData[bin].s[spec] = avgDataSq[bin].s[spec] - Math.pow(avgData[bin].s[spec], 2);
+    });
+  });
+  return avgData;
 }
 
 function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFunc): ModelState {
@@ -180,25 +181,33 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
   return getProbabilities;
 };
 
-export function simulate(payload: SamplePayload): BinnedTimeSeries {
+export function simulate(payload: SamplePayload): Data {
   console.log('Simulating...', payload);
   // const initialState = createInitialState([{ id: 1, n: payload.N }]);
   const getProbabilities = buildModel(payload);
   const t_end = payload.tstop;
   const runs = payload.runs;
+  const data: Data = {};
+  data.runs = {};
   let binnedSeries: BinnedTimeSeries = {};
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
     const iState = createInitialState([{ id: 1, n: payload.N }]);
     const tSeries = simRun(iState, t_end, getProbabilities);
+    // Store individual runs if desired
+    if (payload.ind_runs !== 0) {
+      if (i < payload.ind_runs) {
+        data.runs[i] = tSeries;
+      }
+    }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
     binnedSeries = binData(binnedSeries, tSeries, t_end);
     // console.log(JSON.stringify(binnedSeries, null, '  '));
   }
   // Average data
-  const data = averageData(binnedSeries, runs);
-  console.log(data);
+  data.series = averageData(binnedSeries, runs);
+  data.variance = getVariance(binnedSeries, runs);
   return data;
 }
