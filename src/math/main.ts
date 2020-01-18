@@ -188,7 +188,7 @@ export function simulate(payload: SamplePayload): Data {
   const t_end = payload.tstop;
   const runs = payload.runs;
   const data: Data = {};
-  data.runs = {};
+  if (payload.ind_runs !== 0) data.runs = {};
   let binnedSeries: BinnedTimeSeries = {};
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
@@ -196,10 +196,8 @@ export function simulate(payload: SamplePayload): Data {
     const iState = createInitialState([{ id: 1, n: payload.N }]);
     const tSeries = simRun(iState, t_end, getProbabilities);
     // Store individual runs if desired
-    if (payload.ind_runs !== 0) {
-      if (i < payload.ind_runs) {
-        data.runs[i] = tSeries;
-      }
+    if (i < payload.ind_runs) {
+      data.runs[i] = tSeries;
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
