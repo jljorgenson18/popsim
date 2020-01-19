@@ -188,7 +188,7 @@ function BeckerDoringFields(props: { formik: BeckerDoringFormik }) {
 // Just here for the types
 const SmoluchowsiFormikFunc = (params: any) => useFormik<SmoluchowskiPayload>(params);
 type SmoluchowsiFormik = ReturnType<typeof SmoluchowsiFormikFunc>;
-function SmoluchowsiFields(props: { formik: SmoluchowsiFormik }) {
+function SmoluchowskiFields(props: { formik: SmoluchowsiFormik }) {
   const { formik } = props;
   return (
     <>
@@ -356,7 +356,7 @@ function SampleForm(props: SampleFormProps) {
             <BeckerDoringFields formik={formik as BeckerDoringFormik} />
           ) : null}
           {formik.values.model === 'Smoluchowski' ? (
-            <SmoluchowsiFields formik={formik as SmoluchowsiFormik} />
+            <SmoluchowskiFields formik={formik as SmoluchowsiFormik} />
           ) : null}
           {formik.values.model === 'BD-nucleation' ? (
             <BDNucleationFields formik={formik as BDNucleationFormik} />
