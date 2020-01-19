@@ -16,14 +16,10 @@ export interface BinnedTimeSeries {
   t_end?: number;
 }
 
-export interface IndividualRuns {
-  [run: number]: TimeSeries;
-}
-
 export interface Data {
   series?: BinnedTimeSeries;
   variance?: BinnedTimeSeries;
-  runs?: IndividualRuns;
+  runs?: TimeSeries[];
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {
@@ -188,7 +184,7 @@ export function simulate(payload: SamplePayload): Data {
   const t_end = payload.tstop;
   const runs = payload.runs;
   const data: Data = {};
-  if (payload.ind_runs !== 0) data.runs = {};
+  if (payload.ind_runs !== 0) data.runs = [];
   let binnedSeries: BinnedTimeSeries = {};
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
