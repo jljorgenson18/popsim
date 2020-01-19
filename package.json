@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.0",
+    "file-saver": "^2.0.2",
     "formik": "^2.0.8",
     "grommet": "^2.9.0",
     "grommet-icons": "^4.4.0",

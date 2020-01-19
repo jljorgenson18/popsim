@@ -14,10 +14,8 @@ const InitialConditions = styled.pre`
   margin: 0;
 `;
 
-const initialConditionFields = ['a', 'b', 'ka', 'kb', 'kn', 'na', 'nb', 'nc'];
-
 function SampleList(props: SampleListProps): JSX.Element {
-  const { samples, onDeleteSample } = props;
+  const { samples, onDeleteSample, onDownloadSample } = props;
   if (samples.length === 0) {
     return (
       <Box>
@@ -35,9 +33,27 @@ function SampleList(props: SampleListProps): JSX.Element {
           header: <Text>Name</Text>
         },
         {
+          property: 'model',
+          header: <Text>Model</Text>
+        },
+        {
           property: 'initial conditions',
           header: <Text>Initial Conditions</Text>,
           render(sample: SampleDoc) {
+            const initialConditionFields = [
+              'N',
+              'tstop',
+              'runs',
+              'ind_runs',
+              'a',
+              'b',
+              'ka',
+              'kb',
+              'kn',
+              'na',
+              'nb',
+              'nc'
+            ];
             const intialConditions = initialConditionFields.reduce<any>((ic, field) => {
               if ((sample as any)[field] != null) ic[field] = (sample as any)[field];
               return ic;
@@ -61,7 +77,10 @@ function SampleList(props: SampleListProps): JSX.Element {
             return (
               <Menu
                 label="Actions"
-                items={[{ label: 'Delete', onClick: () => onDeleteSample(sample) }]}
+                items={[
+                  { label: 'Delete', onClick: () => onDeleteSample(sample) },
+                  { label: 'Download', onClick: () => onDownloadSample(sample) }
+                ]}
               />
             );
           },
