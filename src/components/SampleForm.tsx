@@ -16,25 +16,14 @@ interface SampleFormProps {
 
 const validate = (values: Partial<SamplePayload>) => {
   const errors: { [fieldName: string]: string } = {};
-  if (!values.model) {
-    errors.model = 'Required';
-  }
-  if (!values.name) {
-    errors.name = 'Required';
-  }
-  if (values.N == null) {
-    errors.N = 'Required';
-  }
-  if (values.tstop == null) {
-    errors.tstop = 'Required';
-  }
+  if (!values.model) errors.model = 'Required';
+  if (!values.name) errors.name = 'Required';
+  if (values.N == null) errors.N = 'Required';
+  if (values.tstop == null) errors.tstop = 'Required';
+
   if (values.model === 'Becker-Doring') {
-    if (values.a == null) {
-      errors.a = 'Required';
-    }
-    if (values.b == null) {
-      errors.b = 'Required';
-    }
+    if (values.a == null) errors.a = 'Required';
+    if (values.b == null) errors.b = 'Required';
   }
   // else if (values.model === 'Knowles') {
   //   if (values.ka == null) {
@@ -46,28 +35,17 @@ const validate = (values: Partial<SamplePayload>) => {
   //   return errors;
   // }
   else if (values.model === 'Smoluchowski') {
-    if (values.ka == null) {
-      errors.kb = 'Required';
-    }
-    if (values.kb == null) {
-      errors.kb = 'Required';
-    }
+    if (values.ka == null) errors.ka = 'Required';
+    if (values.kb == null) errors.kb = 'Required';
   } else if (values.model === 'BD-nucleation') {
-    if (values.ka == null) {
-      errors.ka = 'Required';
-    }
-    if (values.kb == null) {
-      errors.kb = 'Required';
-    }
-    if (values.na == null) {
-      errors.na = 'Required';
-    }
-    if (values.nb == null) {
-      errors.nb = 'Required';
-    }
-    if (values.nc == null) {
-      errors.nc = 'Required';
-    }
+    if (values.ka == null) errors.ka = 'Required';
+    if (values.kb == null) errors.kb = 'Required';
+    if (values.na == null) errors.na = 'Required';
+    if (values.nb == null) errors.nb = 'Required';
+    if (values.nc == null) errors.nc = 'Required';
+  }
+  if (!errors.nc && values.nc != null && values.nc < 2) {
+    errors.nc = 'Must be greater than or equal to 2';
   }
   return errors;
 };
@@ -110,6 +88,7 @@ function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
       error={(formik.touched[name] || submitted) && formik.errors[name]}
       value={formik.values[name] || ''}
       onChange={formik.handleChange}
+      onBlur={formik.handleBlur}
     />
   );
 }
@@ -300,6 +279,7 @@ function SampleForm(props: SampleFormProps) {
             error={(formik.touched.name || submitted) && formik.errors.name}
             value={formik.values.name}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
           <FormFieldLabel
             label="Number of monomers (N)"
@@ -309,6 +289,7 @@ function SampleForm(props: SampleFormProps) {
             error={(formik.touched.N || submitted) && formik.errors.N}
             value={formik.values.N || ''}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
           <FormFieldLabel
             label="Time to stop simulation (tstop)"
@@ -318,6 +299,7 @@ function SampleForm(props: SampleFormProps) {
             error={(formik.touched.tstop || submitted) && formik.errors.tstop}
             value={formik.values.tstop || ''}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
           <FormFieldLabel
             label="Runs"
@@ -327,6 +309,17 @@ function SampleForm(props: SampleFormProps) {
             error={(formik.touched.runs || submitted) && formik.errors.runs}
             value={formik.values.runs || ''}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+          <FormFieldLabel
+            label="Indvidual Runs"
+            name="ind_runs"
+            type="number"
+            help="Defaults to 0"
+            error={(formik.touched.ind_runs || submitted) && formik.errors.ind_runs}
+            value={formik.values.ind_runs || ''}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
           <FormFieldLabel
             label="System volume (V)"
@@ -336,6 +329,7 @@ function SampleForm(props: SampleFormProps) {
             error={(formik.touched.V || submitted) && formik.errors.V}
             value={formik.values.V || ''}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
           <FormFieldLabel
             label="Model"

@@ -11,8 +11,8 @@ export interface BaseSample {
   N: number; // Number of monomers (int)
   tstop: number; // Time to stop simulation. Could also do a total number of steps to generate
   runs: number; // Number of simulation runs
-  V?: number; // System volume. Defaults to 1
   ind_runs?: number; // Number of individual runs to store
+  V?: number; // System volume. Defaults to 1
 }
 
 // For the optional things, maybe a checkbox or two.
