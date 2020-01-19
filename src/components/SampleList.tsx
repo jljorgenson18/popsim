@@ -14,7 +14,7 @@ const InitialConditions = styled.pre`
   margin: 0;
 `;
 
-const initialConditionFields = ['a', 'b', 'ka', 'kb', 'kn', 'na', 'nb', 'nb'];
+const initialConditionFields = ['a', 'b', 'ka', 'kb', 'kn', 'na', 'nb', 'nc'];
 
 function SampleList(props: SampleListProps): JSX.Element {
   const { samples, onDeleteSample } = props;
