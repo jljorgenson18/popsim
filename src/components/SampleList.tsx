@@ -1,18 +1,13 @@
 import React from 'react';
 import { Heading, Box, Text, Menu, DataTable } from 'grommet';
-import styled from 'styled-components';
+import ReactJson from 'react-json-view';
 import { SampleDoc } from 'src/db/sample';
 
 interface SampleListProps {
   samples: SampleDoc[];
   onDeleteSample: (sample: SampleDoc) => void;
+  onDownloadSample: (sample: SampleDoc) => void;
 }
-
-const InitialConditions = styled.pre`
-  border: 1px solid #aaa;
-  padding: 8px;
-  margin: 0;
-`;
 
 function SampleList(props: SampleListProps): JSX.Element {
   const { samples, onDeleteSample, onDownloadSample } = props;
@@ -37,30 +32,10 @@ function SampleList(props: SampleListProps): JSX.Element {
           header: <Text>Model</Text>
         },
         {
-          property: 'initial conditions',
-          header: <Text>Initial Conditions</Text>,
+          property: 'doc',
+          header: <Text>Document</Text>,
           render(sample: SampleDoc) {
-            const initialConditionFields = [
-              'N',
-              'tstop',
-              'runs',
-              'ind_runs',
-              'a',
-              'b',
-              'ka',
-              'kb',
-              'kn',
-              'na',
-              'nb',
-              'nc'
-            ];
-            const intialConditions = initialConditionFields.reduce<any>((ic, field) => {
-              if ((sample as any)[field] != null) ic[field] = (sample as any)[field];
-              return ic;
-            }, {});
-            return (
-              <InitialConditions>{JSON.stringify(intialConditions, null, '  ')}</InitialConditions>
-            );
+            return <ReactJson src={sample} collapsed enableClipboard={false} />;
           }
         },
         {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Main, Heading, Button, Footer, Header, Layer } from 'grommet';
 import Skeleton from 'react-loading-skeleton';
+import FileSaver from 'file-saver';
 
 import db from 'src/db';
 import { getAllSamples, createSample, SamplePayload, SampleDoc } from 'src/db/sample';
@@ -8,9 +9,14 @@ import SampleList from './SampleList';
 import SampleForm from './SampleForm';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
 
-interface AppProps {}
+const downloadSample = (sample: SampleDoc) => {
+  const blob = new Blob([JSON.stringify(sample, null, '  ')], {
+    type: 'application/json;charset=utf-8'
+  });
+  FileSaver.saveAs(blob, `${sample.name}.${sample._id}.json`);
+};
 
-function App(props: AppProps): JSX.Element {
+function App(): JSX.Element {
   const [allSamples, setAllSamples] = useState<SampleDoc[] | null>(null);
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
@@ -60,6 +66,10 @@ function App(props: AppProps): JSX.Element {
     setDeletingSample(sample);
   }
 
+  function handleDownloadSample(sample: SampleDoc) {
+    downloadSample(sample);
+  }
+
   console.log('All Samples', allSamples);
 
   return (
@@ -71,7 +81,11 @@ function App(props: AppProps): JSX.Element {
       <Main pad="large">
         {fetching && !allSamples ? <Skeleton count={5} /> : null}
         {allSamples ? (
-          <SampleList samples={allSamples} onDeleteSample={handleDeleteSample} />
+          <SampleList
+            samples={allSamples}
+            onDeleteSample={handleDeleteSample}
+            onDownloadSample={handleDownloadSample}
+          />
         ) : null}
       </Main>
       {showingNewSampleModal ? (
