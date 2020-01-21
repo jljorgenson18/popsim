@@ -3,11 +3,12 @@ import { ModelState, SpeciesPair, Species, GetProbabilitiesFunc } from './types'
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
+import { DataPoint, numberSeries, massSeries, lengthSeries } from './analysis';
 
 import { deepClone, stateMoment, checkConserved } from './common';
 
 export interface TimeSeries {
-  states: ModelState[];
+  [state: number]: ModelState;
 }
 
 export interface BinnedTimeSeries {
@@ -17,9 +18,12 @@ export interface BinnedTimeSeries {
 }
 
 export interface Data {
-  series?: BinnedTimeSeries;
-  variance?: BinnedTimeSeries;
+  series?: TimeSeries;
+  variance?: TimeSeries;
   runs?: TimeSeries[];
+  mass?: DataPoint[];
+  length?: DataPoint[];
+  number?: DataPoint[];
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {
@@ -42,7 +46,7 @@ function advanceTime(initialState: ModelState, dt: number): ModelState {
   };
 }
 
-function fillBin(data: BinnedTimeSeries, inputState: ModelState, bin: number): BinnedTimeSeries {
+function fillBin(data: TimeSeries, inputState: ModelState, bin: number): TimeSeries {
   const state = deepClone(inputState);
   if (!data[bin]) {
     // check if that bin exists
@@ -63,27 +67,32 @@ function fillBin(data: BinnedTimeSeries, inputState: ModelState, bin: number): B
   return data;
 }
 
-function binData(
-  data: BinnedTimeSeries,
-  newData: TimeSeries,
-  t_end: number,
-  bins = 100
-): BinnedTimeSeries {
+function binData(data: TimeSeries, newData: TimeSeries, t_end: number, bins = 100): TimeSeries {
   const dt = t_end / bins;
-  let t = dt;
+  let t = 0;
   let idx = 0;
 
   for (let i = 0; i < bins; i++) {
-    fillBin(data, newData.states[idx], i);
-    while (newData.states[idx].t < t) {
+    fillBin(data, newData[idx], i);
+    data[i].t = t;
+    // go to next state
+    idx = idx + 1;
+    // check if next state is still in the same bin
+    while (newData[idx].t < t + dt) {
+      // step through until current bin is exited
       idx = idx + 1;
+    }
+    // check if next state is more than one bin later
+    if (newData[idx].t > t + 2 * dt) {
+      // if step is bigger than a bin, use the last state
+      idx = idx - 1;
     }
     t = t + dt;
   }
   return data;
 }
 
-function averageData(inputData: BinnedTimeSeries, runs: number, moment = 1): BinnedTimeSeries {
+function averageData(inputData: TimeSeries, runs: number, moment = 1): TimeSeries {
   const data = deepClone(inputData);
   const keys = Object.keys(data);
   keys.forEach(key => {
@@ -100,7 +109,7 @@ function averageData(inputData: BinnedTimeSeries, runs: number, moment = 1): Bin
   return data;
 }
 
-function getVariance(data: BinnedTimeSeries, runs: number): BinnedTimeSeries {
+function getVariance(data: TimeSeries, runs: number): TimeSeries {
   const avgData = averageData(data, runs);
   const avgDataSq = averageData(data, runs, 2);
   const keys = Object.keys(avgData);
@@ -147,12 +156,14 @@ function simRun(
 ): TimeSeries {
   let state = deepClone(initialState);
   console.log('here');
-  const t_series: TimeSeries = { states: [initialState] };
+  const t_series: TimeSeries = [initialState];
   // simulate until end time is reached
+  let idx = 0;
   while (state.t < t_end) {
     state = simStep(state, getProbabilities);
+    idx = idx + 1;
     // console.log(JSON.stringify(state, null, '  '));
-    t_series.states.push(state);
+    t_series[idx] = state;
     // gotta have some kind of break here or maybe not idk
   }
   return t_series;
@@ -185,7 +196,8 @@ export function simulate(payload: SamplePayload): Data {
   const runs = payload.runs;
   const data: Data = {};
   if (payload.ind_runs !== 0) data.runs = [];
-  let binnedSeries: BinnedTimeSeries = {};
+  let binnedSeries: TimeSeries;
+  binnedSeries = {};
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
@@ -203,5 +215,8 @@ export function simulate(payload: SamplePayload): Data {
   // Average data
   data.series = averageData(binnedSeries, runs);
   data.variance = getVariance(binnedSeries, runs);
+  data.mass = massSeries(binnedSeries);
+  data.number = numberSeries(binnedSeries);
+  data.length = lengthSeries(binnedSeries);
   return data;
 }

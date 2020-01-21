@@ -3,7 +3,7 @@ import { TimeSeries, BinnedTimeSeries } from 'src/math/main.ts';
 import { deepClone } from 'src/math/common.ts';
 import { parse } from '@babel/core';
 
-interface DataPoint {
+export interface DataPoint {
   t: number;
   p: number;
 }
@@ -38,60 +38,60 @@ function avgLength(state: ModelState): number {
 
 export function massSeries(inputData: TimeSeries): DataPoint[] {
   const data: DataPoint[] = [];
-  const keys = Object.keys(inputData.states);
+  const keys = Object.keys(inputData);
   keys.forEach(key => {
     const idx = parseInt(key, 10);
-    data[idx] = { t: inputData.states[idx].t, p: polymerMass(inputData.states[idx]) };
+    data[idx] = { t: inputData[idx].t, p: polymerMass(inputData[idx]) };
   });
   return data;
 }
 
-export function binnedMassSeries(inputData: BinnedTimeSeries): DataPoint[] {
-  const data: DataPoint[] = [];
-  const keys = Object.keys(inputData);
-  keys.forEach(key => {
-    const bin = parseInt(key, 10);
-    data[bin] = { t: inputData[bin].t, p: polymerMass(inputData[bin]) };
-  });
-  return data;
-}
+// export function binnedMassSeries(inputData: BinnedTimeSeries): DataPoint[] {
+//   const data: DataPoint[] = [];
+//   const keys = Object.keys(inputData);
+//   keys.forEach(key => {
+//     const bin = parseInt(key, 10);
+//     data[bin] = { t: inputData[bin].t, p: polymerMass(inputData[bin]) };
+//   });
+//   return data;
+// }
 
 export function numberSeries(inputData: TimeSeries): DataPoint[] {
   const data: DataPoint[] = [];
-  const keys = Object.keys(inputData.states);
+  const keys = Object.keys(inputData);
   keys.forEach(key => {
     const idx = parseInt(key, 10);
-    data[idx] = { t: inputData.states[idx].t, p: polymerNumber(inputData.states[idx]) };
+    data[idx] = { t: inputData[idx].t, p: polymerNumber(inputData[idx]) };
   });
   return data;
 }
 
-export function binnedNumberSeries(inputData: BinnedTimeSeries): DataPoint[] {
-  const data: DataPoint[] = [];
-  const keys = Object.keys(inputData);
-  keys.forEach(key => {
-    const bin = parseInt(key, 10);
-    data[bin] = { t: inputData[bin].t, p: polymerNumber(inputData[bin]) };
-  });
-  return data;
-}
+// export function binnedNumberSeries(inputData: BinnedTimeSeries): DataPoint[] {
+//   const data: DataPoint[] = [];
+//   const keys = Object.keys(inputData);
+//   keys.forEach(key => {
+//     const bin = parseInt(key, 10);
+//     data[bin] = { t: inputData[bin].t, p: polymerNumber(inputData[bin]) };
+//   });
+//   return data;
+// }
 
 export function lengthSeries(inputData: TimeSeries): DataPoint[] {
   const data: DataPoint[] = [];
-  const keys = Object.keys(inputData.states);
+  const keys = Object.keys(inputData);
   keys.forEach(key => {
     const idx = parseInt(key, 10);
-    data[idx] = { t: inputData.states[idx].t, p: avgLength(inputData.states[idx]) };
+    data[idx] = { t: inputData[idx].t, p: avgLength(inputData[idx]) };
   });
   return data;
 }
 
-export function binnedLengthSeries(inputData: BinnedTimeSeries): DataPoint[] {
-  const data: DataPoint[] = [];
-  const keys = Object.keys(inputData);
-  keys.forEach(key => {
-    const bin = parseInt(key, 10);
-    data[bin] = { t: inputData[bin].t, p: avgLength(inputData[bin]) };
-  });
-  return data;
-}
+// export function binnedLengthSeries(inputData: BinnedTimeSeries): DataPoint[] {
+//   const data: DataPoint[] = [];
+//   const keys = Object.keys(inputData);
+//   keys.forEach(key => {
+//     const bin = parseInt(key, 10);
+//     data[bin] = { t: inputData[bin].t, p: avgLength(inputData[bin]) };
+//   });
+//   return data;
+// }
