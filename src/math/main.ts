@@ -215,8 +215,8 @@ export function simulate(payload: SamplePayload): Data {
   // Average data
   data.series = averageData(binnedSeries, runs);
   data.variance = getVariance(binnedSeries, runs);
-  data.mass = massSeries(binnedSeries);
-  data.number = numberSeries(binnedSeries);
-  data.length = lengthSeries(binnedSeries);
+  data.mass = massSeries(data.series);
+  data.number = numberSeries(data.series);
+  data.length = lengthSeries(data.series);
   return data;
 }
