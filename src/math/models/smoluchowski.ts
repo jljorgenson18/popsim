@@ -1,5 +1,12 @@
 import { SmoluchowskiPayload } from 'src/db/sample';
-import { removeSpecies, deepClone, catchNull, catchNeg, checkConserved } from 'src/math/common';
+import {
+  removeSpecies,
+  deepClone,
+  factorial,
+  catchNull,
+  catchNeg,
+  checkConserved
+} from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc } from '../types';
 
 function nucleate(state: ModelState, nc: number): ModelState {
@@ -123,7 +130,7 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
     const state = deepClone(initialState);
     // nucleate
     if (state.s[1] >= nc) {
-      let P = 0.5 * kn;
+      let P = (1 / factorial(nc)) * kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }

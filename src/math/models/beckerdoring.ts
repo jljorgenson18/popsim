@@ -1,5 +1,5 @@
 import { BeckerDoringPayload } from 'src/db/sample';
-import { removeSpecies, deepClone } from 'src/math/common';
+import { removeSpecies, deepClone, factorial } from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc } from '../types';
 
 function nucleate(state: ModelState, nc: number): ModelState {
@@ -62,7 +62,7 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
   return function(state: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     if (state.s[1] >= nc) {
-      let P = 0.5 * kn;
+      let P = (1 / factorial(nc)) * kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }

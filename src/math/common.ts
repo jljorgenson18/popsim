@@ -78,3 +78,11 @@ export function removeSpecies(initialState: ModelState, id: number): ModelState 
   delete newState.s[id];
   return newState;
 }
+
+export function factorial(n: number): number {
+  let fact = 1;
+  for (let i = 1; i < n + 1; i++) {
+    fact = fact * i;
+  }
+  return fact;
+}
