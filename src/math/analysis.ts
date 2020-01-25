@@ -8,6 +8,84 @@ export interface DataPoint {
   p: number;
 }
 
+export interface DataSet {
+  [label: number]: DataPoint[];
+}
+
+function getLargestStateID(state: ModelState): number {
+  let largest = 0;
+  const keys = Object.keys(state.s);
+  keys.forEach(key => {
+    const id = parseInt(key, 10);
+    if (id > largest) largest = id;
+  });
+  return largest;
+}
+
+function getLargestID(series: TimeSeries): number {
+  let largest = 0;
+  const keys = Object.keys(series);
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    const largestId = getLargestStateID(series[idx]);
+    if (largestId > largest) largest = largestId;
+  });
+  return largest;
+}
+
+export function splitSpecies(series: TimeSeries, ignore?: number[]): DataSet {
+  const keys = Object.keys(series);
+  const numSets = getLargestID(series);
+  const sets: DataSet = {};
+  if (!ignore) ignore = [];
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    for (let i = 1; i < numSets; i++) {
+      if (!ignore.includes(i)) {
+        if (!sets[i]) sets[i] = [];
+        if (series[idx].s[i] != null) {
+          sets[i].push({ t: series[idx].t, p: series[idx].s[i] });
+        } else {
+          sets[i].push({ t: series[idx].t, p: 0 });
+        }
+      }
+    }
+  });
+  return sets;
+}
+
+export function expandToHistogram(state: ModelState, ignore?: number[], num?: number): ModelState {
+  let numSpec = 0;
+  if (!num) {
+    numSpec = getLargestStateID(state);
+  } else {
+    numSpec = num;
+  }
+  const hist: ModelState = { t: state.t, s: {} };
+  if (!ignore) ignore = [];
+  for (let i = 1; i < numSpec; i++) {
+    if (!ignore.includes(i)) {
+      if (state.s[i] != null) {
+        hist.s[i] = state.s[i];
+      } else {
+        hist.s[i] = 0;
+      }
+    }
+  }
+  return hist;
+}
+
+export function histSeries(series: TimeSeries, ignore?: number[]): TimeSeries {
+  const histSer: TimeSeries = {};
+  const keys = Object.keys(series);
+  const num = getLargestID(series);
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    histSer[idx] = expandToHistogram(series[idx], ignore, num);
+  });
+  return histSer;
+}
+
 function polymerMass(state: ModelState): number {
   const keys = Object.keys(state.s);
   let mass = 0;
@@ -33,6 +111,9 @@ function polymerNumber(state: ModelState): number {
 }
 
 function avgLength(state: ModelState): number {
+  let l: number;
+  l = polymerMass(state) / polymerNumber(state);
+  if (l === null) l = 0;
   return polymerMass(state) / polymerNumber(state);
 }
 

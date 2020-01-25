@@ -3,7 +3,14 @@ import { ModelState, SpeciesPair, Species, GetProbabilitiesFunc } from './types'
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
-import { DataPoint, numberSeries, massSeries, lengthSeries } from './analysis';
+import {
+  DataPoint,
+  numberSeries,
+  massSeries,
+  lengthSeries,
+  splitSpecies,
+  DataSet
+} from './analysis';
 
 import { deepClone, stateMoment, checkConserved } from './common';
 
@@ -24,6 +31,7 @@ export interface Data {
   mass?: DataPoint[];
   length?: DataPoint[];
   number?: DataPoint[];
+  species?: DataSet;
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {
@@ -218,5 +226,6 @@ export function simulate(payload: SamplePayload): Data {
   data.mass = massSeries(data.series);
   data.number = numberSeries(data.series);
   data.length = lengthSeries(data.series);
+  data.species = splitSpecies(data.series);
   return data;
 }

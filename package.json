@@ -78,6 +78,7 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
+    "@types/recharts": "^1.8.5",
     "core-js": "^3.6.0",
     "file-saver": "^2.0.2",
     "formik": "^2.0.8",
