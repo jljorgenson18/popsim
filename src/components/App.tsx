@@ -8,6 +8,7 @@ import { getAllSamples, createSample, SamplePayload, SampleDoc } from 'src/db/sa
 import SampleList from './SampleList';
 import SampleForm from './SampleForm';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
+import Visualization from './Visualization';
 
 const downloadSample = (sample: SampleDoc) => {
   const blob = new Blob([JSON.stringify(sample, null, '  ')], {
@@ -21,6 +22,7 @@ function App(): JSX.Element {
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
   const [showingNewSampleModal, setShowingNewSampleModal] = useState<boolean>(false);
+  const [showingVisualization, setShowingVisualization] = useState<SampleDoc | null>(false);
   const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
 
   useEffect(() => {
@@ -62,6 +64,11 @@ function App(): JSX.Element {
     setShowingNewSampleModal(false);
   }
 
+  function handleShowVisualizationModal(sample: SampleDoc) {
+    console.log(sample);
+    setShowingVisualization(sample);
+  }
+
   function handleDeleteSample(sample: SampleDoc) {
     setDeletingSample(sample);
   }
@@ -83,6 +90,7 @@ function App(): JSX.Element {
         {allSamples ? (
           <SampleList
             samples={allSamples}
+            onShowVisualization={handleShowVisualizationModal}
             onDeleteSample={handleDeleteSample}
             onDownloadSample={handleDownloadSample}
           />
@@ -100,6 +108,17 @@ function App(): JSX.Element {
             onSubmit={handleNewSampleSubmit}
             onCancel={() => setShowingNewSampleModal(false)}
           />
+        </Layer>
+      ) : null}
+      {showingVisualization ? (
+        <Layer
+          position="center"
+          modal
+          responsive={false}
+          animation="fadeIn"
+          onEsc={() => setShowingVisualization(null)}
+          onClickOutside={() => setShowingVisualization(null)}>
+          <Visualization sample={showingVisualization} />
         </Layer>
       ) : null}
       {deletingSample ? (

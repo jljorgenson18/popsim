@@ -18,12 +18,6 @@ export interface TimeSeries {
   [state: number]: ModelState;
 }
 
-export interface BinnedTimeSeries {
-  [bins: number]: ModelState;
-  dt?: number;
-  t_end?: number;
-}
-
 export interface Data {
   series?: TimeSeries;
   variance?: TimeSeries;

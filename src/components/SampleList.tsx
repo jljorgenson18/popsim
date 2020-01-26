@@ -5,12 +5,13 @@ import { SampleDoc } from 'src/db/sample';
 
 interface SampleListProps {
   samples: SampleDoc[];
+  onShowVisualization: (sample: SampleDoc) => void;
   onDeleteSample: (sample: SampleDoc) => void;
   onDownloadSample: (sample: SampleDoc) => void;
 }
 
 function SampleList(props: SampleListProps): JSX.Element {
-  const { samples, onDeleteSample, onDownloadSample } = props;
+  const { samples, onDeleteSample, onDownloadSample, onShowVisualization } = props;
   if (samples.length === 0) {
     return (
       <Box>
@@ -53,6 +54,7 @@ function SampleList(props: SampleListProps): JSX.Element {
               <Menu
                 label="Actions"
                 items={[
+                  { label: 'Show Visualization', onClick: () => onShowVisualization(sample) },
                   { label: 'Delete', onClick: () => onDeleteSample(sample) },
                   { label: 'Download', onClick: () => onDownloadSample(sample) }
                 ]}

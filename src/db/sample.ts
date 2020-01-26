@@ -2,7 +2,7 @@ import uuid from 'uuid/v4';
 
 import db from './index';
 import { getSampleData } from 'src/math/index';
-import { BinnedTimeSeries } from 'src/math/main';
+import { Data } from 'src/math/main';
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -66,8 +66,7 @@ export type SampleDoc = SamplePayload & {
   createdAt: number;
 };
 
-// TODO: Build out what the sample data looks like
-export type SampleData = BinnedTimeSeries;
+export type SampleData = Data;
 
 export const modelTypes = ['Becker-Doring', 'Smoluchowski', 'BD-nucleation'];
 
