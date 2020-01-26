@@ -22,7 +22,7 @@ function App(): JSX.Element {
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
   const [showingNewSampleModal, setShowingNewSampleModal] = useState<boolean>(false);
-  const [showingVisualization, setShowingVisualization] = useState<SampleDoc | null>(false);
+  const [showingVisualization, setShowingVisualization] = useState<SampleDoc | null>(null);
   const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
 
   useEffect(() => {

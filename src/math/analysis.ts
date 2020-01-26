@@ -1,5 +1,5 @@
 import { ModelState } from 'src/math/types.d.ts';
-import { TimeSeries, BinnedTimeSeries } from 'src/math/main.ts';
+import { TimeSeries } from 'src/math/main.ts';
 import { deepClone } from 'src/math/common.ts';
 import { parse } from '@babel/core';
 

@@ -4,6 +4,7 @@ import { Box, Button, Form, FormField, Heading, Select, Text, Grid } from 'gromm
 import { SampleDoc } from 'src/db/sample';
 import Mass from './Mass';
 import NumberComponent from './Number';
+import Length from './Length';
 
 interface VisualizationProps {
   sample: SampleDoc;
@@ -11,7 +12,8 @@ interface VisualizationProps {
 
 const VizOptions = {
   mass: Mass,
-  number: NumberComponent
+  number: NumberComponent,
+  length: Length
 } as {
   [visType: string]: any;
 };
