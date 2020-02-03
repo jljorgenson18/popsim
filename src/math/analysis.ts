@@ -52,7 +52,7 @@ export function splitSpecies(series: TimeSeries, ignore?: number[]): SpeciesData
         if (!series[idx].s[i]) {
           dat[i] = 0;
         } else {
-          dat[i] = series[idx].s[i];
+          dat[i] = i * series[idx].s[i];
         }
       }
     }
