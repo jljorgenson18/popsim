@@ -6,6 +6,7 @@ import Mass from './Mass';
 import NumberComponent from './Number';
 import Length from './Length';
 import Species from './Species';
+import Histogram from './Histogram';
 
 interface VisualizationProps {
   sample: SampleDoc;
@@ -15,7 +16,8 @@ const VizOptions = {
   mass: Mass,
   number: NumberComponent,
   length: Length,
-  species: Species
+  species: Species,
+  histogram: Histogram
 } as {
   [visType: string]: any;
 };

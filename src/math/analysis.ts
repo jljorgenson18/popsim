@@ -17,6 +17,11 @@ export interface DataSet {
   [label: number]: DataPoint[];
 }
 
+export interface Histogram {
+  t: number;
+  h: DataPoint[];
+}
+
 function getLargestStateID(state: ModelState): number {
   let largest = 0;
   const keys = Object.keys(state.s);
@@ -82,34 +87,55 @@ export function splitSpecies(series: TimeSeries, ignore?: number[]): SpeciesData
 //   return sets;
 // }
 
-export function expandToHistogram(state: ModelState, ignore?: number[], num?: number): ModelState {
+export function expandToHistogram(state: ModelState, ignore?: number[], num?: number): Histogram {
   let numSpec = 0;
   if (!num) {
     numSpec = getLargestStateID(state);
   } else {
     numSpec = num;
   }
-  const hist: ModelState = { t: state.t, s: {} };
   if (!ignore) ignore = [];
+  const hist: Histogram = { t: state.t, h: [] };
   for (let i = 1; i < numSpec; i++) {
     if (!ignore.includes(i)) {
       if (state.s[i] != null) {
-        hist.s[i] = state.s[i];
+        hist.h.push({ t: i, p: i * state.s[i] });
       } else {
-        hist.s[i] = 0;
+        hist.h.push({ t: i, p: 0 });
       }
     }
   }
   return hist;
 }
 
-export function histSeries(series: TimeSeries, ignore?: number[]): TimeSeries {
-  const histSer: TimeSeries = {};
+// export function expandToHistogram(state: ModelState, ignore?: number[], num?: number): ModelState {
+//   let numSpec = 0;
+//   if (!num) {
+//     numSpec = getLargestStateID(state);
+//   } else {
+//     numSpec = num;
+//   }
+//   const hist: ModelState = { t: state.t, s: {} };
+//   if (!ignore) ignore = [];
+//   for (let i = 1; i < numSpec; i++) {
+//     if (!ignore.includes(i)) {
+//       if (state.s[i] != null) {
+//         hist.s[i] = state.s[i];
+//       } else {
+//         hist.s[i] = 0;
+//       }
+//     }
+//   }
+//   return hist;
+// }
+
+export function histSeries(series: TimeSeries, ignore?: number[]): Histogram[] {
+  const histSer: Histogram[] = [];
   const keys = Object.keys(series);
   const num = getLargestID(series);
   keys.forEach(key => {
     const idx = parseInt(key, 10);
-    histSer[idx] = expandToHistogram(series[idx], ignore, num);
+    histSer.push(expandToHistogram(series[idx], ignore, num));
   });
   return histSer;
 }

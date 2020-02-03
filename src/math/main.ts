@@ -10,7 +10,9 @@ import {
   massSeries,
   lengthSeries,
   splitSpecies,
-  DataSet
+  histSeries,
+  DataSet,
+  Histogram
 } from './analysis';
 
 import { deepClone, stateMoment, checkConserved } from './common';
@@ -27,6 +29,7 @@ export interface Data {
   length?: DataPoint[];
   number?: DataPoint[];
   species?: SpeciesData[];
+  histograms?: Histogram[];
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {
@@ -222,5 +225,6 @@ export function simulate(payload: SamplePayload): Data {
   data.number = numberSeries(data.series);
   data.length = lengthSeries(data.series);
   data.species = splitSpecies(data.series);
+  data.histograms = histSeries(data.series);
   return data;
 }
