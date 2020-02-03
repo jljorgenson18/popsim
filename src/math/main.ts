@@ -5,6 +5,7 @@ import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
 import {
   DataPoint,
+  SpeciesData,
   numberSeries,
   massSeries,
   lengthSeries,
@@ -25,7 +26,7 @@ export interface Data {
   mass?: DataPoint[];
   length?: DataPoint[];
   number?: DataPoint[];
-  species?: DataSet;
+  species?: SpeciesData[];
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {

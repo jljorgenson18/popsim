@@ -5,6 +5,7 @@ import { SampleDoc } from 'src/db/sample';
 import Mass from './Mass';
 import NumberComponent from './Number';
 import Length from './Length';
+import Species from './Species';
 
 interface VisualizationProps {
   sample: SampleDoc;
@@ -13,7 +14,8 @@ interface VisualizationProps {
 const VizOptions = {
   mass: Mass,
   number: NumberComponent,
-  length: Length
+  length: Length,
+  species: Species
 } as {
   [visType: string]: any;
 };

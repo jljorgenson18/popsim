@@ -8,6 +8,11 @@ export interface DataPoint {
   p: number;
 }
 
+export interface SpeciesData {
+  t: number;
+  [p: number]: number;
+}
+
 export interface DataSet {
   [label: number]: DataPoint[];
 }
@@ -33,26 +38,49 @@ function getLargestID(series: TimeSeries): number {
   return largest;
 }
 
-export function splitSpecies(series: TimeSeries, ignore?: number[]): DataSet {
+export function splitSpecies(series: TimeSeries, ignore?: number[]): SpeciesData[] {
   const keys = Object.keys(series);
   const numSets = getLargestID(series);
-  const sets: DataSet = {};
+  const sets: SpeciesData[] = [];
   if (!ignore) ignore = [];
   keys.forEach(key => {
     const idx = parseInt(key, 10);
+    const dat: SpeciesData = { t: series[idx].t };
+    //dat.t = series[1].t;
     for (let i = 1; i < numSets; i++) {
       if (!ignore.includes(i)) {
-        if (!sets[i]) sets[i] = [];
-        if (series[idx].s[i] != null) {
-          sets[i].push({ t: series[idx].t, p: series[idx].s[i] });
+        if (!series[idx].s[i]) {
+          dat[i] = 0;
         } else {
-          sets[i].push({ t: series[idx].t, p: 0 });
+          dat[i] = series[idx].s[i];
         }
       }
     }
+    sets.push(dat);
   });
   return sets;
 }
+
+// export function splitSpecies(series: TimeSeries, ignore?: number[]): DataSet {
+//   const keys = Object.keys(series);
+//   const numSets = getLargestID(series);
+//   const sets: DataSet = {};
+//   if (!ignore) ignore = [];
+//   keys.forEach(key => {
+//     const idx = parseInt(key, 10);
+//     for (let i = 1; i < numSets; i++) {
+//       if (!ignore.includes(i)) {
+//         if (!sets[i]) sets[i] = [];
+//         if (series[idx].s[i] != null) {
+//           sets[i].push({ t: series[idx].t, p: series[idx].s[i] });
+//         } else {
+//           sets[i].push({ t: series[idx].t, p: 0 });
+//         }
+//       }
+//     }
+//   });
+//   return sets;
+// }
 
 export function expandToHistogram(state: ModelState, ignore?: number[], num?: number): ModelState {
   let numSpec = 0;
