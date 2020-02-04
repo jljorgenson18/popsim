@@ -65,7 +65,6 @@ function App(): JSX.Element {
   }
 
   function handleShowVisualizationModal(sample: SampleDoc) {
-    console.log(sample);
     setShowingVisualization(sample);
   }
 

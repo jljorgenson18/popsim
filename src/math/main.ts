@@ -1,4 +1,4 @@
-import { SamplePayload, SampleData } from 'src/db/sample';
+import { SamplePayload } from 'src/db/sample';
 import { ModelState, SpeciesPair, Species, GetProbabilitiesFunc } from './types';
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Form, FormField, Heading, Select, Text, Grid } from 'grommet';
+import { Box, FormField, Select } from 'grommet';
 
 import { SampleDoc } from 'src/db/sample';
 import Mass from './Mass';
@@ -13,11 +13,11 @@ interface VisualizationProps {
 }
 
 const VizOptions = {
-  mass: Mass,
-  number: NumberComponent,
-  length: Length,
-  species: Species,
-  histogram: Histogram
+  Mass: Mass,
+  Number: NumberComponent,
+  Length: Length,
+  Species: Species,
+  Histogram: Histogram
 } as {
   [visType: string]: any;
 };
@@ -26,7 +26,6 @@ const VizOptionTypes = Object.keys(VizOptions);
 
 function Visualization(props: VisualizationProps) {
   const { sample } = props;
-  console.log(sample);
   const [currentViz, setCurrentViz] = useState<string>(VizOptionTypes[0]);
   return (
     <Box

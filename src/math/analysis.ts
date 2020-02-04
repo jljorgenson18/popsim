@@ -1,7 +1,5 @@
-import { ModelState } from 'src/math/types.d.ts';
-import { TimeSeries } from 'src/math/main.ts';
-import { deepClone } from 'src/math/common.ts';
-import { parse } from '@babel/core';
+import { TimeSeries } from 'src/math/main';
+import { ModelState } from './types';
 
 export interface DataPoint {
   t: number;
