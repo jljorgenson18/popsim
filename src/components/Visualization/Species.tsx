@@ -9,7 +9,7 @@ import { VizProps } from './types';
 const SelectedSpecies = styled.div`
   h4 {
     text-align: center;
-    margin: 4px;
+    margin: 8px 0;
   }
 
   > div {
@@ -17,7 +17,7 @@ const SelectedSpecies = styled.div`
     flex-wrap: wrap;
 
     > * {
-      margin: 16px;
+      margin: 16px 24px;
     }
   }
 `;

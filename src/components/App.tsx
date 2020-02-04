@@ -84,7 +84,7 @@ function App(): JSX.Element {
         <Heading>Welcome to Popsim!</Heading>
         <Button onClick={() => setShowingNewSampleModal(true)} label={'Create new Sample'} />
       </Header>
-      <Main pad="large">
+      <main style={{ padding: 48, minHeight: '100%' }}>
         {fetching && !allSamples ? <Skeleton count={5} /> : null}
         {allSamples ? (
           <SampleList
@@ -94,7 +94,7 @@ function App(): JSX.Element {
             onDownloadSample={handleDownloadSample}
           />
         ) : null}
-      </Main>
+      </main>
       {showingNewSampleModal ? (
         <Layer
           position="center"
