@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Main, Heading, Button, Footer, Header, Layer } from 'grommet';
+import { Heading, Button, Footer, Header, Layer } from 'grommet';
 import Skeleton from 'react-loading-skeleton';
 import FileSaver from 'file-saver';
+import styled from 'styled-components';
 
 import db from 'src/db';
 import { getAllSamples, createSample, SamplePayload, SampleDoc } from 'src/db/sample';
@@ -16,6 +17,14 @@ const downloadSample = (sample: SampleDoc) => {
   });
   FileSaver.saveAs(blob, `${sample.name}.${sample._id}.json`);
 };
+
+const MainContainer = styled.main`
+  padding: 48px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+`;
 
 function App(): JSX.Element {
   const [allSamples, setAllSamples] = useState<SampleDoc[] | null>(null);
@@ -84,7 +93,7 @@ function App(): JSX.Element {
         <Heading>Welcome to Popsim!</Heading>
         <Button onClick={() => setShowingNewSampleModal(true)} label={'Create new Sample'} />
       </Header>
-      <main style={{ padding: 48, minHeight: '100%' }}>
+      <MainContainer>
         {fetching && !allSamples ? <Skeleton count={5} /> : null}
         {allSamples ? (
           <SampleList
@@ -94,7 +103,7 @@ function App(): JSX.Element {
             onDownloadSample={handleDownloadSample}
           />
         ) : null}
-      </main>
+      </MainContainer>
       {showingNewSampleModal ? (
         <Layer
           position="center"
