@@ -1,5 +1,11 @@
 import { BDNucleationPayload } from 'src/db/sample';
-import { removeSpecies, deepClone, catchNull, catchNeg } from 'src/math/common';
+import {
+  removeSpecies,
+  deepClone,
+  catchNull,
+  catchNeg,
+  calculateBDNFrequencies
+} from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc } from '../types';
 
 function nucleate(state: ModelState, nc: number): ModelState {
@@ -115,7 +121,24 @@ function randomInt(min: number, max: number): number {
 }
 
 export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
-  const { ka, kb, a = ka, b = kb, nc = 2, na = a, nb = a } = params;
+  //const { ka, kb, a = ka, b = kb, nc = 2, na = a, nb = a } = calculateBDNFrequencies(params);
+  const kb = params.kb;
+  let b: number;
+  if (params.b) {
+    b = params.b;
+  } else {
+    b = kb;
+  }
+  const nc = params.nc;
+  const nb = params.nb;
+  const ka = params.ka * (params.Co / params.N);
+  const na = params.na * (params.Co / params.N);
+  let a: number;
+  if (params.a) {
+    a = params.a * (params.Co / params.N);
+  } else {
+    a = ka;
+  }
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);

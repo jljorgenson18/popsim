@@ -16,6 +16,7 @@ import {
 } from './analysis';
 
 import { deepClone, stateMoment, checkConserved } from './common';
+import SampleForm from 'src/components/SampleForm';
 
 export interface TimeSeries {
   [state: number]: ModelState;
@@ -30,6 +31,7 @@ export interface Data {
   number?: DataPoint[];
   species?: SpeciesData[];
   histograms?: Histogram[];
+  [label: string]: any;
 }
 
 function fillSpecies(s: SpeciesPair[]): Species {
@@ -226,5 +228,10 @@ export function simulate(payload: SamplePayload): Data {
   data.length = lengthSeries(data.series);
   data.species = splitSpecies(data.series);
   data.histograms = histSeries(data.series);
+  // Below here can be done better but jank is fine for now
+  data['V'] = payload.V;
+  data['N'] = payload.N;
+  data['end_time'] = payload.tstop;
+  data['nc'] = payload.nc;
   return data;
 }

@@ -292,7 +292,7 @@ function SampleForm(props: SampleFormProps) {
             onBlur={formik.handleBlur}
           />
           <FormFieldLabel
-            label="Time to stop simulation (tstop)"
+            label="Time to stop simulation"
             name="tstop"
             type="number"
             required
@@ -312,22 +312,22 @@ function SampleForm(props: SampleFormProps) {
             onBlur={formik.handleBlur}
           />
           <FormFieldLabel
-            label="Indvidual Runs"
+            label="Bulk Concentration"
+            name="Co"
+            type="number"
+            placeholder="Micromolar"
+            error={(formik.touched.Co || submitted) && formik.errors.Co}
+            value={formik.values.Co || ''}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+          <FormFieldLabel
+            label="Stored Runs"
             name="ind_runs"
             type="number"
             help="Defaults to 0"
             error={(formik.touched.ind_runs || submitted) && formik.errors.ind_runs}
             value={formik.values.ind_runs || ''}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
-          <FormFieldLabel
-            label="System volume (V)"
-            name="V"
-            type="number"
-            help="Defaults to 1"
-            error={(formik.touched.V || submitted) && formik.errors.V}
-            value={formik.values.V || ''}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />

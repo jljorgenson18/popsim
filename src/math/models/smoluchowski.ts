@@ -5,7 +5,8 @@ import {
   factorial,
   catchNull,
   catchNeg,
-  checkConserved
+  checkConserved,
+  calculateSmoluchowskiFrequencies
 } from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc } from '../types';
 
@@ -124,7 +125,33 @@ function randomInt(min: number, max: number): number {
 }
 
 export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
-  const { ka, kb, a = ka, b = kb, nc = 2, kn = a } = params;
+  // const { ka, kb, a = ka, b = kb, nc = 2, kn = a } = calculateSmoluchowskiFrequencies(params);
+  const ka = params.ka * (params.Co / params.N);
+  const kb = params.kb;
+  let a: number;
+  if (params.a) {
+    a = params.a * (params.Co / params.N);
+  } else {
+    a = ka;
+  }
+  let b: number;
+  if (params.b) {
+    b = params.b;
+  } else {
+    b = kb;
+  }
+  let nc: number;
+  if (params.nc) {
+    nc = params.nc;
+  } else {
+    nc = 2;
+  }
+  let kn: number;
+  if (params.kn) {
+    kn = params.kn * Math.pow(params.Co / params.N, nc - 1);
+  } else {
+    kn = a;
+  }
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);

@@ -1,4 +1,5 @@
 import { ModelState } from './types';
+import { BDNucleationPayload, SmoluchowskiPayload, BeckerDoringPayload } from 'src/db/sample';
 
 export const deepClone = (s: any): any => {
   return JSON.parse(JSON.stringify(s));
@@ -85,4 +86,29 @@ export function factorial(n: number): number {
     fact = fact * i;
   }
   return fact;
+}
+
+export function calculateBDFrequencies(payload: BeckerDoringPayload): BeckerDoringPayload {
+  const outload = deepClone(payload);
+  outload.a = (payload.a * payload.Co) / payload.N;
+  outload.kn = Math.pow(payload.Co / payload.N, payload.nc - 1) * payload.kn;
+  return outload;
+}
+
+export function calculateSmoluchowskiFrequencies(
+  payload: SmoluchowskiPayload
+): SmoluchowskiPayload {
+  const outload = deepClone(payload);
+  outload.a = (payload.Co / payload.N) * payload.a;
+  outload.ka = (payload.Co / payload.N) * payload.ka;
+  outload.kn = Math.pow(payload.Co / payload.N, payload.nc - 1) * payload.kn;
+  return outload;
+}
+
+export function calculateBDNFrequencies(payload: BDNucleationPayload): BDNucleationPayload {
+  const outload = deepClone(payload);
+  outload.a = (payload.Co / payload.N) * payload.a;
+  outload.ka = (payload.Co / payload.N) * payload.ka;
+  outload.na = (payload.Co / payload.N) * payload.na;
+  return outload;
 }

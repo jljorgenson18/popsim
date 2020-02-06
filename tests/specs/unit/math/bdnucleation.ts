@@ -7,6 +7,7 @@ beforeEach(() => {
     name: 'Some Sample',
     model: 'BD-nucleation',
     N: 100,
+    Co: 100,
     tstop: 2,
     runs: 2,
     ind_runs: 0,

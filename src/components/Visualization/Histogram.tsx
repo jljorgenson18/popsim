@@ -16,9 +16,9 @@ function Histogram(props: VizProps) {
     <>
       <BarChart data={plot_data} width={500} height={300}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="t" name="Time" tickFormatter={(val: number) => val.toFixed(2)} />
+        <XAxis dataKey="t" name="Size" />
         <YAxis />
-        <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
+        <Tooltip labelFormatter={(size: number) => `Size: ${size}`} />
         <Bar dataKey="p" fill="#8884d8" />
       </BarChart>
       <RangeInput

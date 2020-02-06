@@ -7,6 +7,7 @@ beforeEach(() => {
     name: 'Some Sample',
     model: 'Becker-Doring',
     N: 100,
+    Co: 100,
     tstop: 2,
     runs: 1,
     ind_runs: 0,
