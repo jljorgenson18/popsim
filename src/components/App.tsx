@@ -5,11 +5,12 @@ import FileSaver from 'file-saver';
 import styled from 'styled-components';
 
 import db from 'src/db';
-import { getAllSamples, createSample, SamplePayload, SampleDoc } from 'src/db/sample';
+import { getAllSamples, createSample, cloneSample, SamplePayload, SampleDoc } from 'src/db/sample';
 import SampleList from './SampleList';
 import SampleForm from './SampleForm';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
 import Visualization from './Visualization';
+import UploadSample from './UploadSample';
 
 const downloadSample = (sample: SampleDoc) => {
   const blob = new Blob([JSON.stringify(sample, null, '  ')], {
@@ -31,6 +32,7 @@ function App(): JSX.Element {
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
   const [showingNewSampleModal, setShowingNewSampleModal] = useState<boolean>(false);
+  const [showingUploadSampleModal, setShowingUploadSampleModal] = useState<boolean>(false);
   const [showingVisualization, setShowingVisualization] = useState<SampleDoc | null>(null);
   const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
 
@@ -73,6 +75,13 @@ function App(): JSX.Element {
     setShowingNewSampleModal(false);
   }
 
+  async function handleUploadSample(docs: SampleDoc[]) {
+    console.log('Uploading samples');
+    await Promise.all(docs.map(doc => cloneSample(doc)));
+    console.log('Samples uploaded!!');
+    setShowingUploadSampleModal(false);
+  }
+
   function handleShowVisualizationModal(sample: SampleDoc) {
     setShowingVisualization(sample);
   }
@@ -92,6 +101,7 @@ function App(): JSX.Element {
       <Header background="brand" pad="medium">
         <Heading>Welcome to Popsim!</Heading>
         <Button onClick={() => setShowingNewSampleModal(true)} label={'Create new Sample'} />
+        <Button onClick={() => setShowingUploadSampleModal(true)} label={'Upload Sample'} />
       </Header>
       <MainContainer>
         {fetching && !allSamples ? <Skeleton count={5} /> : null}
@@ -116,6 +126,17 @@ function App(): JSX.Element {
             onSubmit={handleNewSampleSubmit}
             onCancel={() => setShowingNewSampleModal(false)}
           />
+        </Layer>
+      ) : null}
+      {showingUploadSampleModal ? (
+        <Layer
+          position="center"
+          modal
+          responsive={false}
+          animation="fadeIn"
+          onEsc={() => setShowingUploadSampleModal(false)}
+          onClickOutside={() => setShowingUploadSampleModal(false)}>
+          <UploadSample onUploadSample={handleUploadSample} />
         </Layer>
       ) : null}
       {showingVisualization ? (
