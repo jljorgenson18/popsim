@@ -20,21 +20,11 @@ const validate = (values: Partial<SamplePayload>) => {
   if (!values.name) errors.name = 'Required';
   if (values.N == null) errors.N = 'Required';
   if (values.tstop == null) errors.tstop = 'Required';
-
+  if (values.Co == null) errors.Co = 'Required';
   if (values.model === 'Becker-Doring') {
     if (values.a == null) errors.a = 'Required';
     if (values.b == null) errors.b = 'Required';
-  }
-  // else if (values.model === 'Knowles') {
-  //   if (values.ka == null) {
-  //     errors.ka = 'Required';
-  //   }
-  //   if (values.b == null) {
-  //     errors.b = 'Required';
-  //   }
-  //   return errors;
-  // }
-  else if (values.model === 'Smoluchowski') {
+  } else if (values.model === 'Smoluchowski') {
     if (values.ka == null) errors.ka = 'Required';
     if (values.kb == null) errors.kb = 'Required';
   } else if (values.model === 'BD-nucleation') {
@@ -315,7 +305,8 @@ function SampleForm(props: SampleFormProps) {
             label="Bulk Concentration"
             name="Co"
             type="number"
-            placeholder="Micromolar"
+            required
+            help="Micromolar"
             error={(formik.touched.Co || submitted) && formik.errors.Co}
             value={formik.values.Co || ''}
             onChange={formik.handleChange}

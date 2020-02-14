@@ -87,6 +87,17 @@ export async function createSample(payload: SamplePayload): Promise<SampleDoc> {
   return await db.get<SampleDoc>(id);
 }
 
+export async function cloneSample(payload: SampleDoc): Promise<SampleDoc> {
+  const id = uuid();
+  await db.put<PartialBy<SampleDoc, '_rev'>>({
+    ...payload,
+    _rev: null,
+    createdAt: Date.now(),
+    _id: id
+  });
+  return await db.get<SampleDoc>(id);
+}
+
 export async function deleteSample(payload: SampleDoc): Promise<void> {
   await db.remove(payload);
 }

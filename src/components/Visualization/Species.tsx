@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import randomColor from 'randomcolor';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { CheckBox } from 'grommet';
+import { CheckBox, RadioButtonGroup } from 'grommet';
 import styled from 'styled-components';
 
 import { VizProps } from './types';
+import { useScaleInputField, useFilteredDataPoints } from './hooks';
 
 const SelectedSpecies = styled.div`
   h4 {
@@ -51,6 +52,8 @@ function Species(props: VizProps) {
     }, {});
     setSpeciesOptions(newSpeciesOptions);
   }, [speciesKeys]);
+  const { options, scale, onChange } = useScaleInputField();
+  const dataSpecies = useFilteredDataPoints(data.species);
 
   if (!speciesOptions) return null;
   // Each key is a specific species, UI should somehow allow user to select
@@ -59,9 +62,14 @@ function Species(props: VizProps) {
   return (
     // LINES should be generated based on one or more selected values from keys
     <>
-      <LineChart data={data.species} width={500} height={300}>
+      <LineChart data={dataSpecies} width={500} height={300}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="t" name="Time" tickFormatter={(val: number) => val.toFixed(2)} />
+        <XAxis
+          dataKey="t"
+          name="Time"
+          tickFormatter={(val: number) => val.toFixed(2)}
+          scale={scale}
+        />
         <YAxis dataKey="1" name="Number" />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
         {speciesKeys
@@ -72,6 +80,7 @@ function Species(props: VizProps) {
           })
           .filter(Boolean)}
       </LineChart>
+      <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
       <SelectedSpecies>
         <h4>Select Species</h4>
         <div>
