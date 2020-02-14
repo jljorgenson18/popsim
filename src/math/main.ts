@@ -75,7 +75,9 @@ function fillBin(data: TimeSeries, inputState: ModelState, bin: number): TimeSer
   return data;
 }
 
-function binData(data: TimeSeries, newData: TimeSeries, t_end: number, bins = 100): TimeSeries {
+function linearBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
+  const bins = payload.bins;
+  const t_end = payload.tstop;
   const dt = t_end / bins;
   let t = 0;
   let idx = 0;
@@ -98,6 +100,33 @@ function binData(data: TimeSeries, newData: TimeSeries, t_end: number, bins = 10
     t = t + dt;
   }
   return data;
+}
+
+function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
+  // const bins = payload.bins;
+  // const t_end = payload.tstop;
+  // const dt = t_end / bins;
+  // let t = 0;
+  // let idx = 0;
+
+  // for (let i = 0; i < bins; i++) {
+  //   fillBin(data, newData[idx], i);
+  //   data[i].t = t;
+  //   // go to next state
+  //   idx = idx + 1;
+  //   // check if next state is still in the same bin
+  //   while (newData[idx].t < t + dt) {
+  //     // step through until current bin is exited
+  //     idx = idx + 1;
+  //   }
+  //   // check if next state is more than one bin later
+  //   if (newData[idx].t > t + 2 * dt) {
+  //     // if step is bigger than a bin, use the last state
+  //     idx = idx - 1;
+  //   }
+  //   t = t + dt;
+  // }
+  return linearBin(data, newData, payload);
 }
 
 function averageData(inputData: TimeSeries, runs: number, moment = 1): TimeSeries {
@@ -203,6 +232,8 @@ export function simulate(payload: SamplePayload): Data {
   const t_end = payload.tstop;
   const runs = payload.runs;
   const data: Data = {};
+  if (!payload.bins) payload.bins = 100;
+  if (!payload.bin_scale) payload.bin_scale = 'linear';
   if (payload.ind_runs !== 0) data.runs = [];
   let binnedSeries: TimeSeries;
   binnedSeries = {};
@@ -217,7 +248,7 @@ export function simulate(payload: SamplePayload): Data {
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
-    binnedSeries = binData(binnedSeries, tSeries, t_end);
+    binnedSeries = binData(binnedSeries, tSeries, payload);
     // console.log(JSON.stringify(binnedSeries, null, '  '));
   }
   // Average data

@@ -14,6 +14,8 @@ export interface BaseSample {
   ind_runs?: number; // Number of individual runs to store
   V?: number; // System volume. Defaults to 1
   Co?: number; // Initial concentration of monomers
+  bins?: number;
+  bin_scale?: string;
 }
 
 // For the optional things, maybe a checkbox or two.

@@ -332,6 +332,27 @@ function SampleForm(props: SampleFormProps) {
             onBlur={formik.handleBlur}
           />
           <FormFieldLabel
+            label="Bins"
+            name="bins"
+            type="number"
+            help="Defaults to 100"
+            error={(formik.touched.bins || submitted) && formik.errors.bins}
+            value={formik.values.bins || ''}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+          <FormFieldLabel
+            label="Bin Scale"
+            name="bin_scale"
+            type="string"
+            help="log or linear (default)"
+            placeholder="linear"
+            error={(formik.touched.bin_scale || submitted) && formik.errors.bin_scale}
+            value={formik.values.bin_scale || ''}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+          <FormFieldLabel
             label="Model"
             htmlFor="model-select"
             style={{ gridArea: 'auto / 1 / auto / 3' }}
