@@ -102,6 +102,38 @@ function linearBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload
   return data;
 }
 
+function logBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
+  const bins = payload.bins;
+  const t_end = payload.tstop;
+  let dt = 0;
+  if (!data[1]) {
+    dt = newData[1].t;
+  } else {
+    dt = data[1].t;
+  }
+  const x = Math.pow(t_end / dt, 1 / bins);
+  console.log(x);
+  console.log(dt);
+  let t = 0;
+  let idx = 0;
+  fillBin(data, newData[idx], 0);
+  data[0].t = 0;
+  idx = 1;
+  t = dt;
+  for (let i = 1; i < bins; i++) {
+    while (newData[idx].t < dt * x) {
+      idx = idx + 1;
+    }
+    if (newData[idx].t > dt * x * x) {
+      idx = idx - 1;
+    }
+    fillBin(data, newData[idx], i);
+    t = t * x;
+    data[i].t = t;
+  }
+  return data;
+}
+
 function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
   // const bins = payload.bins;
   // const t_end = payload.tstop;
@@ -126,7 +158,8 @@ function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload):
   //   }
   //   t = t + dt;
   // }
-  return linearBin(data, newData, payload);
+  if (payload.bin_scale === 'linear') return linearBin(data, newData, payload);
+  if (payload.bin_scale === 'log') return logBin(data, newData, payload);
 }
 
 function averageData(inputData: TimeSeries, runs: number, moment = 1): TimeSeries {
