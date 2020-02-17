@@ -6,7 +6,8 @@ import {
   modelTypes,
   BeckerDoringPayload,
   SmoluchowskiPayload,
-  BDNucleationPayload
+  BDNucleationPayload,
+  SmoluchowskiCrowderPayload
 } from 'src/db/sample';
 
 interface SampleFormProps {
@@ -191,6 +192,66 @@ function SmoluchowskiFields(props: { formik: SmoluchowsiFormik }) {
   );
 }
 
+const SmoluchowsiCrowderFormikFunc = (params: any) => useFormik<SmoluchowskiCrowderPayload>(params);
+type SmoluchowskiCrowderFormik = ReturnType<typeof SmoluchowsiCrowderFormikFunc>;
+function SmoluchowskiCrowderFields(props: { formik: SmoluchowskiCrowderFormik }) {
+  const { formik } = props;
+  return (
+    <>
+      <InitialConditionField formik={formik} label="Association (ka)" name="ka" required />
+      <InitialConditionField formik={formik} label="Dissociation (kb)" name="kb" required />
+      <InitialConditionField
+        formik={formik}
+        label="Addition (a)"
+        name="a"
+        help="Defaults to a = ka"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Addition (b)"
+        name="b"
+        help="Defaults to b = kb"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Critical nucleus size (nc)"
+        name="nc"
+        help="Defaults to 2"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Nucleation rate constant (kn)"
+        name="kn"
+        help="Defaults to kn = a"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Crowder volume fraction (phi)"
+        name="phi"
+        //help="Defaults to phi = 0"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Monomer radius (r1)"
+        name="r1"
+        //help="Defaults to r1 = 1"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Crowder radius (rc)"
+        name="rc"
+        //help="Defaults to rc = 1"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Spherocylinder radius (rsc)"
+        name="rsc"
+        //help="Defaults to rsc = 1"
+      />
+    </>
+  );
+}
+
 // Just here for the types
 const BDNucleationFormikFunc = (params: any) => useFormik<BDNucleationPayload>(params);
 type BDNucleationFormik = ReturnType<typeof BDNucleationFormikFunc>;
@@ -366,6 +427,9 @@ function SampleForm(props: SampleFormProps) {
           ) : null}
           {formik.values.model === 'BD-nucleation' ? (
             <BDNucleationFields formik={formik as BDNucleationFormik} />
+          ) : null}
+          {formik.values.model === 'Smoluchowski-crowders' ? (
+            <SmoluchowskiCrowderFields formik={formik as SmoluchowskiCrowderFormik} />
           ) : null}
           <Box direction="row" gap="medium" gridArea="auto / 1 / auto / 3">
             <Button

@@ -48,6 +48,20 @@ export interface SmoluchowskiPayload extends BaseSample {
   kn?: number; // Nucleation rate constant. Defaults to kn = a
 }
 
+export interface SmoluchowskiCrowderPayload extends BaseSample {
+  model: 'Smoluchowski-crowders';
+  ka: number; // Association
+  kb: number; // Dissociation
+  a?: number; // Addition. Defaults to a = ka
+  b?: number; // Subtraction. Defaults to b = kb
+  nc?: number; // Critical nucleus size. Defaults to 2
+  kn?: number; // Nucleation rate constant. Defaults to kn = a
+  phi?: number; // Crowder volume concentration
+  rc?: number; // Crowder radius
+  r1?: number; // Monomer radius
+  rsc?: number; // Sphero-cylinder radius
+}
+
 // BACKBURNER
 export interface BDNucleationPayload extends BaseSample {
   model: 'BD-nucleation';
@@ -60,7 +74,11 @@ export interface BDNucleationPayload extends BaseSample {
   b?: number; // Growth-phase subtraction. ditto nb or kb
 }
 
-export type SamplePayload = BeckerDoringPayload | SmoluchowskiPayload | BDNucleationPayload;
+export type SamplePayload =
+  | BeckerDoringPayload
+  | SmoluchowskiPayload
+  | BDNucleationPayload
+  | SmoluchowskiCrowderPayload;
 
 export type SampleDoc = SamplePayload & {
   _id: string;
@@ -71,7 +89,12 @@ export type SampleDoc = SamplePayload & {
 
 export type SampleData = Data;
 
-export const modelTypes = ['Becker-Doring', 'Smoluchowski', 'BD-nucleation'];
+export const modelTypes = [
+  'Becker-Doring',
+  'Smoluchowski',
+  'BD-nucleation',
+  'Smoluchowski-crowders'
+];
 
 export async function createSample(payload: SamplePayload): Promise<SampleDoc> {
   const id = uuid();
