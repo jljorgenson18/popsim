@@ -29,6 +29,20 @@ export interface BeckerDoringPayload extends BaseSample {
   kn?: number; // Nucleation rate constant. Defaults to kn = a
 }
 
+export interface BeckerDoringCrowderPayload extends BaseSample {
+  model: 'BD-crowders';
+  a: number; // Addition rate constant (float)
+  b: number; // Subtraction rate constant (float)
+  nc?: number; // Critical nucleus size. Defaults to 2
+  kn?: number; // Nucleation rate constant. Defaults to kn = a
+  phi?: number; // Crowder volume concentration
+  rc?: number; // Crowder radius
+  r1?: number; // Monomer radius
+  rsc?: number; // Sphero-cylinder radius
+  gamma?: number; // Chemical activity of monomer
+  alpha?: number; // Activity modifier
+}
+
 // export interface KnowlesPayload extends BaseSample {
 //   model: 'Knowles';
 //   ka: number; // Association rate constant
@@ -80,7 +94,8 @@ export type SamplePayload =
   | BeckerDoringPayload
   | SmoluchowskiPayload
   | BDNucleationPayload
-  | SmoluchowskiCrowderPayload;
+  | SmoluchowskiCrowderPayload
+  | BeckerDoringCrowderPayload;
 
 export type SampleDoc = SamplePayload & {
   _id: string;
@@ -95,7 +110,8 @@ export const modelTypes = [
   'Becker-Doring',
   'Smoluchowski',
   'BD-nucleation',
-  'Smoluchowski-crowders'
+  'Smoluchowski-crowders',
+  'BD-crowders'
 ];
 
 export async function createSample(payload: SamplePayload): Promise<SampleDoc> {

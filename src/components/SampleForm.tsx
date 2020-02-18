@@ -7,7 +7,8 @@ import {
   BeckerDoringPayload,
   SmoluchowskiPayload,
   BDNucleationPayload,
-  SmoluchowskiCrowderPayload
+  SmoluchowskiCrowderPayload,
+  BeckerDoringCrowderPayload
 } from 'src/db/sample';
 
 interface SampleFormProps {
@@ -109,6 +110,60 @@ function BeckerDoringFields(props: { formik: BeckerDoringFormik }) {
         label="Nucleation rate constant (kn)"
         name="kn"
         required
+      />
+    </>
+  );
+}
+
+const BeckerDoringCrowderFormikFunc = (params: any) =>
+  useFormik<BeckerDoringCrowderPayload>(params);
+type BeckerDoringCrowderFormik = ReturnType<typeof BeckerDoringCrowderFormikFunc>;
+function BeckerDoringCrowderFields(props: { formik: BeckerDoringCrowderFormik }) {
+  const { formik } = props;
+  return (
+    <>
+      <InitialConditionField formik={formik} label="Addition rate constant (a)" name="a" required />
+      <InitialConditionField
+        formik={formik}
+        label="Subtraction rate constant (b)"
+        name="b"
+        required
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Critical nucleus size (nc)"
+        name="nc"
+        help="Defaults to 2"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Nucleation rate constant (kn)"
+        name="kn"
+        required
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Crowder volume fraction (phi)"
+        name="phi"
+        //help="Defaults to phi = 0"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Monomer radius (r1)"
+        name="r1"
+        //help="Defaults to r1 = 1"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Crowder radius (rc)"
+        name="rc"
+        //help="Defaults to rc = 1"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Spherocylinder radius (rsc)"
+        name="rsc"
+        //help="Defaults to rsc = 1"
       />
     </>
   );
@@ -421,6 +476,9 @@ function SampleForm(props: SampleFormProps) {
           </FormFieldLabel>
           {formik.values.model === 'Becker-Doring' ? (
             <BeckerDoringFields formik={formik as BeckerDoringFormik} />
+          ) : null}
+          {formik.values.model === 'BD-crowders' ? (
+            <BeckerDoringCrowderFields formik={formik as BeckerDoringCrowderFormik} />
           ) : null}
           {formik.values.model === 'Smoluchowski' ? (
             <SmoluchowskiFields formik={formik as SmoluchowsiFormik} />
