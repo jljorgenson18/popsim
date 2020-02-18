@@ -60,6 +60,8 @@ export interface SmoluchowskiCrowderPayload extends BaseSample {
   rc?: number; // Crowder radius
   r1?: number; // Monomer radius
   rsc?: number; // Sphero-cylinder radius
+  gamma?: number; // Chemical activity of monomer
+  alpha?: number; // Activity modifier
 }
 
 // BACKBURNER

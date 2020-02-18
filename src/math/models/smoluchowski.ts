@@ -150,14 +150,14 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
   if (params.kn) {
     kn = params.kn * Math.pow(params.Co / params.N, nc - 1);
   } else {
-    kn = a;
+    kn = a / nc;
   }
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);
     // nucleate
     if (state.s[1] >= nc) {
-      let P = (1 / factorial(nc)) * kn;
+      let P = kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }

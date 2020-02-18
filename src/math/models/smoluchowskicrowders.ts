@@ -150,14 +150,38 @@ export function buildModel(params: SmoluchowskiCrowderPayload): GetProbabilities
   if (params.kn) {
     kn = params.kn * Math.pow(params.Co / params.N, nc - 1);
   } else {
-    kn = a;
+    kn = a / nc;
   }
+  if (params.phi) {
+    const R = params.r1 / params.rc;
+    // const L = params.r1 / params.rsc;
+    const A1 = R * R * R + 3 * R * R + 3 * R;
+    const A2 = 3 * R * R * R + 4.5 * R * R;
+    const A3 = 3 * R * R * R;
+    const z = params.phi / (1 - params.phi);
+    const lng = Math.log(1 - params.phi) + A1 * z + A2 * z * z + A3 * z * z * z;
+    const gamma = Math.exp(lng);
+    const lna =
+      (2 / 3) *
+      Math.pow(params.r1 / params.rsc, 3) *
+      (1.5 * (R * R + R + 1) * z + 4.5 * (R * R + R) * z * z + 4.5 * R * R * z * z * z);
+    const alpha = Math.exp(lna);
+    params.alpha = alpha;
+    params.gamma = gamma;
+  } else {
+    params.gamma = 1.0;
+    params.alpha = 1.0;
+  }
+  const goa = params.gamma / params.alpha;
+  const goanc = Math.pow(goa, params.nc - 1);
+  console.log(goa);
+  console.log(goanc);
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     const state = deepClone(initialState);
     // nucleate
     if (state.s[1] >= nc) {
-      let P = (1 / factorial(nc)) * kn;
+      let P = goanc * kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }
@@ -170,7 +194,7 @@ export function buildModel(params: SmoluchowskiCrowderPayload): GetProbabilities
       if (speciesIdx !== 1) {
         // add
         if (state.s[1] !== 0) {
-          const Pa = a * state.s[1] * state.s[speciesIdx];
+          const Pa = goa * a * state.s[1] * state.s[speciesIdx];
           possibleStates.push({ P: Pa, s: addition(state, speciesIdx) });
         }
         // subtract
@@ -189,11 +213,11 @@ export function buildModel(params: SmoluchowskiCrowderPayload): GetProbabilities
           if (subKey === key) {
             // adding to self. must be at least 2 polymers of same size
             if (state.s[speciesIdx] > 1) {
-              const Pco = 0.5 * ka * state.s[speciesIdx] * (state.s[speciesIdx] - 1);
+              const Pco = 0.5 * goa * ka * state.s[speciesIdx] * (state.s[speciesIdx] - 1);
               possibleStates.push({ P: Pco, s: coagulate(state, speciesIdx, speciesIdx) });
             }
           } else {
-            const Pco = ka * state.s[speciesIdx] * state.s[subIdx];
+            const Pco = goa * ka * state.s[speciesIdx] * state.s[subIdx];
             possibleStates.push({ P: Pco, s: coagulate(state, speciesIdx, subIdx) });
           }
         });
