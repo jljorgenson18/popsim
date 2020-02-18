@@ -60,22 +60,17 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
 export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
   // const { a, b, nc = 2, kn = a } = params;
   const a = params.a * (params.Co / params.N);
-  console.log(params.Co);
-  console.log(params.N);
   let kn: number;
   if (params.kn) {
     kn = params.kn * Math.pow(params.Co / params.N, params.nc - 1);
   } else {
-    kn = a;
+    kn = a / params.nc;
   }
   const b = params.b;
-  let nc: number;
+  let nc = 2;
   if (params.nc) {
     nc = params.nc;
-  } else {
-    nc = 2;
   }
-  console.log(a, kn, nc, b);
   return function(state: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     if (state.s[1] >= nc) {

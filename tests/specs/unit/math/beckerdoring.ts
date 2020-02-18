@@ -12,7 +12,8 @@ beforeEach(() => {
     runs: 1,
     ind_runs: 0,
     a: 1,
-    b: 1
+    b: 1,
+    nc: 1
   };
 });
 

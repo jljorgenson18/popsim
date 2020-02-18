@@ -60,25 +60,45 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
 export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilitiesFunc {
   // const { a, b, nc = 2, kn = a } = params;
   const a = params.a * (params.Co / params.N);
-  console.log(params.Co);
-  console.log(params.N);
   let kn: number;
   if (params.kn) {
     kn = params.kn * Math.pow(params.Co / params.N, params.nc - 1);
   } else {
-    kn = a;
+    kn = a / params.nc;
   }
   const b = params.b;
-  let nc: number;
+  let nc = 2;
   if (params.nc) {
     nc = params.nc;
-  } else {
-    nc = 2;
   }
+  if (params.phi) {
+    const R = params.r1 / params.rc;
+    // const L = params.r1 / params.rsc;
+    const A1 = R * R * R + 3 * R * R + 3 * R;
+    const A2 = 3 * R * R * R + 4.5 * R * R;
+    const A3 = 3 * R * R * R;
+    const z = params.phi / (1 - params.phi);
+    const lng = Math.log(1 - params.phi) + A1 * z + A2 * z * z + A3 * z * z * z;
+    const gamma = Math.exp(lng);
+    const lna =
+      (2 / 3) *
+      Math.pow(params.r1 / params.rsc, 3) *
+      (1.5 * (R * R + R + 1) * z + 4.5 * (R * R + R) * z * z + 4.5 * R * R * z * z * z);
+    const alpha = Math.exp(lna);
+    params.alpha = alpha;
+    params.gamma = gamma;
+  } else {
+    params.gamma = 1.0;
+    params.alpha = 1.0;
+  }
+  const goa = params.gamma / params.alpha;
+  const goanc = Math.pow(goa, params.nc - 1);
+  console.log(goa, goanc);
   return function(state: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
+    // nucleate
     if (state.s[1] >= nc) {
-      let P = (1 / factorial(nc)) * kn;
+      let P = goanc * kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }
@@ -89,7 +109,7 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
       if (Number.isNaN(speciesIdx)) return;
       if (speciesIdx !== 1) {
         if (state.s[1] !== 0) {
-          const Pa = a * state.s[1] * state.s[speciesIdx];
+          const Pa = goa * a * state.s[1] * state.s[speciesIdx];
           possibleStates.push({ P: Pa, s: addition(state, speciesIdx) });
         }
         const Pb = b * state.s[speciesIdx];
