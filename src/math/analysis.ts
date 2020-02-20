@@ -1,5 +1,6 @@
 import { TimeSeries } from 'src/math/main';
-import { ModelState } from './types';
+import { ModelState, Moments } from './types';
+import { deepClone } from './common';
 
 export interface DataPoint {
   t: number;
@@ -138,28 +139,87 @@ export function histSeries(series: TimeSeries, ignore?: number[]): Histogram[] {
   return histSer;
 }
 
-function polymerMass(state: ModelState): number {
+function polymerMass(state: ModelState, order = 1): number {
   const keys = Object.keys(state.s);
   let mass = 0;
   keys.forEach(key => {
     const id = parseInt(key, 10);
     if (id > 1) {
-      mass = mass + id * state.s[id];
+      mass = mass + Math.pow(id * state.s[id], order);
     }
   });
   return mass;
 }
 
-function polymerNumber(state: ModelState): number {
+function polymerNumber(state: ModelState, order = 1): number {
   let num = 0;
   const keys = Object.keys(state.s);
   keys.forEach(key => {
     const idx = parseInt(key, 10);
     if (idx > 1) {
-      num = num + state.s[idx];
+      num = num + Math.pow(state.s[idx], order);
     }
   });
   return num;
+}
+
+export function addToMoments(inMoments: Moments[], inputData: TimeSeries): Moments[] {
+  const moments = deepClone(inMoments);
+  const keys = Object.keys(inputData);
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    const P = polymerNumber(inputData[idx]);
+    const M = polymerMass(inputData[idx]);
+    const L = M / P;
+    const P2 = P * P;
+    const M2 = M * M;
+    const L2 = L * L;
+    if (!moments[idx]) {
+      moments[idx] = { t: inputData[idx].t, M: M, M2: M2, P: P, P2: P2, L: L, L2: L2 };
+    } else {
+      moments[idx].M = moments[idx].M + M;
+      moments[idx].M2 = moments[idx].M2 + M2;
+      moments[idx].P = moments[idx].P + P;
+      moments[idx].P2 = moments[idx].P2 + P2;
+      moments[idx].L = moments[idx].L + L;
+      moments[idx].L2 = moments[idx].L2 + L2;
+    }
+  });
+  return moments;
+}
+
+export function calculateMomentDevs(inMoments: Moments[]): Moments[] {
+  const moments = deepClone(inMoments);
+  const idxs = Object.keys(inMoments);
+  idxs.forEach(idx => {
+    const id = parseInt(idx, 10);
+    const M2av = moments[id].M2;
+    const Mav2 = moments[id].M * moments[id].M;
+    const P2av = moments[id].P2;
+    const Pav2 = moments[id].P * moments[id].P;
+    const L2av = moments[id].L2;
+    const Lav2 = moments[id].L * moments[id].L;
+    moments[id].M_dev = Math.sqrt(M2av - Mav2);
+    moments[id].P_dev = Math.sqrt(P2av - Pav2);
+    moments[id].L_dev = Math.sqrt(L2av - Lav2);
+  });
+  return moments;
+}
+
+export function averageMoments(inMoments: Moments[], runs: number): Moments[] {
+  const moments = deepClone(inMoments);
+  const idxs = Object.keys(moments);
+  idxs.forEach(idx => {
+    const id = parseInt(idx, 10);
+    const keys = Object.keys(moments[id]);
+    console.log(keys);
+    keys.forEach(key => {
+      if (key !== 't') {
+        moments[id][key] = moments[id][key] / runs;
+      }
+    });
+  });
+  return moments;
 }
 
 function avgLength(state: ModelState): number {

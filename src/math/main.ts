@@ -1,5 +1,5 @@
 import { SamplePayload } from 'src/db/sample';
-import { ModelState, SpeciesPair, Species, GetProbabilitiesFunc } from './types';
+import { ModelState, SpeciesPair, Species, GetProbabilitiesFunc, Moments } from './types';
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
@@ -14,7 +14,10 @@ import {
   splitSpecies,
   histSeries,
   DataSet,
-  Histogram
+  Histogram,
+  addToMoments,
+  averageMoments,
+  calculateMomentDevs
 } from './analysis';
 
 import { deepClone, stateMoment, checkConserved } from './common';
@@ -26,13 +29,14 @@ export interface TimeSeries {
 
 export interface Data {
   series?: TimeSeries;
-  variance?: TimeSeries;
-  runs?: TimeSeries[];
+  variance?: SpeciesData[];
+  runs?: SpeciesData[][];
   mass?: DataPoint[];
   length?: DataPoint[];
   number?: DataPoint[];
   species?: SpeciesData[];
   histograms?: Histogram[];
+  moments?: Moments[];
   [label: string]: any;
 }
 
@@ -136,6 +140,34 @@ function logBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): 
   return data;
 }
 
+function binSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
+  const bins = payload.bins;
+  const t_end = payload.tstop;
+  const dt = t_end / bins;
+  let t = 0;
+  let idx = 0;
+  const data: TimeSeries = {};
+
+  for (let i = 0; i < bins; i++) {
+    fillBin(data, newData[idx], i);
+    data[i].t = t;
+    // go to next state
+    idx = idx + 1;
+    // check if next state is still in the same bin
+    while (newData[idx].t < t + dt) {
+      // step through until current bin is exited
+      idx = idx + 1;
+    }
+    // check if next state is more than one bin later
+    if (newData[idx].t > t + 2 * dt) {
+      // if step is bigger than a bin, use the last state
+      idx = idx - 1;
+    }
+    t = t + dt;
+  }
+  return data;
+}
+
 function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
   // const bins = payload.bins;
   // const t_end = payload.tstop;
@@ -161,7 +193,7 @@ function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload):
   //   t = t + dt;
   // }
   if (payload.bin_scale === 'linear') return linearBin(data, newData, payload);
-  if (payload.bin_scale === 'log') return logBin(data, newData, payload);
+  //if (payload.bin_scale === 'log') return logBin(data, newData, payload);
 }
 
 function averageData(inputData: TimeSeries, runs: number, moment = 1): TimeSeries {
@@ -190,7 +222,7 @@ function getVariance(data: TimeSeries, runs: number): TimeSeries {
     const subKeys = Object.keys(avgData[bin].s);
     subKeys.forEach(subKey => {
       const spec = parseInt(subKey, 10);
-      avgData[bin].s[spec] = avgDataSq[bin].s[spec] - Math.pow(avgData[bin].s[spec], 2);
+      avgData[bin].s[spec] = (avgDataSq[bin].s[spec] - Math.pow(avgData[bin].s[spec], 2)) / runs;
     });
   });
   return avgData;
@@ -276,6 +308,7 @@ export function simulate(payload: SamplePayload): Data {
   if (!payload.bins) payload.bins = 100;
   if (!payload.bin_scale) payload.bin_scale = 'linear';
   if (payload.ind_runs !== 0) data.runs = [];
+  data.moments = [];
   let binnedSeries: TimeSeries;
   binnedSeries = {};
   // Run simulation however many times is needed
@@ -285,21 +318,23 @@ export function simulate(payload: SamplePayload): Data {
     const tSeries = simRun(iState, t_end, getProbabilities);
     // Store individual runs if desired
     if (i < payload.ind_runs) {
-      data.runs[i] = tSeries;
+      data.runs[i] = splitSpecies(tSeries);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
     binnedSeries = binData(binnedSeries, tSeries, payload);
-    // console.log(JSON.stringify(binnedSeries, null, '  '));
+    const singleBinnedSeries = binSeries(tSeries, payload);
+    data.moments = addToMoments(data.moments, singleBinnedSeries);
   }
   // Average data
   data.series = averageData(binnedSeries, runs);
-  data.variance = getVariance(binnedSeries, runs);
+  data.variance = splitSpecies(getVariance(binnedSeries, runs));
   data.mass = massSeries(data.series);
   data.number = numberSeries(data.series);
   data.length = lengthSeries(data.series);
   data.species = splitSpecies(data.series);
   data.histograms = histSeries(data.series);
+  data.moments = calculateMomentDevs(averageMoments(data.moments, runs));
   // Below here can be done better but jank is fine for now
   data['V'] = payload.V;
   data['N'] = payload.N;

@@ -1,20 +1,19 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-
 import { VizProps } from './types';
-import { useScaleInputField, useFilteredDataPoints, useFilteredMoments } from './hooks';
 import { RadioButtonGroup } from 'grommet';
+import { useScaleInputField, useFilteredDataPoints, useFilteredMoments } from './hooks';
 
-function Mass(props: VizProps) {
+function NumberDeviation(props: VizProps) {
   const {
     sample: { data }
   } = props;
   const { options, scale, onChange } = useScaleInputField();
-  const dataMass = useFilteredMoments(data.moments);
-  console.log(dataMass);
+  const dataNumberDeviation = useFilteredMoments(data.moments);
+
   return (
     <>
-      <LineChart data={dataMass} width={500} height={300}>
+      <LineChart data={dataNumberDeviation} width={500} height={300}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="t"
@@ -22,13 +21,13 @@ function Mass(props: VizProps) {
           tickFormatter={(val: number) => val.toFixed(2)}
           scale={scale}
         />
-        <YAxis dataKey="M" name="Mass" domain={[0, 'auto']} />
+        <YAxis dataKey="P_dev" name="NumberDeviation" />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        <Line type="monotone" dataKey="M" stroke="#82ca9d" dot={false} />
+        <Line type="monotone" dataKey="P_dev" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
     </>
   );
 }
 
-export default Mass;
+export default NumberDeviation;

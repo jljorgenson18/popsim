@@ -7,6 +7,10 @@ import NumberComponent from './Number';
 import Length from './Length';
 import Species from './Species';
 import Histogram from './Histogram';
+import SpeciesVariance from './SpeciesVariance';
+import MassDeviation from './MassDeviation';
+import Runs from './Runs';
+import NumberDeviation from './NumberDeviation';
 
 interface VisualizationProps {
   sample: SampleDoc;
@@ -17,7 +21,11 @@ const VizOptions = {
   Number: NumberComponent,
   Length: Length,
   Species: Species,
-  Histogram: Histogram
+  Histogram: Histogram,
+  SpeciesVariance: SpeciesVariance,
+  Runs: Runs,
+  MassDeviation: MassDeviation,
+  NumberDeviation: NumberDeviation
 } as {
   [visType: string]: any;
 };
