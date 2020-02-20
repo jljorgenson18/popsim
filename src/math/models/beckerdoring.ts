@@ -74,7 +74,7 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
   return function(state: ModelState) {
     const possibleStates: { P: number; s: ModelState }[] = [];
     if (state.s[1] >= nc) {
-      let P = (1 / factorial(nc)) * kn;
+      let P = kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }
