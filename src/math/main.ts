@@ -126,11 +126,11 @@ function logBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): 
   data[0].t = 0;
   idx = 1;
   t = dt;
-  for (let i = 1; i < bins; i++) {
-    while (newData[idx].t < dt * x) {
+  for (let i = 1; i < bins - 1; i++) {
+    while (newData[idx].t < t * x) {
       idx = idx + 1;
     }
-    if (newData[idx].t > dt * x * x) {
+    if (newData[idx].t > t * x * x) {
       idx = idx - 1;
     }
     fillBin(data, newData[idx], i);
@@ -140,7 +140,35 @@ function logBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): 
   return data;
 }
 
-function binSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
+function logBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
+  const bins = payload.bins;
+  const t_end = payload.tstop;
+  const dt = newData[1].t;
+  const x = Math.pow(t_end / dt, 1 / bins);
+  const data: TimeSeries = {};
+  console.log(x);
+  console.log(dt);
+  let t = 0;
+  let idx = 0;
+  fillBin(data, newData[idx], 0);
+  data[0].t = 0;
+  idx = 1;
+  t = dt;
+  for (let i = 1; i < bins - 1; i++) {
+    while (newData[idx].t < t * x) {
+      idx = idx + 1;
+    }
+    if (newData[idx].t > t * x * x) {
+      idx = idx - 1;
+    }
+    fillBin(data, newData[idx], i);
+    t = t * x;
+    data[i].t = t;
+  }
+  return data;
+}
+
+function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
   const bins = payload.bins;
   const t_end = payload.tstop;
   const dt = t_end / bins;
@@ -168,32 +196,14 @@ function binSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
   return data;
 }
 
-function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
-  // const bins = payload.bins;
-  // const t_end = payload.tstop;
-  // const dt = t_end / bins;
-  // let t = 0;
-  // let idx = 0;
+function binSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
+  if (payload.bin_scale === 'linear') return linearBinSeries(newData, payload);
+  if (payload.bin_scale === 'log') return logBinSeries(newData, payload);
+}
 
-  // for (let i = 0; i < bins; i++) {
-  //   fillBin(data, newData[idx], i);
-  //   data[i].t = t;
-  //   // go to next state
-  //   idx = idx + 1;
-  //   // check if next state is still in the same bin
-  //   while (newData[idx].t < t + dt) {
-  //     // step through until current bin is exited
-  //     idx = idx + 1;
-  //   }
-  //   // check if next state is more than one bin later
-  //   if (newData[idx].t > t + 2 * dt) {
-  //     // if step is bigger than a bin, use the last state
-  //     idx = idx - 1;
-  //   }
-  //   t = t + dt;
-  // }
+function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
   if (payload.bin_scale === 'linear') return linearBin(data, newData, payload);
-  //if (payload.bin_scale === 'log') return logBin(data, newData, payload);
+  if (payload.bin_scale === 'log') return logBin(data, newData, payload);
 }
 
 function averageData(inputData: TimeSeries, runs: number, moment = 1): TimeSeries {
@@ -264,6 +274,7 @@ function simRun(
   // simulate until end time is reached
   let idx = 0;
   while (state.t < t_end) {
+    // console.log('step');
     state = simStep(state, getProbabilities);
     idx = idx + 1;
     // console.log(JSON.stringify(state, null, '  '));
@@ -315,15 +326,20 @@ export function simulate(payload: SamplePayload): Data {
   for (let i = 0; i < runs; i++) {
     // Generate new time series
     const iState = createInitialState([{ id: 1, n: payload.N }]);
+    console.log('run');
     const tSeries = simRun(iState, t_end, getProbabilities);
+    console.log('done run');
     // Store individual runs if desired
     if (i < payload.ind_runs) {
       data.runs[i] = splitSpecies(tSeries);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
+    console.log('Start binning');
     binnedSeries = binData(binnedSeries, tSeries, payload);
+    console.log('Bin individual run');
     const singleBinnedSeries = binSeries(tSeries, payload);
+    console.log('Done binning');
     data.moments = addToMoments(data.moments, singleBinnedSeries);
   }
   // Average data
