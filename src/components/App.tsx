@@ -11,6 +11,7 @@ import SampleForm from './SampleForm';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
 import Visualization from './Visualization';
 import UploadSample from './UploadSample';
+import Loading, { LoadingProps } from './Loading';
 
 const downloadSample = (sample: SampleDoc) => {
   const blob = new Blob([JSON.stringify(sample, null, '  ')], {
@@ -35,6 +36,7 @@ function App(): JSX.Element {
   const [showingUploadSampleModal, setShowingUploadSampleModal] = useState<boolean>(false);
   const [showingVisualization, setShowingVisualization] = useState<SampleDoc | null>(null);
   const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
+  const [showingLoadingModal, setShowingLoadingModal] = useState<LoadingProps | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,8 +73,17 @@ function App(): JSX.Element {
   }, []);
 
   async function handleNewSampleSubmit(values: SamplePayload) {
-    await createSample(values);
-    setShowingNewSampleModal(false);
+    try {
+      setShowingNewSampleModal(false);
+      setShowingLoadingModal({
+        message: 'Creating sample...'
+      });
+      await createSample(values);
+      setShowingLoadingModal(null);
+    } catch (err) {
+      console.error(err);
+      setShowingLoadingModal(null);
+    }
   }
 
   async function handleUploadSample(docs: SampleDoc[]) {
@@ -152,6 +163,11 @@ function App(): JSX.Element {
       ) : null}
       {deletingSample ? (
         <DeleteSamplePrompt sample={deletingSample} onClear={() => setDeletingSample(null)} />
+      ) : null}
+      {showingLoadingModal ? (
+        <Layer position="center" modal responsive={false} animation="fadeIn">
+          <Loading message={showingLoadingModal.message} progress={showingLoadingModal.progress} />
+        </Layer>
       ) : null}
       <Footer background="brand" pad="medium"></Footer>
     </>
