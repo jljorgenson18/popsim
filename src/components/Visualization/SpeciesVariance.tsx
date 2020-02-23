@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import randomColor from 'randomcolor';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { CheckBox, RadioButtonGroup } from 'grommet';
@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { VizProps } from './types';
 import { useScaleInputField, useFilteredDataPoints } from './hooks';
+import SaveChart from './common/SaveChart';
 
 const SelectedSpeciesVariance = styled.div`
   h4 {
@@ -29,7 +30,7 @@ interface SpeciesVarianceOption {
 }
 function SpeciesVariance(props: VizProps) {
   const {
-    sample: { data }
+    sample: { data, name }
   } = props;
 
   const [speciesVarianceOptions, setSpeciesVarianceOptions] = useState<{
@@ -58,6 +59,7 @@ function SpeciesVariance(props: VizProps) {
   }, [speciesVarianceKeys]);
   const { options, scale, onChange } = useScaleInputField();
   const dataSpeciesVariance = useFilteredDataPoints(data.variance);
+  const chartRef = useRef(null);
 
   if (!speciesVarianceOptions) return null;
   // Each key is a specific speciesVariance, UI should somehow allow user to select
@@ -66,7 +68,7 @@ function SpeciesVariance(props: VizProps) {
   return (
     // LINES should be generated based on one or more selected values from keys
     <>
-      <LineChart data={dataSpeciesVariance} width={500} height={300}>
+      <LineChart data={dataSpeciesVariance} width={500} height={300} ref={chartRef}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="t"
@@ -85,6 +87,7 @@ function SpeciesVariance(props: VizProps) {
           .filter(Boolean)}
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
+      <SaveChart chartRef={chartRef} visualization="species-variance" sampleName={name} />
       <SelectedSpeciesVariance>
         <h4>Select SpeciesVariance</h4>
         <div>

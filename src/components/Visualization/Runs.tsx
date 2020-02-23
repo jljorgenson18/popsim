@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import randomColor from 'randomcolor';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { CheckBox, RadioButtonGroup } from 'grommet';
@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { VizProps } from './types';
 import { useScaleInputField, useFilteredDataPoints } from './hooks';
+import SaveChart from './common/SaveChart';
 
 const SelectedRuns = styled.div`
   h4 {
@@ -29,7 +30,7 @@ interface RunsOption {
 }
 function Runs(props: VizProps) {
   const {
-    sample: { data }
+    sample: { data, name }
   } = props;
 
   const [RunsOptions, setRunsOptions] = useState<{
@@ -54,6 +55,7 @@ function Runs(props: VizProps) {
   }, [RunsKeys]);
   const { options, scale, onChange } = useScaleInputField();
   const dataRuns = useFilteredDataPoints(data.runs[0]);
+  const chartRef = useRef(null);
 
   if (!RunsOptions) return null;
   // Each key is a specific Runs, UI should somehow allow user to select
@@ -62,7 +64,7 @@ function Runs(props: VizProps) {
   return (
     // LINES should be generated based on one or more selected values from keys
     <>
-      <LineChart data={dataRuns} width={500} height={300}>
+      <LineChart data={dataRuns} width={500} height={300} ref={chartRef}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="t"
@@ -79,6 +81,7 @@ function Runs(props: VizProps) {
         }).filter(Boolean)}
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
+      <SaveChart chartRef={chartRef} visualization="run" sampleName={name} />
       <SelectedRuns>
         <h4>Select Runs</h4>
         <div>

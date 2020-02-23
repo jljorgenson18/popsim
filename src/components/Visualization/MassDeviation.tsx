@@ -1,20 +1,23 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 import { VizProps } from './types';
 import { useScaleInputField, useFilteredDataPoints, useFilteredMoments } from './hooks';
 import { RadioButtonGroup } from 'grommet';
+import SaveChart from './common/SaveChart';
 
 function MassDeviation(props: VizProps) {
   const {
-    sample: { data }
+    sample: { data, name }
   } = props;
   const { options, scale, onChange } = useScaleInputField();
   const dataMassDeviation = useFilteredMoments(data.moments);
+  const chartRef = useRef(null);
+
   console.log(dataMassDeviation);
   return (
     <>
-      <LineChart data={dataMassDeviation} width={500} height={300}>
+      <LineChart data={dataMassDeviation} width={500} height={300} ref={chartRef}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="t"
@@ -27,6 +30,7 @@ function MassDeviation(props: VizProps) {
         <Line type="monotone" dataKey="M_dev" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
+      <SaveChart chartRef={chartRef} visualization="mass-deviation" sampleName={name} />
     </>
   );
 }
