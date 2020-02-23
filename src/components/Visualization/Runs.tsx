@@ -81,7 +81,7 @@ function Runs(props: VizProps) {
         }).filter(Boolean)}
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="run" sampleName={name} />
+      <SaveChart chartRef={chartRef} visualization={'run-' + scale} sampleName={name} />
       <SelectedRuns>
         <h4>Select Runs</h4>
         <div>

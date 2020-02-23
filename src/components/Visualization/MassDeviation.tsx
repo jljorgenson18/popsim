@@ -30,7 +30,7 @@ function MassDeviation(props: VizProps) {
         <Line type="monotone" dataKey="M_dev" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="mass-deviation" sampleName={name} />
+      <SaveChart chartRef={chartRef} visualization={'mass-deviation-' + scale} sampleName={name} />
     </>
   );
 }

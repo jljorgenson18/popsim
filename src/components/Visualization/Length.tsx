@@ -28,7 +28,7 @@ function Length(props: VizProps) {
         <Line type="monotone" dataKey="L" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="length" sampleName={name} />
+      <SaveChart chartRef={chartRef} visualization={'length-' + scale} sampleName={name} />
     </>
   );
 }

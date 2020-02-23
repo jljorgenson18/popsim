@@ -30,7 +30,7 @@ function Mass(props: VizProps) {
         <Line type="monotone" dataKey="M" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="mass" sampleName={name} />
+      <SaveChart chartRef={chartRef} visualization={'mass-' + scale} sampleName={name} />
     </>
   );
 }

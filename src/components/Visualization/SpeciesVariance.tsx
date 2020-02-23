@@ -87,7 +87,11 @@ function SpeciesVariance(props: VizProps) {
           .filter(Boolean)}
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="species-variance" sampleName={name} />
+      <SaveChart
+        chartRef={chartRef}
+        visualization={'species-variance-' + scale}
+        sampleName={name}
+      />
       <SelectedSpeciesVariance>
         <h4>Select SpeciesVariance</h4>
         <div>

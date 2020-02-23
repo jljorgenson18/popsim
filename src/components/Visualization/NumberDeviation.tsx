@@ -28,7 +28,11 @@ function NumberDeviation(props: VizProps) {
         <Line type="monotone" dataKey="P_dev" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="number-deviation" sampleName={name} />
+      <SaveChart
+        chartRef={chartRef}
+        visualization={'number-deviation-' + scale}
+        sampleName={name}
+      />
     </>
   );
 }

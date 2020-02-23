@@ -28,7 +28,7 @@ function NumberComponent(props: VizProps) {
         <Line type="monotone" dataKey="P" stroke="#82ca9d" dot={false} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization="number" sampleName={name} />
+      <SaveChart chartRef={chartRef} visualization={'number-' + scale} sampleName={name} />
     </>
   );
 }

@@ -31,7 +31,7 @@ function Histogram(props: VizProps) {
         onChange={(event: any) => setSelectedBin(event.target.value)}
       />
       <p>{`Selected Time: ${data.histograms[selectedBin].t.toFixed(6)}`}</p>
-      <SaveChart chartRef={chartRef} visualization="histogram" sampleName={name} />
+      <SaveChart chartRef={chartRef} visualization={'histogram'} sampleName={name} />
     </>
   );
 }
