@@ -25,7 +25,7 @@ function NumberDeviation(props: VizProps) {
         />
         <YAxis dataKey="P_dev" name="NumberDeviation" />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        <Line type="monotone" dataKey="P_dev" stroke="#82ca9d" dot={false} />
+        <Line type="monotone" dataKey="P_dev" stroke="#82ca9d" dot={false} strokeWidth={3} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
       <SaveChart

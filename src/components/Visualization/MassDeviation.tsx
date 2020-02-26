@@ -27,7 +27,7 @@ function MassDeviation(props: VizProps) {
         />
         <YAxis dataKey="M_dev" name="MassDeviation" domain={[0, 'auto']} />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        <Line type="monotone" dataKey="M_dev" stroke="#82ca9d" dot={false} />
+        <Line type="monotone" dataKey="M_dev" stroke="#82ca9d" dot={false} strokeWidth={3} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
       <SaveChart chartRef={chartRef} visualization={'mass-deviation-' + scale} sampleName={name} />

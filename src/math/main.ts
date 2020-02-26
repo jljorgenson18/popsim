@@ -113,13 +113,12 @@ function logBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): 
   const t_end = payload.tstop;
   let dt = 0;
   if (!data[1]) {
-    dt = newData[1].t;
+    dt = newData[1].t / 10.0;
   } else {
     dt = data[1].t;
   }
-  const x = Math.pow(t_end / dt, 1 / bins);
-  console.log(x);
   console.log(dt);
+  const x = Math.pow(t_end / dt, 1 / bins);
   let t = 0;
   let idx = 0;
   fillBin(data, newData[idx], 0);
@@ -146,8 +145,6 @@ function logBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
   const dt = newData[1].t;
   const x = Math.pow(t_end / dt, 1 / bins);
   const data: TimeSeries = {};
-  console.log(x);
-  console.log(dt);
   let t = 0;
   let idx = 0;
   fillBin(data, newData[idx], 0);
@@ -326,20 +323,15 @@ export function simulate(payload: SamplePayload): Data {
   for (let i = 0; i < runs; i++) {
     // Generate new time series
     const iState = createInitialState([{ id: 1, n: payload.N }]);
-    console.log('run');
     const tSeries = simRun(iState, t_end, getProbabilities);
-    console.log('done run');
     // Store individual runs if desired
     if (i < payload.ind_runs) {
       data.runs[i] = splitSpecies(tSeries);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
-    console.log('Start binning');
     binnedSeries = binData(binnedSeries, tSeries, payload);
-    console.log('Bin individual run');
     const singleBinnedSeries = binSeries(tSeries, payload);
-    console.log('Done binning');
     data.moments = addToMoments(data.moments, singleBinnedSeries);
   }
   // Average data

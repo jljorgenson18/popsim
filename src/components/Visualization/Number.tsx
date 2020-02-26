@@ -25,7 +25,7 @@ function NumberComponent(props: VizProps) {
         />
         <YAxis dataKey="P" name="Number" />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        <Line type="monotone" dataKey="P" stroke="#82ca9d" dot={false} />
+        <Line type="monotone" dataKey="P" stroke="#82ca9d" dot={false} strokeWidth={3} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
       <SaveChart chartRef={chartRef} visualization={'number-' + scale} sampleName={name} />

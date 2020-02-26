@@ -11,6 +11,7 @@ import SpeciesVariance from './SpeciesVariance';
 import MassDeviation from './MassDeviation';
 import Runs from './Runs';
 import NumberDeviation from './NumberDeviation';
+import LengthDeviation from './LengthDeviation';
 
 interface VisualizationProps {
   sample: SampleDoc;
@@ -25,7 +26,8 @@ const VizOptions = {
   SpeciesVariance: SpeciesVariance,
   Runs: Runs,
   MassDeviation: MassDeviation,
-  NumberDeviation: NumberDeviation
+  NumberDeviation: NumberDeviation,
+  LengthDeviation: LengthDeviation
 } as {
   [visType: string]: any;
 };

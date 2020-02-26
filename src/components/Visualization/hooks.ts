@@ -23,8 +23,6 @@ export function useFilteredDataPoints(points: Array<DataPoint | SpeciesData>) {
 
 export function useFilteredMoments(points: Array<Moments>) {
   return useMemo(() => {
-    return points.filter(
-      point => !Number.isNaN(point.t) && !Number.isNaN(point.L) && point.t !== 0
-    );
+    return points.filter(point => !Number.isNaN(point.t) && point.t !== 0);
   }, [points]);
 }

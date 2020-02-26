@@ -78,7 +78,16 @@ function Species(props: VizProps) {
           .map(key => {
             const { display, color } = speciesOptions[key];
             if (!display) return null;
-            return <Line key={key} type="monotone" dataKey={key} stroke={color} dot={false} />;
+            return (
+              <Line
+                key={key}
+                type="monotone"
+                dataKey={key}
+                stroke={color}
+                dot={false}
+                strokeWidth={3}
+              />
+            );
           })
           .filter(Boolean)}
       </LineChart>

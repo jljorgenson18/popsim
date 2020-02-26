@@ -20,6 +20,7 @@ function Mass(props: VizProps) {
       <LineChart data={dataMass} width={500} height={300} ref={chartRef}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
+          tickCount={5}
           dataKey="t"
           name="Time"
           tickFormatter={(val: number) => val.toFixed(2)}
@@ -27,7 +28,7 @@ function Mass(props: VizProps) {
         />
         <YAxis dataKey="M" name="Mass" domain={[0, 'auto']} />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        <Line type="monotone" dataKey="M" stroke="#82ca9d" dot={false} />
+        <Line type="monotone" dataKey="M" stroke="#82ca9d" dot={false} strokeWidth={3} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
       <SaveChart chartRef={chartRef} visualization={'mass-' + scale} sampleName={name} />

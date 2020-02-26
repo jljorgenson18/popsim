@@ -1,21 +1,21 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { VizProps } from './types';
+import { RadioButtonGroup } from 'grommet';
 import { useScaleInputField, useFilteredDataPoints, useFilteredMoments } from './hooks';
-import { RadioButtonGroup, FormField } from 'grommet';
 import SaveChart from './common/SaveChart';
 
-function Length(props: VizProps) {
+function LengthDeviation(props: VizProps) {
   const {
     sample: { data, name }
   } = props;
   const { options, scale, onChange } = useScaleInputField();
-  const dataLength = useFilteredMoments(data.moments);
+  const dataLengthDeviation = useFilteredMoments(data.moments);
   const chartRef = useRef(null);
 
   return (
     <>
-      <LineChart data={dataLength} width={500} height={300} ref={chartRef}>
+      <LineChart data={dataLengthDeviation} width={500} height={300} ref={chartRef}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="t"
@@ -23,14 +23,18 @@ function Length(props: VizProps) {
           tickFormatter={(val: number) => val.toFixed(2)}
           scale={scale}
         />
-        <YAxis dataKey="L" name="Length" />
+        <YAxis dataKey="L_dev" name="LengthDeviation" />
         <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        <Line type="monotone" dataKey="L" stroke="#82ca9d" dot={false} strokeWidth={3} />
+        <Line type="monotone" dataKey="L_dev" stroke="#82ca9d" dot={false} strokeWidth={3} />
       </LineChart>
       <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization={'length-' + scale} sampleName={name} />
+      <SaveChart
+        chartRef={chartRef}
+        visualization={'length-deviation-' + scale}
+        sampleName={name}
+      />
     </>
   );
 }
 
-export default Length;
+export default LengthDeviation;
