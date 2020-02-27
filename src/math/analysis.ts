@@ -170,7 +170,10 @@ export function addToMoments(inMoments: Moments[], inputData: TimeSeries): Momen
     const idx = parseInt(key, 10);
     const P = polymerNumber(inputData[idx]);
     const M = polymerMass(inputData[idx]);
-    const L = M / P;
+    let L = 0;
+    if (P !== 0) {
+      L = M / P;
+    }
     const P2 = P * P;
     const M2 = M * M;
     const L2 = L * L;
