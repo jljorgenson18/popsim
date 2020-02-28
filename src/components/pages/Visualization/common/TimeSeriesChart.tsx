@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
-import styled from 'styled-components';
 
 import { useScaleInputField, useFilteredMoments } from '../hooks';
 import { RadioButtonGroup, CheckBox, Box, FormField } from 'grommet';
@@ -16,14 +15,6 @@ import SaveChart from './SaveChart';
 import { Moments } from 'src/math/types';
 import Controls from './Controls';
 import ControlField from './ControlField';
-
-/**
- * - Mass
- * - Length
- * - Number
- *
- * and deviations of each
- */
 
 interface TimeSeriesChartProps {
   dataKey: string;
@@ -53,7 +44,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
   const currentVizName = deviation ? deviationVizName : vizName;
   return (
     <>
-      <ResponsiveContainer minHeight={300}>
+      <ResponsiveContainer minHeight={300} width="100%">
         <LineChart data={data} ref={chartRef}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis

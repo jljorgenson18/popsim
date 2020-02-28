@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, FormField, Select } from 'grommet';
+import { FormField, Select } from 'grommet';
 
 import { SampleDoc } from 'src/db/sample';
 import Mass from './Mass';
@@ -9,10 +9,12 @@ import Species from './Species';
 import Histogram from './Histogram';
 import SpeciesVariance from './SpeciesVariance';
 import Runs from './Runs';
-import styled from 'styled-components';
+import Page from 'src/components/common/Page';
+import RawSampleData from './RawSampleData';
+import { useLocation } from 'react-router-dom';
 
 interface VisualizationProps {
-  sample: SampleDoc;
+  allSamples?: SampleDoc[];
 }
 
 const VizOptions = {
@@ -22,29 +24,27 @@ const VizOptions = {
   Species: Species,
   Histogram: Histogram,
   SpeciesVariance: SpeciesVariance,
-  Runs: Runs
+  Runs: Runs,
+  'Raw Sample Data': RawSampleData
 } as {
   [visType: string]: any;
 };
 
 const VizOptionTypes = Object.keys(VizOptions);
 
-const VizWrapper = styled(Box)`
-  .recharts-wrapper .recharts-surface {
-    overflow: visible;
-  }
-`;
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 function Visualization(props: VisualizationProps) {
-  const { sample } = props;
+  const { allSamples } = props;
+  const query = useQuery();
   const [currentViz, setCurrentViz] = useState<string>(VizOptionTypes[0]);
+  const sampleIds = query.get('samples').split(',');
+  const sample = (allSamples || []).find(sample => sample._id === sampleIds[0]);
+  if (!sample) return null;
   return (
-    <VizWrapper
-      pad="medium"
-      gap="none"
-      width="large"
-      style={{ maxHeight: '90vh', overflowY: 'scroll' }}
-      data-testid="sampleForm">
+    <Page>
       <FormField>
         <Select
           id="model-select"
@@ -57,7 +57,7 @@ function Visualization(props: VisualizationProps) {
       {React.createElement(VizOptions[currentViz], {
         sample
       })}
-    </VizWrapper>
+    </Page>
   );
 }
 

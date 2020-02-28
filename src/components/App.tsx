@@ -1,42 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Heading, Button, Footer, Header, Layer } from 'grommet';
-import Skeleton from 'react-loading-skeleton';
-import FileSaver from 'file-saver';
-import styled from 'styled-components';
+import { Heading, Footer, Header, Main, Box, ThemeType } from 'grommet';
+import styled, { createGlobalStyle } from 'styled-components';
 
 import db from 'src/db';
-import { getAllSamples, createSample, cloneSample, SamplePayload, SampleDoc } from 'src/db/sample';
-import SampleList from './SampleList';
-import SampleForm from './SampleForm';
-import DeleteSamplePrompt from './DeleteSamplePrompt';
-import Visualization from './Visualization';
-import UploadSample from './UploadSample';
-import Loading, { LoadingProps } from './Loading';
+import { getAllSamples, SampleDoc } from 'src/db/sample';
+import SampleList from './pages/SampleList/SampleList';
+import SampleForm from './pages/SampleForm';
+import Visualization from './pages/Visualization';
 
-const downloadSample = (sample: SampleDoc) => {
-  const blob = new Blob([JSON.stringify(sample, null, '  ')], {
-    type: 'application/json;charset=utf-8'
-  });
-  FileSaver.saveAs(blob, `${sample.name}.${sample._id}.json`);
-};
+import { Switch, Route, Redirect, Link } from 'react-router-dom';
+import AnchorLink from './common/AnchorLink';
 
-const MainContainer = styled.main`
-  padding: 48px;
-  min-height: 100%;
+const GlobalStyle = createGlobalStyle`
+  body {
+    height: 100%;
+  }
+  /** Overwrites weird overflow style issues on Recharts */
+  .recharts-wrapper .recharts-surface {
+    overflow: visible;
+  }
+`;
+
+const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  height: 100%;
+  max-height: 100%;
+`;
+const ActivePage = styled.div`
+  flex-grow: 1;
+  overflow-y: scroll;
+`;
+
+const MainHeading = styled(Heading)`
+  a {
+    text-decoration: none;
+    color: ${props => {
+      return (props.theme as ThemeType).global.colors.white;
+    }};
+  }
 `;
 
 function App(): JSX.Element {
   const [allSamples, setAllSamples] = useState<SampleDoc[] | null>(null);
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
-  const [showingNewSampleModal, setShowingNewSampleModal] = useState<boolean>(false);
-  const [showingUploadSampleModal, setShowingUploadSampleModal] = useState<boolean>(false);
-  const [showingVisualization, setShowingVisualization] = useState<SampleDoc | null>(null);
-  const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
-  const [showingLoadingModal, setShowingLoadingModal] = useState<LoadingProps | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,105 +80,37 @@ function App(): JSX.Element {
     return () => changes.cancel();
   }, []);
 
-  async function handleNewSampleSubmit(values: SamplePayload) {
-    try {
-      setShowingNewSampleModal(false);
-      setShowingLoadingModal({
-        message: 'Creating sample...'
-      });
-      await createSample(values);
-      setShowingLoadingModal(null);
-    } catch (err) {
-      console.error(err);
-      setShowingLoadingModal(null);
-    }
-  }
-
-  async function handleUploadSample(docs: SampleDoc[]) {
-    console.log('Uploading samples');
-    await Promise.all(docs.map(doc => cloneSample(doc)));
-    console.log('Samples uploaded!!');
-    setShowingUploadSampleModal(false);
-  }
-
-  function handleShowVisualizationModal(sample: SampleDoc) {
-    setShowingVisualization(sample);
-  }
-
-  function handleDeleteSample(sample: SampleDoc) {
-    setDeletingSample(sample);
-  }
-
-  function handleDownloadSample(sample: SampleDoc) {
-    downloadSample(sample);
-  }
-
   console.log('All Samples', allSamples);
 
   return (
-    <>
-      <Header background="brand" pad="medium">
-        <Heading>Welcome to Popsim!</Heading>
-        <Button onClick={() => setShowingNewSampleModal(true)} label={'Create new Sample'} />
-        <Button onClick={() => setShowingUploadSampleModal(true)} label={'Upload Sample'} />
+    <ContentWrapper>
+      <Header background="brand" pad="small">
+        <MainHeading level="3">
+          <Link to="/">Popsim</Link>
+        </MainHeading>
+        <Box direction="row" gap="medium">
+          <AnchorLink to="/sample-list">Sample List</AnchorLink>
+          <AnchorLink to="/create-sample">Create New Sample</AnchorLink>
+        </Box>
       </Header>
-      <MainContainer>
-        {fetching && !allSamples ? <Skeleton count={5} /> : null}
-        {allSamples ? (
-          <SampleList
-            samples={allSamples}
-            onShowVisualization={handleShowVisualizationModal}
-            onDeleteSample={handleDeleteSample}
-            onDownloadSample={handleDownloadSample}
-          />
-        ) : null}
-      </MainContainer>
-      {showingNewSampleModal ? (
-        <Layer
-          position="center"
-          modal
-          responsive={false}
-          animation="fadeIn"
-          onEsc={() => setShowingNewSampleModal(false)}
-          onClickOutside={() => setShowingNewSampleModal(false)}>
-          <SampleForm
-            onSubmit={handleNewSampleSubmit}
-            onCancel={() => setShowingNewSampleModal(false)}
-          />
-        </Layer>
-      ) : null}
-      {showingUploadSampleModal ? (
-        <Layer
-          position="center"
-          modal
-          responsive={false}
-          animation="fadeIn"
-          onEsc={() => setShowingUploadSampleModal(false)}
-          onClickOutside={() => setShowingUploadSampleModal(false)}>
-          <UploadSample onUploadSample={handleUploadSample} />
-        </Layer>
-      ) : null}
-      {showingVisualization ? (
-        <Layer
-          position="center"
-          modal
-          responsive={false}
-          animation="fadeIn"
-          onEsc={() => setShowingVisualization(null)}
-          onClickOutside={() => setShowingVisualization(null)}>
-          <Visualization sample={showingVisualization} />
-        </Layer>
-      ) : null}
-      {deletingSample ? (
-        <DeleteSamplePrompt sample={deletingSample} onClear={() => setDeletingSample(null)} />
-      ) : null}
-      {showingLoadingModal ? (
-        <Layer position="center" modal responsive={false} animation="fadeIn">
-          <Loading message={showingLoadingModal.message} progress={showingLoadingModal.progress} />
-        </Layer>
-      ) : null}
-      <Footer background="brand" pad="medium"></Footer>
-    </>
+      <GlobalStyle />
+      <ActivePage>
+        <Switch>
+          <Route path="/sample-list">
+            <SampleList fetching={fetching} allSamples={allSamples} />
+          </Route>
+          <Route path="/create-sample">
+            <SampleForm />
+          </Route>
+          <Route path="/visualize">
+            <Visualization allSamples={allSamples} />
+          </Route>
+          <Route exact path="/">
+            <Redirect to="/sample-list" />
+          </Route>
+        </Switch>
+      </ActivePage>
+    </ContentWrapper>
   );
 }
 
