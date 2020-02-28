@@ -4,15 +4,19 @@ import { Grommet } from 'grommet';
 import { grommet } from 'grommet/themes';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
+import { HashRouter as Router } from 'react-router-dom';
+
 import App from './App';
 
 function Root(): JSX.Element {
   return (
-    <SkeletonTheme>
-      <Grommet theme={grommet} full>
-        <App />
-      </Grommet>
-    </SkeletonTheme>
+    <Router>
+      <SkeletonTheme>
+        <Grommet theme={grommet} full style={{ overflow: 'hidden' }}>
+          <App />
+        </Grommet>
+      </SkeletonTheme>
+    </Router>
   );
 }
 

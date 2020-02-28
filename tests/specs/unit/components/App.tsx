@@ -18,7 +18,7 @@ test('That the new sample modal pops up when hitting the create sample button', 
 
   await act(async () => {
     result = render(<App />);
-    fireEvent.click(result.getByText('Create new Sample'));
+    fireEvent.click(result.getByText('Create New Sample'));
   });
 
   expect(result.getByTestId('sampleForm')).toBeTruthy();

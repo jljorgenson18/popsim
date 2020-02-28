@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Button, Form, FormField, Heading, Select, Text, Grid } from 'grommet';
+import React, { useState } from 'react';
+import { Box, Button, Form, FormField, Heading, Select, Text, Grid, Layer } from 'grommet';
 import { useFormik } from 'formik';
 import {
   SamplePayload,
@@ -8,13 +8,14 @@ import {
   SmoluchowskiPayload,
   BDNucleationPayload,
   SmoluchowskiCrowderPayload,
-  BeckerDoringCrowderPayload
+  BeckerDoringCrowderPayload,
+  createSample
 } from 'src/db/sample';
+import Loading, { LoadingProps } from '../common/Loading';
+import Page from '../common/Page';
+import { useHistory } from 'react-router-dom';
 
-interface SampleFormProps {
-  onCancel: () => void;
-  onSubmit: (payload: SamplePayload) => void;
-}
+interface SampleFormProps {}
 
 const validate = (values: Partial<SamplePayload>) => {
   const errors: { [fieldName: string]: string } = {};
@@ -352,7 +353,21 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
 }
 
 function SampleForm(props: SampleFormProps) {
-  const { onSubmit, onCancel } = props;
+  const [showingLoadingModal, setShowingLoadingModal] = useState<LoadingProps | null>(null);
+  const history = useHistory();
+  async function handleNewSampleSubmit(values: SamplePayload) {
+    try {
+      setShowingLoadingModal({
+        message: 'Creating sample...'
+      });
+      await createSample(values);
+      setShowingLoadingModal(null);
+      history.push('/'); // Redirect back to home
+    } catch (err) {
+      // TODO: Add an error message
+      console.error(err);
+    }
+  }
   const initialValues: Partial<SamplePayload> = {
     name: ''
   };
@@ -361,17 +376,13 @@ function SampleForm(props: SampleFormProps) {
     validate,
     // Assumes that the values are populated correctly
     onSubmit(values: SamplePayload) {
-      onSubmit(values);
+      handleNewSampleSubmit(values);
     }
   });
+
   const submitted = formik.submitCount > 0;
   return (
-    <Box
-      pad="medium"
-      gap="none"
-      width="large"
-      style={{ maxHeight: '90vh', overflowY: 'scroll' }}
-      data-testid="sampleForm">
+    <Page data-testid="sampleForm">
       <Form onSubmit={formik.handleSubmit}>
         <Grid rows="auto" columns={['1/2', '1/2']} gap="small" fill>
           <Heading level={3} gridArea="1 / 1 / 2 / 3" margin="small">
@@ -496,11 +507,15 @@ function SampleForm(props: SampleFormProps) {
               gap="small"
               type="submit"
               disabled={!formik.isValid && formik.submitCount > 0}></Button>
-            <Button label={'Cancel'} onClick={onCancel} gap="small"></Button>
           </Box>
         </Grid>
       </Form>
-    </Box>
+      {showingLoadingModal ? (
+        <Layer position="center" modal responsive={false} animation="fadeIn">
+          <Loading message={showingLoadingModal.message} progress={showingLoadingModal.progress} />
+        </Layer>
+      ) : null}
+    </Page>
   );
 }
 
