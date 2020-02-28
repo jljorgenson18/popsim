@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, Queries } from '@testing-library/react';
 import { Grommet } from 'grommet';
 import { grommet } from 'grommet/themes';
 
@@ -15,10 +15,9 @@ const AllTheProviders = ({ children }: AllProviderProps): JSX.Element => {
   );
 };
 
-const customRender: typeof render = (
-  ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'queries'>
-) => render(ui, { wrapper: AllTheProviders, ...options });
+function customRender<Q extends Queries>(ui: React.ReactElement, options?: RenderOptions<Q>) {
+  return render(ui, { wrapper: AllTheProviders, ...options });
+}
 
 // re-export everything
 export * from '@testing-library/react';

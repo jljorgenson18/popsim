@@ -7,6 +7,8 @@ import styled from 'styled-components';
 import { VizProps } from './types';
 import { useScaleInputField, useFilteredDataPoints } from './hooks';
 import SaveChart from './common/SaveChart';
+import Controls from './common/Controls';
+import ControlField from './common/ControlField';
 
 const SelectedSpecies = styled.div`
   h4 {
@@ -36,11 +38,14 @@ function Species(props: VizProps) {
   const [speciesOptions, setSpeciesOptions] = useState<{
     [speciesKey: string]: SpeciesOption;
   }>(null);
+  console.log(data.species);
 
   // We can get the species keys from just looking at the first species data
   const speciesKeys = useMemo(() => Object.keys(data.species[0]).filter(key => key !== 't'), [
     data.species
   ]);
+  console.log(speciesKeys);
+
   useEffect(() => {
     const newSpeciesOptions = speciesKeys.reduce<typeof speciesOptions>((mapped, key) => {
       mapped[key] = {
@@ -91,32 +96,40 @@ function Species(props: VizProps) {
           })
           .filter(Boolean)}
       </LineChart>
-      <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-      <SaveChart chartRef={chartRef} visualization={'species-' + scale} sampleName={name} />
-      <SelectedSpecies>
-        <h4>Select Species</h4>
-        <div>
-          {speciesKeys.map(key => {
-            const { display, ...rest } = speciesOptions[key];
-            return (
-              <CheckBox
-                key={key}
-                checked={display}
-                label={key}
-                onChange={event => {
-                  setSpeciesOptions({
-                    ...speciesOptions,
-                    [key]: {
-                      ...rest,
-                      display: event.target.checked
-                    }
-                  });
-                }}
-              />
-            );
-          })}
-        </div>
-      </SelectedSpecies>
+      <Controls>
+        <ControlField
+          label="Scale"
+          input={
+            <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
+          }
+        />
+        <ControlField
+          label="Select Species"
+          input={
+            <div>
+              {speciesKeys.map(key => {
+                const { display, ...rest } = speciesOptions[key];
+                return (
+                  <CheckBox
+                    key={key}
+                    checked={display}
+                    label={key}
+                    onChange={event => {
+                      setSpeciesOptions({
+                        ...speciesOptions,
+                        [key]: {
+                          ...rest,
+                          display: event.target.checked
+                        }
+                      });
+                    }}
+                  />
+                );
+              })}
+            </div>
+          }></ControlField>
+        <SaveChart chartRef={chartRef} visualization={'species-' + scale} sampleName={name} />
+      </Controls>
     </>
   );
 }

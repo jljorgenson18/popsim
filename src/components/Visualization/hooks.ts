@@ -1,6 +1,6 @@
 import { useState, useMemo, ChangeEvent } from 'react';
 import { DataPoint, SpeciesData } from 'src/math/analysis';
-import { Moments } from 'src/math/types.d';
+import { Moments } from 'src/math/types';
 
 type Scale = 'linear' | 'log';
 

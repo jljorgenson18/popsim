@@ -3,15 +3,13 @@ import { Box, FormField, Select } from 'grommet';
 
 import { SampleDoc } from 'src/db/sample';
 import Mass from './Mass';
-import NumberComponent from './Number';
+import NumberChart from './Number';
 import Length from './Length';
 import Species from './Species';
 import Histogram from './Histogram';
 import SpeciesVariance from './SpeciesVariance';
-import MassDeviation from './MassDeviation';
 import Runs from './Runs';
-import NumberDeviation from './NumberDeviation';
-import LengthDeviation from './LengthDeviation';
+import styled from 'styled-components';
 
 interface VisualizationProps {
   sample: SampleDoc;
@@ -19,26 +17,29 @@ interface VisualizationProps {
 
 const VizOptions = {
   Mass: Mass,
-  Number: NumberComponent,
+  Number: NumberChart,
   Length: Length,
   Species: Species,
   Histogram: Histogram,
   SpeciesVariance: SpeciesVariance,
-  Runs: Runs,
-  MassDeviation: MassDeviation,
-  NumberDeviation: NumberDeviation,
-  LengthDeviation: LengthDeviation
+  Runs: Runs
 } as {
   [visType: string]: any;
 };
 
 const VizOptionTypes = Object.keys(VizOptions);
 
+const VizWrapper = styled(Box)`
+  .recharts-wrapper .recharts-surface {
+    overflow: visible;
+  }
+`;
+
 function Visualization(props: VisualizationProps) {
   const { sample } = props;
   const [currentViz, setCurrentViz] = useState<string>(VizOptionTypes[0]);
   return (
-    <Box
+    <VizWrapper
       pad="medium"
       gap="none"
       width="large"
@@ -56,7 +57,7 @@ function Visualization(props: VisualizationProps) {
       {React.createElement(VizOptions[currentViz], {
         sample
       })}
-    </Box>
+    </VizWrapper>
   );
 }
 

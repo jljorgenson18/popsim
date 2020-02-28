@@ -21,7 +21,6 @@ import {
 } from './analysis';
 
 import { deepClone, stateMoment, checkConserved } from './common';
-import SampleForm from 'src/components/SampleForm';
 
 export interface TimeSeries {
   [state: number]: ModelState;
@@ -31,6 +30,7 @@ export interface Data {
   series?: TimeSeries;
   variance?: SpeciesData[];
   runs?: SpeciesData[][];
+  /** DEPRECATED */
   mass?: DataPoint[];
   length?: DataPoint[];
   number?: DataPoint[];

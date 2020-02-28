@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import React, { useState, useRef } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { VizProps } from './types';
 import { RangeInput } from 'grommet';
 import SaveChart from './common/SaveChart';
