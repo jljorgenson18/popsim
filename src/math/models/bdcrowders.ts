@@ -79,16 +79,16 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
   // const { a, b, nc = 2, kn = a } = params;
   const a = params.a * (params.Co / params.N);
   let kn: number;
+  let nc = 2;
+  if (params.nc) {
+    nc = params.nc;
+  }
   if (params.kn) {
     kn = params.kn * Math.pow(params.Co / params.N, params.nc - 1);
   } else {
     kn = a / params.nc;
   }
   const b = params.b;
-  let nc = 2;
-  if (params.nc) {
-    nc = params.nc;
-  }
   if (params.phi) {
     const R = params.r1 / params.rc;
     // const L = params.r1 / params.rsc;
