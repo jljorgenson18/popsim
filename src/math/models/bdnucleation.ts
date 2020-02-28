@@ -6,7 +6,22 @@ import {
   catchNeg,
   calculateBDNFrequencies
 } from 'src/math/common';
-import { ModelState, GetProbabilitiesFunc } from '../types';
+import { ModelState, GetProbabilitiesFunc, ReactionCount, Step } from '../types';
+
+function reaction(name: string): ReactionCount {
+  const reactions: ReactionCount = {
+    addition: 0,
+    subtraction: 0,
+    coagulation: 0,
+    fragmentation: 0
+  };
+  if (name in reactions) {
+    reactions[name] = 1;
+  } else {
+    throw new Error('reaction not labelled correctly');
+  }
+  return reactions;
+}
 
 function nucleate(state: ModelState, nc: number): ModelState {
   const newState = deepClone(state);
@@ -19,7 +34,7 @@ function nucleate(state: ModelState, nc: number): ModelState {
   return newState;
 }
 
-function addition(state: ModelState, id: number): ModelState {
+function addition(state: ModelState, id: number): Step {
   let newState = deepClone(state);
   //console.log(id);
   newState.s[1] = newState.s[1] - 1;
@@ -34,10 +49,11 @@ function addition(state: ModelState, id: number): ModelState {
     newState.s[id + 1] = 1;
   }
   catchNeg(newState, 'nucleate');
-  return newState;
+  const step: Step = { state: newState, reactions: reaction('addition') };
+  return step;
 }
 
-function subtraction(state: ModelState, id: number, nc: number): ModelState {
+function subtraction(state: ModelState, id: number, nc: number): Step {
   let newState = deepClone(state);
   // Check if the polymer is bigger than a nucleus
   // if (id > nc) {
@@ -54,7 +70,8 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
     newState = removeSpecies(newState, id);
   }
   catchNeg(newState, 'sub');
-  return newState;
+  const step: Step = { state: newState, reactions: reaction('subtraction') };
+  return step;
   // } else {
   //   // If polymer is a nucleus, it dissolves
   //   newState.s[1] = newState.s[1] + nc;
@@ -67,7 +84,7 @@ function subtraction(state: ModelState, id: number, nc: number): ModelState {
   // return newState;}
 }
 
-function coagulate(state: ModelState, id1: number, id2: number): ModelState {
+function coagulate(state: ModelState, id1: number, id2: number): Step {
   let newState = deepClone(state);
   newState.s[id1] = newState.s[id1] - 1;
   if (newState.s[id1] === 0) {
@@ -83,10 +100,11 @@ function coagulate(state: ModelState, id1: number, id2: number): ModelState {
     newState.s[id1 + id2] = 1;
   }
   catchNeg(newState, 'coagulate');
-  return newState;
+  const step: Step = { state: newState, reactions: reaction('coagulation') };
+  return step;
 }
 
-function dissociate(state: ModelState, id1: number, id2: number, nc: number): ModelState {
+function dissociate(state: ModelState, id1: number, id2: number, nc: number): Step {
   let newState = deepClone(state);
   newState.s[id1] = newState.s[id1] - 1;
   if (newState.s[id1] === 0) {
@@ -113,7 +131,8 @@ function dissociate(state: ModelState, id1: number, id2: number, nc: number): Mo
   }
   //console.log(JSON.stringify(newState, null, '  '));
   catchNeg(newState, 'dissociate');
-  return newState;
+  const step: Step = { state: newState, reactions: reaction('fragmentation') };
+  return step;
 }
 
 function randomInt(min: number, max: number): number {
@@ -140,7 +159,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
     a = ka;
   }
   return function(initialState: ModelState) {
-    const possibleStates: { P: number; s: ModelState }[] = [];
+    const possibleStates: { P: number; s: ModelState; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
     catchNeg(state, 'buildModel');
     const keys = Object.keys(state.s);
@@ -149,28 +168,34 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
       if (Number.isNaN(speciesIdx)) return;
       if (speciesIdx === 1 && state.s[1] > 1) {
         const Pan = na * state.s[1] * (state.s[1] - 1);
-        possibleStates.push({ P: Pan, s: addition(state, 1) });
+        const add = addition(state, 1);
+        possibleStates.push({ P: Pan, s: add.state, R: add.reactions });
       } else if (speciesIdx > 1 && speciesIdx < nc) {
         if (state.s[1] !== 0) {
           const Pan = a * state.s[1] * state.s[speciesIdx];
-          possibleStates.push({ P: Pan, s: addition(state, speciesIdx) });
+          const add = addition(state, speciesIdx);
+          possibleStates.push({ P: Pan, s: add.state, R: add.reactions });
         }
         const Pbn = nb * state.s[speciesIdx];
-        possibleStates.push({ P: Pbn, s: subtraction(state, speciesIdx, nc) });
+        const sub = subtraction(state, speciesIdx, nc);
+        possibleStates.push({ P: Pbn, s: sub.state, R: sub.reactions });
       } else if (speciesIdx >= nc) {
         // add
         if (state.s[1] !== 0) {
           const Pag = a * state.s[1] * state.s[speciesIdx];
-          possibleStates.push({ P: Pag, s: addition(state, speciesIdx) });
+          const add = addition(state, speciesIdx);
+          possibleStates.push({ P: Pag, s: add.state, R: add.reactions });
         }
         // subtract
         const Pbg = b * state.s[speciesIdx];
-        possibleStates.push({ P: Pbg, s: subtraction(state, speciesIdx, nc) });
+        const sub = subtraction(state, speciesIdx, nc);
+        possibleStates.push({ P: Pbg, s: sub.state, R: sub.reactions });
         // break
         if (speciesIdx > 3) {
           const Pbr = kb * state.s[speciesIdx] * (speciesIdx - 3); // key - 3 accounts for multiple break points
           const frag = randomInt(2, speciesIdx - 2);
-          possibleStates.push({ P: Pbr, s: dissociate(state, speciesIdx, frag, nc) });
+          const diss = dissociate(state, speciesIdx, frag, nc);
+          possibleStates.push({ P: Pbr, s: diss.state, R: diss.reactions });
         }
         // coagulate
         keys.slice(idx).forEach(subKey => {
@@ -180,11 +205,13 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
             // adding to self. must be at least 2 polymers of same size
             if (state.s[speciesIdx] > 1) {
               const Pco = 0.5 * ka * state.s[speciesIdx] * (state.s[speciesIdx] - 1);
-              possibleStates.push({ P: Pco, s: coagulate(state, speciesIdx, speciesIdx) });
+              const coag = coagulate(state, speciesIdx, speciesIdx);
+              possibleStates.push({ P: Pco, s: coag.state, R: coag.reactions });
             }
           } else {
             const Pco = ka * state.s[speciesIdx] * state.s[subIdx];
-            possibleStates.push({ P: Pco, s: coagulate(state, speciesIdx, subIdx) });
+            const coag = coagulate(state, speciesIdx, subIdx);
+            possibleStates.push({ P: Pco, s: coag.state, R: coag.reactions });
           }
         });
       }

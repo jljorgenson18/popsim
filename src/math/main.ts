@@ -1,5 +1,16 @@
 import { SamplePayload } from 'src/db/sample';
-import { ModelState, SpeciesPair, Species, GetProbabilitiesFunc, Moments } from './types';
+import {
+  ModelState,
+  SpeciesPair,
+  Species,
+  GetProbabilitiesFunc,
+  Moments,
+  ReactionCount,
+  ReactionSeries,
+  Solution,
+  SolutionStep,
+  Step
+} from './types';
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
@@ -20,7 +31,7 @@ import {
   calculateMomentDevs
 } from './analysis';
 
-import { deepClone, stateMoment, checkConserved } from './common';
+import { deepClone } from './common';
 
 export interface TimeSeries {
   [state: number]: ModelState;
@@ -37,6 +48,7 @@ export interface Data {
   species?: SpeciesData[];
   histograms?: Histogram[];
   moments?: Moments[];
+  reactions?: ReactionCount[];
   [label: string]: any;
 }
 
@@ -81,7 +93,65 @@ function fillBin(data: TimeSeries, inputState: ModelState, bin: number): TimeSer
   return data;
 }
 
-function linearBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
+function addReactions(reactions: ReactionSeries, inputReactions: ReactionCount, bin: number) {
+  ///const inputReactions = deepClone(inReactions);
+  if (!reactions[bin]) {
+    reactions[bin] = inputReactions;
+  } else {
+    const keys = Object.keys(inputReactions);
+    keys.forEach(key => {
+      reactions[bin][key] += inputReactions[key];
+    });
+  }
+  return reactions;
+}
+
+function normalizeReactions(inReactions: ReactionSeries, runs: number): ReactionSeries {
+  const reactions = deepClone(inReactions);
+  const keys = Object.keys(reactions);
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    const dt = reactions[idx].dt;
+    console.log('the dt: ', dt);
+    const rxns = Object.keys(reactions[idx]);
+    rxns.forEach(rxn => {
+      //reactions[idx].dt = dt;
+      if (rxn !== 'dt' && rxn !== 't') {
+        reactions[idx][rxn] = reactions[idx][rxn] / (dt * runs);
+      }
+    });
+    console.log('t (norm): ', reactions[idx].t);
+    console.log('dt (norm: ', reactions[idx].dt);
+  });
+  return reactions;
+}
+
+function datifyReactions(reactions: ReactionSeries): ReactionCount[] {
+  const data: ReactionCount[] = [];
+  const keys = Object.keys(reactions);
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    const rcount: ReactionCount = {};
+    const rxns = Object.keys(reactions[idx]);
+    rxns.forEach(rxn => {
+      if (rxn !== 't' && rxn !== 'dt') {
+        rcount[rxn] = reactions[idx][rxn];
+      }
+    });
+    data[idx] = rcount;
+    data[idx].t = reactions[idx].t;
+    console.log('t (datify): ', data[idx].t);
+    data[idx].dt = reactions[idx].dt;
+    console.log('dt (datify): ', data[idx].dt);
+  });
+  return data;
+}
+
+function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): Solution {
+  const data = inData.data;
+  const newData = nData.data;
+  const reactions = inData.reactions;
+  const newReactions = nData.reactions;
   const bins = payload.bins;
   const t_end = payload.tstop;
   const dt = t_end / bins;
@@ -93,10 +163,16 @@ function linearBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload
     data[i].t = t;
     // go to next state
     idx = idx + 1;
+    addReactions(reactions, newReactions[idx], i);
+    reactions[i].t = t;
+    reactions[i].dt = dt;
     // check if next state is still in the same bin
     while (newData[idx].t < t + dt) {
       // step through until current bin is exited
       idx = idx + 1;
+      if (newData[idx].t < t + 2 * dt) {
+        addReactions(reactions, newReactions[idx], i);
+      }
     }
     // check if next state is more than one bin later
     if (newData[idx].t > t + 2 * dt) {
@@ -105,38 +181,72 @@ function linearBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload
     }
     t = t + dt;
   }
-  return data;
+  return { data: data, reactions: reactions };
 }
 
-function logBin(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
+function tLogBin(bin: number, x: number, dt: number): number {
+  if (bin === 1) {
+    return dt;
+  } else if (bin === 0) {
+    return 0;
+  } else {
+    return dt * Math.pow(x, bin - 1);
+  }
+}
+
+function tLogDiff(bin: number, x: number, dt: number): number {
+  if (bin > 0) {
+    return tLogBin(bin, x, dt) - tLogBin(bin - 1, x, dt);
+  } else {
+    throw new Error('Cant use bin = 0');
+  }
+}
+
+function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solution {
+  const data = inData.data;
+  const newData = nData.data;
+  const reactions = inData.reactions;
+  const newReactions = nData.reactions;
   const bins = payload.bins;
   const t_end = payload.tstop;
   let dt = 0;
+  const length = Object.keys(newReactions).length;
+  const otherlength = Object.keys(newData).length;
   if (!data[1]) {
     dt = newData[1].t / 10.0;
   } else {
     dt = data[1].t;
   }
-  console.log(dt);
   const x = Math.pow(t_end / dt, 1 / bins);
-  let t = 0;
   let idx = 0;
   fillBin(data, newData[idx], 0);
   data[0].t = 0;
   idx = 1;
-  t = dt;
+  let t = dt;
+  addReactions(reactions, newReactions[idx], 0);
+  reactions[0].t = t;
+  reactions[0].dt = tLogDiff(1, x, dt);
   for (let i = 1; i < bins - 1; i++) {
     while (newData[idx].t < t * x) {
       idx = idx + 1;
+      if (newData[idx].t < t * x * x) {
+        addReactions(reactions, newReactions[idx], i - 1);
+      }
     }
     if (newData[idx].t > t * x * x) {
       idx = idx - 1;
     }
     fillBin(data, newData[idx], i);
-    t = t * x;
     data[i].t = t;
+    t = tLogBin(i + 1, x, dt);
+    if (idx < length - 1) {
+      addReactions(reactions, newReactions[idx + 1], i);
+      reactions[i].t = t;
+      reactions[i].dt = tLogDiff(i + 1, x, dt);
+      console.log(tLogDiff(i + 1, x, dt));
+    }
   }
-  return data;
+  return { data: data, reactions: reactions };
 }
 
 function logBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
@@ -198,7 +308,7 @@ function binSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
   if (payload.bin_scale === 'log') return logBinSeries(newData, payload);
 }
 
-function binData(data: TimeSeries, newData: TimeSeries, payload: SamplePayload): TimeSeries {
+function binData(data: Solution, newData: Solution, payload: SamplePayload): Solution {
   if (payload.bin_scale === 'linear') return linearBin(data, newData, payload);
   if (payload.bin_scale === 'log') return logBin(data, newData, payload);
 }
@@ -235,7 +345,7 @@ function getVariance(data: TimeSeries, runs: number): TimeSeries {
   return avgData;
 }
 
-function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFunc): ModelState {
+function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFunc): SolutionStep {
   const u1 = Math.random();
   const u2 = Math.random();
   const iState = deepClone(initialState);
@@ -257,28 +367,34 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
     // if it makes it here its broken dawg
     throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
   }
-  return advanceTime(newState.s, dt);
+  const solStep: SolutionStep = { state: advanceTime(newState.s, dt), reactions: newState.R };
+  return solStep;
 }
 
 function simRun(
   initialState: ModelState,
   t_end: number,
   getProbabilities: GetProbabilitiesFunc
-): TimeSeries {
+): Solution {
   let state = deepClone(initialState);
   console.log('here');
   const t_series: TimeSeries = [initialState];
+  const r_series: ReactionSeries = {};
   // simulate until end time is reached
   let idx = 0;
-  while (state.t < t_end) {
+  let t = 0;
+  while (t < t_end) {
     // console.log('step');
-    state = simStep(state, getProbabilities);
+    const step = simStep(state, getProbabilities);
+    state = step.state;
     idx = idx + 1;
     // console.log(JSON.stringify(state, null, '  '));
-    t_series[idx] = state;
+    t_series[idx] = step.state;
+    r_series[idx] = step.reactions;
+    t = step.state.t;
     // gotta have some kind of break here or maybe not idk
   }
-  return t_series;
+  return { data: t_series, reactions: r_series };
 }
 
 export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
@@ -317,32 +433,36 @@ export function simulate(payload: SamplePayload): Data {
   if (!payload.bin_scale) payload.bin_scale = 'linear';
   if (payload.ind_runs !== 0) data.runs = [];
   data.moments = [];
-  let binnedSeries: TimeSeries;
-  binnedSeries = {};
+  const binnedSeries: TimeSeries = {};
+  const reactions: ReactionSeries = {};
+  let sol: Solution;
+  sol = { data: binnedSeries, reactions: reactions };
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
     const iState = createInitialState([{ id: 1, n: payload.N }]);
-    const tSeries = simRun(iState, t_end, getProbabilities);
+    const run = simRun(iState, t_end, getProbabilities);
+    const tSeries = run.data;
     // Store individual runs if desired
     if (i < payload.ind_runs) {
       data.runs[i] = splitSpecies(tSeries);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
-    binnedSeries = binData(binnedSeries, tSeries, payload);
+    sol = binData(sol, run, payload);
     const singleBinnedSeries = binSeries(tSeries, payload);
     data.moments = addToMoments(data.moments, singleBinnedSeries);
   }
   // Average data
-  data.series = averageData(binnedSeries, runs);
-  data.variance = splitSpecies(getVariance(binnedSeries, runs));
+  data.series = averageData(sol.data, runs);
+  data.variance = splitSpecies(getVariance(sol.data, runs));
   data.mass = massSeries(data.series);
   data.number = numberSeries(data.series);
   data.length = lengthSeries(data.series);
   data.species = splitSpecies(data.series);
   data.histograms = histSeries(data.series);
   data.moments = calculateMomentDevs(averageMoments(data.moments, runs));
+  data.reactions = datifyReactions(normalizeReactions(sol.reactions, runs));
   // Below here can be done better but jank is fine for now
   data['V'] = payload.V;
   data['N'] = payload.N;

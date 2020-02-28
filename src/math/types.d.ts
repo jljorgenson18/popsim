@@ -1,7 +1,34 @@
-export type GetProbabilitiesFunc = (s: ModelState) => { P: number; s: ModelState }[];
+export type GetProbabilitiesFunc = (
+  s: ModelState
+) => { P: number; s: ModelState; R: ReactionCount }[];
 
 export interface Species {
   [species: number]: number; // Species
+}
+
+export interface ReactionCount {
+  t?: number;
+  dt?: number;
+  [reaction: string]: number;
+}
+
+export interface ReactionSeries {
+  [step: number]: ReactionCount;
+}
+
+export interface Solution {
+  data: TimeSeries;
+  reactions: ReactionSeries;
+}
+
+export interface SolutionStep {
+  state: ModelState;
+  reactions: ReactionCount;
+}
+
+export interface Step {
+  state: ModelState;
+  reactions: ReactionCount;
 }
 
 export interface SpeciesPair {
