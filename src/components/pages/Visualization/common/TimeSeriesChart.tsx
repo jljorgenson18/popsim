@@ -84,11 +84,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
         </LineChart>
       </ResponsiveContainer>
       <Box direction="column" gap="large" pad="medium">
-        {controlElement ? (
-          <Box direction="row" gap="large" align="start">
-            {controlElement}
-          </Box>
-        ) : null}
+        {controlElement}
         <Box direction="row" gap="large">
           <ControlField
             label="Scale X"
@@ -113,7 +109,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
             }
           />
         </Box>
-        <Box direction="row">
+        <Box direction="row" gap="large">
           <SaveChart
             chartRef={chartRef}
             visualization={`${vizName}-${scaleX}-${scaleY}`}

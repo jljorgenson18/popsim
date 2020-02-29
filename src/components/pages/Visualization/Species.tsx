@@ -39,12 +39,11 @@ function Species(props: VizProps) {
       sampleName={name}
       data={variance ? (data.variance as any) : (data.species as any)}
       controlElement={
-        <>
+        <Box direction="row" gap="large" align="start">
           <ControlField
-            flex={{ grow: 1 }}
             label="Select Species"
             input={
-              <Box>
+              <Box overflow="auto" height={{ min: '0px', max: '160px' }}>
                 {speciesKeys.map(key => {
                   const display = !!speciesOptions[key];
                   return (
@@ -71,7 +70,7 @@ function Species(props: VizProps) {
               setVariance(event.target.checked);
             }}
           />
-        </>
+        </Box>
       }
     />
   );

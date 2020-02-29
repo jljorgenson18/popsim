@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { VizProps } from './types';
 import TimeSeriesChart from './common/TimeSeriesChart';
-import { CheckBox } from 'grommet';
+import { CheckBox, Box } from 'grommet';
 
 function Mass(props: VizProps) {
   const {
@@ -15,13 +15,15 @@ function Mass(props: VizProps) {
       sampleName={name}
       data={data.moments as any}
       controlElement={
-        <CheckBox
-          checked={deviation}
-          label="Standard Deviation"
-          onChange={(event: any) => {
-            setDeviation(event.target.checked);
-          }}
-        />
+        <Box>
+          <CheckBox
+            checked={deviation}
+            label="Standard Deviation"
+            onChange={(event: any) => {
+              setDeviation(event.target.checked);
+            }}
+          />
+        </Box>
       }
     />
   );
