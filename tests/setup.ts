@@ -15,3 +15,10 @@ jest.mock('src/math/index', () => {
     getSampleData
   };
 });
+
+// Mock matchMedia
+(window as any).matchMedia =
+  window.matchMedia ||
+  function() {
+    return { matches: false, addListener: function() {}, removeListener: function() {} };
+  };

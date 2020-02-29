@@ -7,12 +7,14 @@ import { SkeletonTheme } from 'react-loading-skeleton';
 import { HashRouter as Router } from 'react-router-dom';
 
 import App from './App';
+import { deepMerge } from 'grommet/utils';
+import theme from 'src/styles/theme';
 
 function Root(): JSX.Element {
   return (
     <Router>
       <SkeletonTheme>
-        <Grommet theme={grommet} full>
+        <Grommet theme={deepMerge(grommet, theme)} full>
           <App />
         </Grommet>
       </SkeletonTheme>

@@ -4,6 +4,8 @@ import { render, RenderOptions, Queries } from '@testing-library/react';
 import { Grommet } from 'grommet';
 import { grommet } from 'grommet/themes';
 import { MemoryRouter } from 'react-router-dom';
+import { deepMerge } from 'grommet/utils';
+import theme from 'src/styles/theme';
 
 interface AllProviderProps {
   children: React.ReactNode;
@@ -11,7 +13,7 @@ interface AllProviderProps {
 const AllTheProviders = ({ children }: AllProviderProps): JSX.Element => {
   return (
     <MemoryRouter>
-      <Grommet theme={grommet} full>
+      <Grommet theme={deepMerge(grommet, theme)} full>
         {children}
       </Grommet>
     </MemoryRouter>
