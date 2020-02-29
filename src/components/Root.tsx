@@ -12,7 +12,7 @@ function Root(): JSX.Element {
   return (
     <Router>
       <SkeletonTheme>
-        <Grommet theme={grommet} full style={{ overflow: 'hidden' }}>
+        <Grommet theme={grommet} full>
           <App />
         </Grommet>
       </SkeletonTheme>

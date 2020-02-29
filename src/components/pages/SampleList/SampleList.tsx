@@ -5,7 +5,6 @@ import Skeleton from 'react-loading-skeleton';
 
 import { SampleDoc, cloneSample } from 'src/db/sample';
 import Page from 'src/components/common/Page';
-import UploadSample from './UploadSample';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
 import { downloadSample } from 'src/utils';
 
@@ -17,18 +16,10 @@ interface SampleListProps {
 function SampleList(props: SampleListProps): JSX.Element {
   const { fetching, allSamples } = props;
   const history = useHistory();
-  const [showingUploadSampleModal, setShowingUploadSampleModal] = useState<boolean>(false);
   const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
 
   function handleShowVisualization(sample: SampleDoc) {
     history.push(`/visualize?samples=${sample._id}`);
-  }
-
-  async function handleUploadSample(uploadedSamples: SampleDoc[]) {
-    console.log('Uploading samples');
-    await Promise.all(uploadedSamples.map(doc => cloneSample(doc)));
-    console.log('Samples uploaded!!');
-    setShowingUploadSampleModal(false);
   }
 
   function handleDeleteSample(sample: SampleDoc) {
@@ -44,9 +35,7 @@ function SampleList(props: SampleListProps): JSX.Element {
   }
   return (
     <Page>
-      <Box direction="row">
-        <Button onClick={() => setShowingUploadSampleModal(true)} label="Upload Samples"></Button>
-      </Box>
+      <Heading level={2}>Sample List</Heading>
       <DataTable
         primaryKey="_id"
         sortable
@@ -86,17 +75,6 @@ function SampleList(props: SampleListProps): JSX.Element {
           }
         ]}
         data={allSamples}></DataTable>
-      {showingUploadSampleModal ? (
-        <Layer
-          position="center"
-          modal
-          responsive={false}
-          animation="fadeIn"
-          onEsc={() => setShowingUploadSampleModal(false)}
-          onClickOutside={() => setShowingUploadSampleModal(false)}>
-          <UploadSample onUploadSample={handleUploadSample} />
-        </Layer>
-      ) : null}
       {deletingSample ? (
         <DeleteSamplePrompt sample={deletingSample} onClear={() => setDeletingSample(null)} />
       ) : null}

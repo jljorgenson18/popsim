@@ -6,6 +6,9 @@ type AnchorLinkProps = LinkProps & AnchorProps & Omit<JSX.IntrinsicElements['a']
 
 export default function AnchorLink(props: AnchorLinkProps) {
   return (
-    <Anchor as={({ colorProp, hasIcon, hasLabel, focus, ...p }) => <Link {...p} />} {...props} />
+    <Anchor
+      as={({ colorProp, hasIcon, hasLabel, focus, theme, ...p }) => <Link {...p} />}
+      {...props}
+    />
   );
 }

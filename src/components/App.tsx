@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Heading, Footer, Header, Main, Box, ThemeType } from 'grommet';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Heading, Box, ThemeType } from 'grommet';
 import styled, { createGlobalStyle } from 'styled-components';
+import { normalize } from 'polished';
+import Sidebar from 'react-sidebar';
 
 import db from 'src/db';
 import { getAllSamples, SampleDoc } from 'src/db/sample';
@@ -10,26 +12,14 @@ import Visualization from './pages/Visualization';
 
 import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import AnchorLink from './common/AnchorLink';
+import UploadSamples from './pages/UploadSamples';
 
 const GlobalStyle = createGlobalStyle`
-  body {
-    height: 100%;
-  }
+  ${normalize()}
   /** Overwrites weird overflow style issues on Recharts */
   .recharts-wrapper .recharts-surface {
     overflow: visible;
   }
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: 100%;
-`;
-const ActivePage = styled.div`
-  flex-grow: 1;
-  overflow-y: scroll;
 `;
 
 const MainHeading = styled(Heading)`
@@ -41,10 +31,28 @@ const MainHeading = styled(Heading)`
   }
 `;
 
+function useIsMobile() {
+  const mql = useMemo(() => window.matchMedia(`(max-width: 800px)`), []);
+  const [isMobile, setIsMobile] = useState(mql.matches);
+  useEffect(() => {
+    const handleMediaQueryChange = () => {
+      setIsMobile(mql.matches);
+    };
+    mql.addListener(handleMediaQueryChange);
+    return () => mql.removeListener(handleMediaQueryChange);
+  }, [mql]);
+  return isMobile;
+}
+
 function App(): JSX.Element {
   const [allSamples, setAllSamples] = useState<SampleDoc[] | null>(null);
   const [fetching, setFetching] = useState<boolean>(false);
   const [changeCount, setChangeCount] = useState<number>(0);
+  const isMobile = useIsMobile();
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
+  useEffect(() => {
+    setSidebarIsOpen(false);
+  }, [isMobile]);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,34 +91,45 @@ function App(): JSX.Element {
   console.log('All Samples', allSamples);
 
   return (
-    <ContentWrapper>
-      <Header background="brand" pad="small">
-        <MainHeading level="3">
-          <Link to="/">Popsim</Link>
-        </MainHeading>
-        <Box direction="row" gap="medium">
-          <AnchorLink to="/sample-list">Sample List</AnchorLink>
-          <AnchorLink to="/create-sample">Create New Sample</AnchorLink>
-        </Box>
-      </Header>
+    <>
       <GlobalStyle />
-      <ActivePage>
-        <Switch>
-          <Route path="/sample-list">
-            <SampleList fetching={fetching} allSamples={allSamples} />
-          </Route>
-          <Route path="/create-sample">
-            <SampleForm />
-          </Route>
-          <Route path="/visualize">
-            <Visualization allSamples={allSamples} />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/sample-list" />
-          </Route>
-        </Switch>
-      </ActivePage>
-    </ContentWrapper>
+      <Sidebar
+        open={sidebarIsOpen}
+        docked={!isMobile}
+        onSetOpen={open => setSidebarIsOpen(open)}
+        sidebar={
+          <Box fill direction="column" pad="medium" background="brand">
+            <MainHeading level="3">
+              <Link to="/">Popsim</Link>
+            </MainHeading>
+            <Box as="nav" direction="column" gap="small">
+              <AnchorLink to="/sample-list">Sample List</AnchorLink>
+              <AnchorLink to="/create-sample">Create New Sample</AnchorLink>
+              <AnchorLink to="/upload-samples">Upload Samples</AnchorLink>
+            </Box>
+          </Box>
+        }>
+        <Box>
+          <Switch>
+            <Route path="/sample-list">
+              <SampleList fetching={fetching} allSamples={allSamples} />
+            </Route>
+            <Route path="/create-sample">
+              <SampleForm />
+            </Route>
+            <Route path="/visualize">
+              <Visualization allSamples={allSamples} />
+            </Route>
+            <Route path="/upload-samples">
+              <UploadSamples />
+            </Route>
+            <Route exact path="/">
+              <Redirect to="/sample-list" />
+            </Route>
+          </Switch>
+        </Box>
+      </Sidebar>
+    </>
   );
 }
 

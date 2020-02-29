@@ -362,7 +362,7 @@ function SampleForm(props: SampleFormProps) {
       });
       await createSample(values);
       setShowingLoadingModal(null);
-      history.push('/'); // Redirect back to home
+      history.push('/sample-list');
     } catch (err) {
       // TODO: Add an error message
       console.error(err);
@@ -383,11 +383,9 @@ function SampleForm(props: SampleFormProps) {
   const submitted = formik.submitCount > 0;
   return (
     <Page data-testid="sampleForm">
-      <Form onSubmit={formik.handleSubmit}>
+      <Heading level={2}>Create New Sample</Heading>
+      <Form onSubmit={formik.handleSubmit} style={{ maxWidth: 900, width: '100%' }}>
         <Grid rows="auto" columns={['1/2', '1/2']} gap="small" fill>
-          <Heading level={3} gridArea="1 / 1 / 2 / 3" margin="small">
-            New Sample
-          </Heading>
           <FormFieldLabel
             label="Name"
             name="name"

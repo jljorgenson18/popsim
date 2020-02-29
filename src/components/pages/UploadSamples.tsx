@@ -1,11 +1,12 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Box } from 'grommet';
-import { SampleDoc } from 'src/db/sample';
+import { Box, Heading, Paragraph } from 'grommet';
 
-interface UploadSampleProps {
-  onUploadSample: (docs: SampleDoc[]) => void;
-}
+import Page from '../common/Page';
+import { SampleDoc, cloneSample } from 'src/db/sample';
+import { useHistory } from 'react-router-dom';
+
+interface UploadSamplesProps {}
 
 const getSampleDataFile = async (file: File): Promise<SampleDoc> => {
   const jsonString = await new Promise<string>((resolve, reject) => {
@@ -20,28 +21,35 @@ const getSampleDataFile = async (file: File): Promise<SampleDoc> => {
   return JSON.parse(jsonString) as SampleDoc;
 };
 
-function UploadSample(props: UploadSampleProps) {
-  const { onUploadSample } = props;
+function UploadSamples(props: UploadSamplesProps) {
+  const history = useHistory();
+  async function handleUploadSamples(uploadedSamples: SampleDoc[]) {
+    console.log('Uploading samples...');
+    await Promise.all(uploadedSamples.map(doc => cloneSample(doc)));
+    console.log('Samples uploaded!!');
+    history.push('/sample-list');
+  }
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const sampleDocs = await Promise.all(acceptedFiles.map(getSampleDataFile));
-    onUploadSample(sampleDocs);
+    handleUploadSamples(sampleDocs);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: '.json,application/json'
   });
   return (
-    <Box pad="medium" gap="none" width="large" style={{ maxHeight: '90vh', overflowY: 'scroll' }}>
-      <div {...getRootProps()}>
+    <Page align="center">
+      <Heading level={2}>Upload Samples</Heading>
+      <Box {...getRootProps()} border pad="large">
         <input {...getInputProps()} />
         {isDragActive ? (
-          <p>Drop the files here ...</p>
+          <Paragraph>Drop the files here ...</Paragraph>
         ) : (
-          <p>{`Drag 'n' drop some files here, or click to select files`}</p>
+          <Paragraph>{`Drag 'n' drop some files here, or click to select files`}</Paragraph>
         )}
-      </div>
-    </Box>
+      </Box>
+    </Page>
   );
 }
 
-export default UploadSample;
+export default UploadSamples;
