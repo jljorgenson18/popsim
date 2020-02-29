@@ -8,12 +8,12 @@ function NumberChart(props: VizProps) {
   } = props;
   return (
     <TimeSeriesChart
-      dataKey="P"
+      dataKeys={['P']}
+      deviationDataKeys={['P_dev']}
       vizName="Number"
-      deviationDataKey="P_dev"
       deviationVizName="Number Deviation"
       sampleName={name}
-      moments={data.moments}
+      data={data.moments as any}
     />
   );
 }

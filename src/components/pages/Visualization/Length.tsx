@@ -8,12 +8,12 @@ function Length(props: VizProps) {
   } = props;
   return (
     <TimeSeriesChart
-      dataKey="L"
+      dataKeys={['L']}
+      deviationDataKeys={['L_dev']}
       vizName="Length"
-      deviationDataKey="L_dev"
       deviationVizName="Length Deviation"
       sampleName={name}
-      moments={data.moments}
+      data={data.moments as any}
     />
   );
 }

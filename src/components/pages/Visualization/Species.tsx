@@ -10,22 +10,6 @@ import SaveChart from './common/SaveChart';
 import Controls from './common/Controls';
 import ControlField from './common/ControlField';
 
-const SelectedSpecies = styled.div`
-  h4 {
-    text-align: center;
-    margin: 8px 0;
-  }
-
-  > div {
-    display: flex;
-    flex-wrap: wrap;
-
-    > * {
-      margin: 16px 24px;
-    }
-  }
-`;
-
 interface SpeciesOption {
   display: boolean;
   color: string;
@@ -58,7 +42,7 @@ function Species(props: VizProps) {
     }, {});
     setSpeciesOptions(newSpeciesOptions);
   }, [speciesKeys]);
-  const { options, scale, onChange } = useScaleInputField();
+  const { options, scale, onChange } = useScaleInputField('scale');
   const dataSpecies = useFilteredDataPoints(data.species);
   const chartRef = useRef(null);
 

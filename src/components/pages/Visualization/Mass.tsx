@@ -9,12 +9,12 @@ function Mass(props: VizProps) {
   return (
     <div>
       <TimeSeriesChart
-        dataKey="M"
-        deviationDataKey="M_dev"
+        dataKeys={['M']}
+        deviationDataKeys={['M_dev']}
         deviationVizName="Mass Deviation"
         vizName="Mass"
         sampleName={name}
-        moments={data.moments}
+        data={data.moments as any}
       />
     </div>
   );
