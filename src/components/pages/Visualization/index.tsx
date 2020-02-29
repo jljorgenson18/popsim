@@ -11,6 +11,7 @@ import Runs from './Runs';
 import Page from 'src/components/common/Page';
 import RawSampleData from './RawSampleData';
 import { useLocation } from 'react-router-dom';
+import Reactions from './reactions';
 
 interface VisualizationProps {
   allSamples?: SampleDoc[];
@@ -23,6 +24,7 @@ const VizOptions = {
   Species: Species,
   Histogram: Histogram,
   Runs: Runs,
+  Reactions: Reactions,
   'Raw Sample Data': RawSampleData
 } as {
   [visType: string]: any;
