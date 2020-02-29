@@ -9,67 +9,93 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import { useScaleInputField, useFilteredMoments } from '../hooks';
-import { RadioButtonGroup, CheckBox, Box, FormField } from 'grommet';
+import { useScaleInputField, useFilteredData } from '../hooks';
+import { RadioButtonGroup, CheckBox } from 'grommet';
 import SaveChart from './SaveChart';
-import { Moments } from 'src/math/types';
 import Controls from './Controls';
 import ControlField from './ControlField';
+import { TimeSeriesData } from '../types';
 
 interface TimeSeriesChartProps {
-  dataKey: string;
+  dataKeys: string[];
   vizName: string;
-  deviationDataKey: string;
+  deviationDataKeys: string[];
   deviationVizName: string;
   sampleName: string;
-  moments: Moments[];
+  data: TimeSeriesData[];
   strokeColor?: string;
 }
 
 function TimeSeriesChart(props: TimeSeriesChartProps) {
   const {
-    dataKey,
+    dataKeys,
     vizName,
-    deviationDataKey,
+    deviationDataKeys,
     deviationVizName,
     sampleName,
-    moments,
+    data,
     strokeColor = '#82ca9d'
   } = props;
-  const { options, scale, onChange } = useScaleInputField();
-  const data = useFilteredMoments(moments);
+  const { options: optionsX, scale: scaleX, onChange: onScaleXChange } = useScaleInputField(
+    'scaleX'
+  );
+  const { options: optionsY, scale: scaleY, onChange: onScaleYChange } = useScaleInputField(
+    'scaleY'
+  );
+  const filteredData = useFilteredData(data, ['t']);
   const [deviation, setDeviation] = useState(false);
   const chartRef = useRef(null);
-  const currentDataKey = deviation ? deviationDataKey : dataKey;
+  const currentDataKeys = deviation ? deviationDataKeys : dataKeys;
   const currentVizName = deviation ? deviationVizName : vizName;
   return (
     <>
       <ResponsiveContainer minHeight={300} width="100%">
-        <LineChart data={data} ref={chartRef}>
+        <LineChart data={filteredData} ref={chartRef}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="t"
             minTickGap={24}
             name="Time"
             tickFormatter={(val: number) => val.toExponential(2)}
-            scale={scale}
+            scale={scaleX}
           />
-          <YAxis dataKey={currentDataKey} name={currentVizName} domain={[0, 'auto']} />
+          <YAxis name={currentVizName} scale={scaleY} domain={['auto', 'auto']} />
           <Tooltip labelFormatter={(time: number) => `Time: ${time.toExponential(2)}`} />
-          <Line
-            type="monotone"
-            dataKey={currentDataKey}
-            stroke={strokeColor}
-            dot={false}
-            strokeWidth={3}
-          />
+          {currentDataKeys.map(datakey => {
+            return (
+              <Line
+                key={datakey}
+                type="monotone"
+                dataKey={datakey}
+                stroke={strokeColor}
+                dot={false}
+                strokeWidth={3}
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
       <Controls>
         <ControlField
-          label="Scale"
+          label="Scale X"
           input={
-            <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
+            <RadioButtonGroup
+              name="scaleX"
+              options={optionsX}
+              value={scaleX}
+              onChange={onScaleXChange}
+            />
+          }
+        />
+        <ControlField
+          label="Scale Y"
+          input={
+            <RadioButtonGroup
+              name="scaleY"
+              options={optionsY}
+              value={scaleY}
+              onChange={onScaleYChange}
+            />
           }
         />
         <CheckBox
@@ -81,7 +107,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
         />
         <SaveChart
           chartRef={chartRef}
-          visualization={`${currentVizName}-${scale}`}
+          visualization={`${currentVizName}-${scaleX}-${scaleY}`}
           sampleName={sampleName}
         />
       </Controls>

@@ -53,7 +53,7 @@ function Runs(props: VizProps) {
     }, {});
     setRunsOptions(newRunsOptions);
   }, [RunsKeys]);
-  const { options, scale, onChange } = useScaleInputField();
+  const { options, scale, onChange } = useScaleInputField('scale');
   const dataRuns = useFilteredDataPoints(data.runs[0]);
   const chartRef = useRef(null);
 

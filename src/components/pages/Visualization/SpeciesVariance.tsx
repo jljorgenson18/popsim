@@ -57,7 +57,7 @@ function SpeciesVariance(props: VizProps) {
     );
     setSpeciesVarianceOptions(newSpeciesVarianceOptions);
   }, [speciesVarianceKeys]);
-  const { options, scale, onChange } = useScaleInputField();
+  const { options, scale, onChange } = useScaleInputField('scale');
   const dataSpeciesVariance = useFilteredDataPoints(data.variance);
   const chartRef = useRef(null);
 

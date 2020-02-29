@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormField, Select } from 'grommet';
+import { FormField, Select, Heading } from 'grommet';
 
 import { SampleDoc } from 'src/db/sample';
 import Mass from './Mass';
@@ -45,6 +45,7 @@ function Visualization(props: VisualizationProps) {
   if (!sample) return null;
   return (
     <Page>
+      <Heading level={2}>Visualize Samples</Heading>
       <FormField>
         <Select
           id="model-select"
