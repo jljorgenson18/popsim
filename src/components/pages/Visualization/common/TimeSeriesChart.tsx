@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
 import {
   LineChart,
   Line,
@@ -8,6 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import randomColor from 'randomcolor';
+import memoize from 'lodash/memoize';
 
 import { useScaleInputField, useFilteredData } from '../hooks';
 import { RadioButtonGroup, CheckBox } from 'grommet';
@@ -24,6 +26,7 @@ interface TimeSeriesChartProps {
   sampleName: string;
   data: TimeSeriesData[];
   strokeColor?: string;
+  controlElement?: JSX.Element;
 }
 
 function TimeSeriesChart(props: TimeSeriesChartProps) {
@@ -34,7 +37,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
     deviationVizName,
     sampleName,
     data,
-    strokeColor = '#82ca9d'
+    controlElement = null
   } = props;
   const { options: optionsX, scale: scaleX, onChange: onScaleXChange } = useScaleInputField(
     'scaleX'
@@ -47,6 +50,15 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
   const chartRef = useRef(null);
   const currentDataKeys = deviation ? deviationDataKeys : dataKeys;
   const currentVizName = deviation ? deviationVizName : vizName;
+  // So each dataKey will get their own color and it will be remembered
+  const getColorFromDataKey = useMemo(() => {
+    return memoize((dataKey: string) => {
+      return randomColor({
+        luminosity: 'dark'
+      });
+    });
+  }, []);
+  const sciNotationTickFormatter = (val: number) => val.toExponential(2);
   return (
     <>
       <ResponsiveContainer minHeight={300} width="100%">
@@ -56,18 +68,27 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
             dataKey="t"
             minTickGap={24}
             name="Time"
-            tickFormatter={(val: number) => val.toExponential(2)}
+            tickFormatter={sciNotationTickFormatter}
             scale={scaleX}
           />
-          <YAxis name={currentVizName} scale={scaleY} domain={['auto', 'auto']} />
-          <Tooltip labelFormatter={(time: number) => `Time: ${time.toExponential(2)}`} />
-          {currentDataKeys.map(datakey => {
+          <YAxis
+            name={currentVizName}
+            scale={scaleY}
+            domain={['auto', 'auto']}
+            tickFormatter={scaleY === 'log' ? sciNotationTickFormatter : null}
+          />
+          <Tooltip
+            labelStyle={{ marginBottom: 8 }}
+            labelFormatter={(time: number) => `Time: ${time.toExponential(2)}`}
+            formatter={(value, name, props) => `${name}: ${Number(value).toExponential(2)}`}
+          />
+          {currentDataKeys.map(dataKey => {
             return (
               <Line
-                key={datakey}
+                key={dataKey}
                 type="monotone"
-                dataKey={datakey}
-                stroke={strokeColor}
+                dataKey={dataKey}
+                stroke={getColorFromDataKey(dataKey)}
                 dot={false}
                 strokeWidth={3}
               />
@@ -76,6 +97,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
         </LineChart>
       </ResponsiveContainer>
       <Controls>
+        {controlElement}
         <ControlField
           label="Scale X"
           input={

@@ -1,98 +1,51 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import randomColor from 'randomcolor';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { CheckBox, RadioButtonGroup } from 'grommet';
-import styled from 'styled-components';
+import React, { useMemo, useState, useEffect } from 'react';
+import { CheckBox, Box } from 'grommet';
 
 import { VizProps } from './types';
-import { useScaleInputField, useFilteredDataPoints } from './hooks';
-import SaveChart from './common/SaveChart';
-import Controls from './common/Controls';
 import ControlField from './common/ControlField';
+import TimeSeriesChart from './common/TimeSeriesChart';
 
-interface SpeciesOption {
-  display: boolean;
-  color: string;
+interface SpeciesOptions {
+  [speciesKey: string]: boolean;
 }
+
 function Species(props: VizProps) {
   const {
     sample: { data, name }
   } = props;
-
-  const [speciesOptions, setSpeciesOptions] = useState<{
-    [speciesKey: string]: SpeciesOption;
-  }>(null);
-  console.log(data.species);
-
   // We can get the species keys from just looking at the first species data
   const speciesKeys = useMemo(() => Object.keys(data.species[0]).filter(key => key !== 't'), [
     data.species
   ]);
-  console.log(speciesKeys);
-
+  const [speciesOptions, setSpeciesOptions] = useState<SpeciesOptions>({});
   useEffect(() => {
     const newSpeciesOptions = speciesKeys.reduce<typeof speciesOptions>((mapped, key) => {
-      mapped[key] = {
-        display: false,
-        color: randomColor({
-          luminosity: 'dark'
-        })
-      };
+      mapped[key] = false;
       return mapped;
     }, {});
     setSpeciesOptions(newSpeciesOptions);
   }, [speciesKeys]);
-  const { options, scale, onChange } = useScaleInputField('scale');
-  const dataSpecies = useFilteredDataPoints(data.species);
-  const chartRef = useRef(null);
 
-  if (!speciesOptions) return null;
-  // Each key is a specific species, UI should somehow allow user to select
-  // multiple species to plot on the same graph.
-  // Key "t" should be ignored as it is the x-axis
+  const dataKeys = useMemo(
+    () => (speciesOptions ? speciesKeys.filter(key => speciesOptions[key]) : []),
+    [speciesKeys, speciesOptions]
+  );
+
   return (
-    // LINES should be generated based on one or more selected values from keys
-    <>
-      <LineChart data={dataSpecies} width={500} height={300} ref={chartRef}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="t"
-          name="Time"
-          tickFormatter={(val: number) => val.toFixed(2)}
-          scale={scale}
-        />
-        <YAxis dataKey="1" name="Number" />
-        <Tooltip labelFormatter={(time: number) => `Time: ${time.toFixed(2)}`} />
-        {speciesKeys
-          .map(key => {
-            const { display, color } = speciesOptions[key];
-            if (!display) return null;
-            return (
-              <Line
-                key={key}
-                type="monotone"
-                dataKey={key}
-                stroke={color}
-                dot={false}
-                strokeWidth={3}
-              />
-            );
-          })
-          .filter(Boolean)}
-      </LineChart>
-      <Controls>
-        <ControlField
-          label="Scale"
-          input={
-            <RadioButtonGroup name="scale" options={options} value={scale} onChange={onChange} />
-          }
-        />
+    <TimeSeriesChart
+      dataKeys={dataKeys}
+      deviationDataKeys={['L_dev']}
+      vizName="Species"
+      deviationVizName="Species Deviation"
+      sampleName={name}
+      data={data.species as any}
+      controlElement={
         <ControlField
           label="Select Species"
           input={
-            <div>
+            <Box>
               {speciesKeys.map(key => {
-                const { display, ...rest } = speciesOptions[key];
+                const display = !!speciesOptions[key];
                 return (
                   <CheckBox
                     key={key}
@@ -101,21 +54,16 @@ function Species(props: VizProps) {
                     onChange={event => {
                       setSpeciesOptions({
                         ...speciesOptions,
-                        [key]: {
-                          ...rest,
-                          display: event.target.checked
-                        }
+                        [key]: event.target.checked
                       });
                     }}
                   />
                 );
               })}
-            </div>
+            </Box>
           }></ControlField>
-        <SaveChart chartRef={chartRef} visualization={'species-' + scale} sampleName={name} />
-      </Controls>
-    </>
+      }
+    />
   );
 }
-
 export default Species;
