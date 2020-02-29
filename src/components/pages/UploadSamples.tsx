@@ -40,7 +40,7 @@ function UploadSamples(props: UploadSamplesProps) {
   return (
     <Page align="center">
       <Heading level={2}>Upload Samples</Heading>
-      <Box {...getRootProps()} border pad="large" style={{ borderRadius: 8 }}>
+      <Box {...getRootProps()} border pad="large" round="medium">
         <input {...getInputProps()} />
         {isDragActive ? (
           <Paragraph>Drop the files here ...</Paragraph>

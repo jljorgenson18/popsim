@@ -12,7 +12,7 @@ import randomColor from 'randomcolor';
 import memoize from 'lodash/memoize';
 
 import { useScaleInputField, useFilteredData } from '../hooks';
-import { RadioButtonGroup, CheckBox } from 'grommet';
+import { RadioButtonGroup, CheckBox, Box } from 'grommet';
 import SaveChart from './SaveChart';
 import Controls from './Controls';
 import ControlField from './ControlField';
@@ -21,8 +21,6 @@ import { TimeSeriesData } from '../types';
 interface TimeSeriesChartProps {
   dataKeys: string[];
   vizName: string;
-  deviationDataKeys: string[];
-  deviationVizName: string;
   sampleName: string;
   data: TimeSeriesData[];
   strokeColor?: string;
@@ -30,15 +28,7 @@ interface TimeSeriesChartProps {
 }
 
 function TimeSeriesChart(props: TimeSeriesChartProps) {
-  const {
-    dataKeys,
-    vizName,
-    deviationDataKeys,
-    deviationVizName,
-    sampleName,
-    data,
-    controlElement = null
-  } = props;
+  const { dataKeys, vizName, sampleName, data, controlElement = null } = props;
   const { options: optionsX, scale: scaleX, onChange: onScaleXChange } = useScaleInputField(
     'scaleX'
   );
@@ -46,10 +36,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
     'scaleY'
   );
   const filteredData = useFilteredData(data, ['t']);
-  const [deviation, setDeviation] = useState(false);
   const chartRef = useRef(null);
-  const currentDataKeys = deviation ? deviationDataKeys : dataKeys;
-  const currentVizName = deviation ? deviationVizName : vizName;
   // So each dataKey will get their own color and it will be remembered
   const getColorFromDataKey = useMemo(() => {
     return memoize((dataKey: string) => {
@@ -72,7 +59,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
             scale={scaleX}
           />
           <YAxis
-            name={currentVizName}
+            name={vizName}
             scale={scaleY}
             domain={['auto', 'auto']}
             tickFormatter={scaleY === 'log' ? sciNotationTickFormatter : null}
@@ -82,7 +69,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
             labelFormatter={(time: number) => `Time: ${time.toExponential(2)}`}
             formatter={(value, name, props) => `${name}: ${Number(value).toExponential(2)}`}
           />
-          {currentDataKeys.map(dataKey => {
+          {dataKeys.map(dataKey => {
             return (
               <Line
                 key={dataKey}
@@ -96,43 +83,44 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
           })}
         </LineChart>
       </ResponsiveContainer>
-      <Controls>
-        {controlElement}
-        <ControlField
-          label="Scale X"
-          input={
-            <RadioButtonGroup
-              name="scaleX"
-              options={optionsX}
-              value={scaleX}
-              onChange={onScaleXChange}
-            />
-          }
-        />
-        <ControlField
-          label="Scale Y"
-          input={
-            <RadioButtonGroup
-              name="scaleY"
-              options={optionsY}
-              value={scaleY}
-              onChange={onScaleYChange}
-            />
-          }
-        />
-        <CheckBox
-          checked={deviation}
-          label="Standard Deviation"
-          onChange={(event: any) => {
-            setDeviation(event.target.checked);
-          }}
-        />
-        <SaveChart
-          chartRef={chartRef}
-          visualization={`${currentVizName}-${scaleX}-${scaleY}`}
-          sampleName={sampleName}
-        />
-      </Controls>
+      <Box direction="column" gap="large" pad="medium">
+        {controlElement ? (
+          <Box direction="row" gap="large" align="start">
+            {controlElement}
+          </Box>
+        ) : null}
+        <Box direction="row" gap="large">
+          <ControlField
+            label="Scale X"
+            input={
+              <RadioButtonGroup
+                name="scaleX"
+                options={optionsX}
+                value={scaleX}
+                onChange={onScaleXChange}
+              />
+            }
+          />
+          <ControlField
+            label="Scale Y"
+            input={
+              <RadioButtonGroup
+                name="scaleY"
+                options={optionsY}
+                value={scaleY}
+                onChange={onScaleYChange}
+              />
+            }
+          />
+        </Box>
+        <Box direction="row">
+          <SaveChart
+            chartRef={chartRef}
+            visualization={`${vizName}-${scaleX}-${scaleY}`}
+            sampleName={sampleName}
+          />
+        </Box>
+      </Box>
     </>
   );
 }

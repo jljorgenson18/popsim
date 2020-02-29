@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box } from 'grommet';
+import { Box, BoxProps } from 'grommet';
 import styled from 'styled-components';
 
 interface ControlFieldProps {
@@ -14,10 +14,10 @@ const FieldWrapper = styled(Box)`
   }
 `;
 
-function ControlField(props: ControlFieldProps) {
-  const { input, label } = props;
+function ControlField(props: ControlFieldProps & BoxProps) {
+  const { input, label, ...rest } = props;
   return (
-    <FieldWrapper>
+    <FieldWrapper {...rest}>
       <label>{label}</label>
       {input}
     </FieldWrapper>

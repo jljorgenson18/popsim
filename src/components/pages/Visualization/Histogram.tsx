@@ -37,7 +37,9 @@ function Histogram(props: VizProps) {
           />
           <p>{`Selected Time: ${data.histograms[selectedBin].t.toFixed(6)}`}</p>
         </Box>
-        <SaveChart chartRef={chartRef} visualization={'histogram'} sampleName={name} />
+        <Box direction="row">
+          <SaveChart chartRef={chartRef} visualization={'histogram'} sampleName={name} />
+        </Box>
       </Controls>
     </>
   );

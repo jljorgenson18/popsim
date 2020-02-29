@@ -7,7 +7,6 @@ import NumberChart from './Number';
 import Length from './Length';
 import Species from './Species';
 import Histogram from './Histogram';
-import SpeciesVariance from './SpeciesVariance';
 import Runs from './Runs';
 import Page from 'src/components/common/Page';
 import RawSampleData from './RawSampleData';
@@ -23,7 +22,6 @@ const VizOptions = {
   Length: Length,
   Species: Species,
   Histogram: Histogram,
-  SpeciesVariance: SpeciesVariance,
   Runs: Runs,
   'Raw Sample Data': RawSampleData
 } as {

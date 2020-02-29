@@ -17,6 +17,7 @@ function Species(props: VizProps) {
   const speciesKeys = useMemo(() => Object.keys(data.species[0]).filter(key => key !== 't'), [
     data.species
   ]);
+  const [variance, setVariance] = useState(false);
   const [speciesOptions, setSpeciesOptions] = useState<SpeciesOptions>({});
   useEffect(() => {
     const newSpeciesOptions = speciesKeys.reduce<typeof speciesOptions>((mapped, key) => {
@@ -34,34 +35,43 @@ function Species(props: VizProps) {
   return (
     <TimeSeriesChart
       dataKeys={dataKeys}
-      deviationDataKeys={['L_dev']}
       vizName="Species"
-      deviationVizName="Species Deviation"
       sampleName={name}
-      data={data.species as any}
+      data={variance ? (data.variance as any) : (data.species as any)}
       controlElement={
-        <ControlField
-          label="Select Species"
-          input={
-            <Box>
-              {speciesKeys.map(key => {
-                const display = !!speciesOptions[key];
-                return (
-                  <CheckBox
-                    key={key}
-                    checked={display}
-                    label={key}
-                    onChange={event => {
-                      setSpeciesOptions({
-                        ...speciesOptions,
-                        [key]: event.target.checked
-                      });
-                    }}
-                  />
-                );
-              })}
-            </Box>
-          }></ControlField>
+        <>
+          <ControlField
+            flex={{ grow: 1 }}
+            label="Select Species"
+            input={
+              <Box>
+                {speciesKeys.map(key => {
+                  const display = !!speciesOptions[key];
+                  return (
+                    <CheckBox
+                      key={key}
+                      checked={display}
+                      label={key}
+                      onChange={event => {
+                        setSpeciesOptions({
+                          ...speciesOptions,
+                          [key]: event.target.checked
+                        });
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+            }
+          />
+          <CheckBox
+            checked={variance}
+            label="Variance"
+            onChange={(event: any) => {
+              setVariance(event.target.checked);
+            }}
+          />
+        </>
       }
     />
   );
