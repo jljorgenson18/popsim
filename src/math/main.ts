@@ -41,6 +41,7 @@ export interface Data {
   series?: TimeSeries;
   variance?: SpeciesData[];
   runs?: SpeciesData[][];
+  runMoments?: Moments[][];
   /** DEPRECATED */
   mass?: DataPoint[];
   length?: DataPoint[];
@@ -48,6 +49,7 @@ export interface Data {
   species?: SpeciesData[];
   histograms?: Histogram[];
   moments?: Moments[];
+  singleMoments?: Moments[][];
   reactions?: ReactionCount[];
   [label: string]: any;
 }
@@ -431,8 +433,10 @@ export function simulate(payload: SamplePayload): Data {
   const data: Data = {};
   if (!payload.bins) payload.bins = 100;
   if (!payload.bin_scale) payload.bin_scale = 'linear';
-  if (payload.ind_runs !== 0) data.runs = [];
+  if (!payload.ind_runs) payload.ind_runs = 1;
+  data.runs = [];
   data.moments = [];
+  data.runMoments = [];
   const binnedSeries: TimeSeries = {};
   const reactions: ReactionSeries = {};
   let sol: Solution;
@@ -446,6 +450,8 @@ export function simulate(payload: SamplePayload): Data {
     // Store individual runs if desired
     if (i < payload.ind_runs) {
       data.runs[i] = splitSpecies(tSeries);
+      data.runMoments[i] = [];
+      data.runMoments[i] = addToMoments(data.runMoments[i], tSeries);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
