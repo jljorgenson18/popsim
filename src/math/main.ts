@@ -169,14 +169,14 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
     fillBin(data, newData[idx], i);
     data[i].t = dt * i;
 
-    if (!reactions[i + 1]) {
-      reactions[i + 1] = deepClone(newReactions[idx + 1]);
-      reactions[i + 1].t = dt * i;
-      reactions[i + 1].dt = dt;
+    if (!reactions[i]) {
+      reactions[i] = deepClone(newReactions[idx + 1]);
+      reactions[i].t = dt * i;
+      reactions[i].dt = dt;
     } else {
       keys.forEach(key => {
         if (key !== 't' && key !== 'dt') {
-          reactions[i + 1][key] += newReactions[idx + 1][key];
+          reactions[i][key] += newReactions[idx + 1][key];
         }
       });
     }
@@ -188,7 +188,7 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
       console.log('newReac: ', newReactions[idx + 1]);
       keys.forEach(key => {
         if (key !== 't' && key !== 'dt') {
-          reactions[i + 1][key] += newReactions[idx + 1][key];
+          reactions[i][key] += newReactions[idx + 1][key];
         }
       });
       // step through until current bin is exited

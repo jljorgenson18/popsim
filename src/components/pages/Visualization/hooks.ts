@@ -28,7 +28,7 @@ export function useFilteredDataPoints(points: Array<DataPoint | SpeciesData>) {
 export function useFilteredData(data: { [key: string]: number }[], keys: string[]) {
   return useMemo(() => {
     return data.filter(entry => {
-      return keys.every(key => !Number.isNaN(entry[key]) && entry[key] !== 0);
+      return keys.every(key => !Number.isNaN(entry[key]) && entry[key] !== 0 && entry);
     });
   }, [data]);
 }
