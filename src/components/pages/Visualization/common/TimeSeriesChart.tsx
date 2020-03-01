@@ -61,7 +61,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
           <YAxis
             name={vizName}
             scale={scaleY}
-            domain={['auto', 'auto']}
+            domain={scaleY === 'log' ? ['auto', 'auto'] : [0, 'auto']}
             tickFormatter={scaleY === 'log' ? sciNotationTickFormatter : null}
           />
           <Tooltip
