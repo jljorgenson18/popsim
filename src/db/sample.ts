@@ -139,14 +139,28 @@ export async function cloneSample(payload: SampleDoc): Promise<SampleDoc> {
   return await db.get<SampleDoc>(id);
 }
 
-export async function deleteSample(payload: SampleDoc): Promise<void> {
-  await db.remove(payload);
+export async function deleteSamples(sampleDocs: SampleDoc[]): Promise<void> {
+  await db.bulkDocs(
+    sampleDocs.map(doc => {
+      return {
+        ...doc,
+        _deleted: true
+      };
+    })
+  );
 }
 
+export function getSamplesFromIds(sampleIds: string[]) {
+  return Promise.all(sampleIds.map(getSample));
+}
+
+export async function getSample(id: string): Promise<SampleDoc> {
+  return await db.get<SampleDoc>(id);
+}
 export async function getAllSamples(): Promise<SampleDoc[]> {
   const result = await db.allDocs<SampleDoc>({
     include_docs: true,
     descending: true
   });
-  return result.rows.map(row => row.doc as SampleDoc).sort((a, b) => a.createdAt - b.createdAt);
+  return result.rows.map(row => row.doc as SampleDoc).sort((a, b) => b.createdAt - a.createdAt);
 }

@@ -532,8 +532,8 @@ function SampleForm(props: SampleFormProps) {
           modal
           responsive={false}
           animation="fadeIn"
-          onClickOutside={() => setShowingErrorModal(false)}
-          onEsc={() => setShowingErrorModal(false)}>
+          onClickOutside={() => setShowingErrorModal(null)}
+          onEsc={() => setShowingErrorModal(null)}>
           <Box pad="large">
             <Heading level={3}>Something went wrong</Heading>
             <Paragraph>{`Error: ${showingErrorModal.message}`}</Paragraph>

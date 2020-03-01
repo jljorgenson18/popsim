@@ -1,22 +1,24 @@
 import React from 'react';
 import { Layer, Box, Heading, Text, Button } from 'grommet';
 
-import { SampleDoc, deleteSample } from 'src/db/sample';
+import { deleteSamples, getSamplesFromIds } from 'src/db/sample';
 
 interface DeleteSamplePromptProps {
-  sample: SampleDoc;
+  sampleIds: string[];
   onClear: () => void;
 }
 
 function DeleteSamplePrompt(props: DeleteSamplePromptProps) {
-  const { sample, onClear } = props;
+  const { sampleIds, onClear } = props;
   return (
     <Layer position="center" modal onClickOutside={onClear} onEsc={onClear} responsive={false}>
       <Box pad="medium" gap="small" width="medium">
         <Heading level={3} margin="none">
           Confirm
         </Heading>
-        <Text>Are you sure you want to delete this sample?</Text>
+        <Text>{`Are you sure you want to delete ${
+          sampleIds.length === 1 ? 'this sample' : 'these samples'
+        }?`}</Text>
         <Box
           as="footer"
           gap="small"
@@ -27,17 +29,18 @@ function DeleteSamplePrompt(props: DeleteSamplePromptProps) {
           <Button
             label={
               <Text color="white">
-                <strong>Yep!</strong>
+                <strong>Yes</strong>
               </Text>
             }
             onClick={async () => {
-              await deleteSample(sample);
+              const samples = await getSamplesFromIds(sampleIds);
+              await deleteSamples(samples);
               onClear();
             }}
             primary
             color="status-critical"
           />
-          <Button label="Nah I'm good" color="dark-3" onClick={onClear} />
+          <Button label="No" color="dark-3" onClick={onClear} />
         </Box>
       </Box>
     </Layer>

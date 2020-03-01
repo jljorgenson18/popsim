@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Heading, Box, Text, Menu, DataTable, Layer, Button } from 'grommet';
+import React, { useState, useMemo } from 'react';
+import { Heading, Box, Text, DataTable, Button, CheckBox } from 'grommet';
 import { useHistory } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 
-import { SampleDoc, cloneSample } from 'src/db/sample';
+import { SampleDoc, getSample } from 'src/db/sample';
 import Page from 'src/components/common/Page';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
 import { downloadSample } from 'src/utils';
@@ -16,31 +16,87 @@ interface SampleListProps {
 function SampleList(props: SampleListProps): JSX.Element {
   const { fetching, allSamples } = props;
   const history = useHistory();
-  const [deletingSample, setDeletingSample] = useState<SampleDoc | null>(null);
-
-  function handleShowVisualization(sample: SampleDoc) {
-    history.push(`/visualize?samples=${sample._id}`);
+  const [deletingSample, setDeletingSample] = useState<boolean>(false);
+  const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
+  const selectedIds = useMemo(() => {
+    return Object.keys(selected).filter(id => selected[id]);
+  }, [selected]);
+  function handleShowVisualization() {
+    history.push(`/visualize?samples=${selectedIds.join(',')}`);
   }
 
-  function handleDeleteSample(sample: SampleDoc) {
-    setDeletingSample(sample);
+  async function handleDeleteSample() {
+    setDeletingSample(true);
   }
 
-  function handleDownloadSample(sample: SampleDoc) {
+  async function handleDownloadSample() {
+    const sample = await getSample(selectedIds[0]);
     downloadSample(sample);
   }
 
   if (!allSamples || allSamples.length === 0) {
     return <Page>{fetching ? <Skeleton count={5} /> : <Heading>No samples yet!</Heading>}</Page>;
   }
+
+  const allSelected = Boolean(allSamples && selectedIds.length === allSamples.length);
+
+  function handleHeaderSelectedChange() {
+    setSelected(
+      allSamples.reduce((mapped, sample) => {
+        mapped[sample._id] = !allSelected;
+        return mapped;
+      }, {} as typeof selected)
+    );
+  }
   return (
     <Page>
       <Heading level={2}>Sample List</Heading>
+      <Box pad="medium" gap="medium" direction="row">
+        <Button
+          primary
+          label="Show Visualization"
+          disabled={selectedIds.length !== 1}
+          onClick={handleShowVisualization}
+        />
+        <Button
+          label="Download"
+          disabled={selectedIds.length !== 1}
+          onClick={handleDownloadSample}
+        />
+        <Button
+          label="Delete"
+          color="status-critical"
+          onClick={handleDeleteSample}
+          disabled={selectedIds.length === 0}
+        />
+      </Box>
       <DataTable
-        border
         primaryKey="_id"
         sortable
+        pad={{ horizontal: 'medium', vertical: 'small' }}
+        background={{
+          header: 'dark-3',
+          body: ['light-1', 'light-3']
+        }}
+        border={{ body: 'bottom' }}
         columns={[
+          {
+            property: 'selected',
+            sortable: false,
+            header: <CheckBox checked={allSelected} onChange={handleHeaderSelectedChange} />,
+            render(sample: SampleDoc) {
+              return (
+                <CheckBox
+                  checked={!!selected[sample._id]}
+                  onChange={event => {
+                    setSelected({
+                      ...selected,
+                      [sample._id]: event.target.checked
+                    });
+                  }}></CheckBox>
+              );
+            }
+          },
           {
             property: 'name',
             search: true,
@@ -56,28 +112,11 @@ function SampleList(props: SampleListProps): JSX.Element {
             render(sample: SampleDoc) {
               return <Text>{new Date(sample.createdAt).toLocaleString()}</Text>;
             }
-          },
-          {
-            property: 'actions',
-            header: <Text>Actions</Text>,
-            render(sample: SampleDoc) {
-              return (
-                <Menu
-                  label="Actions"
-                  items={[
-                    { label: 'Show Visualization', onClick: () => handleShowVisualization(sample) },
-                    { label: 'Delete', onClick: () => handleDeleteSample(sample) },
-                    { label: 'Download', onClick: () => handleDownloadSample(sample) }
-                  ]}
-                />
-              );
-            },
-            sortable: false
           }
         ]}
         data={allSamples}></DataTable>
       {deletingSample ? (
-        <DeleteSamplePrompt sample={deletingSample} onClear={() => setDeletingSample(null)} />
+        <DeleteSamplePrompt sampleIds={selectedIds} onClear={() => setDeletingSample(null)} />
       ) : null}
     </Page>
   );
