@@ -42,14 +42,9 @@ export interface Data {
   variance?: SpeciesData[];
   runs?: SpeciesData[][];
   runMoments?: Moments[][];
-  /** DEPRECATED */
-  mass?: DataPoint[];
-  length?: DataPoint[];
-  number?: DataPoint[];
   species?: SpeciesData[];
   histograms?: Histogram[];
   moments?: Moments[];
-  singleMoments?: Moments[][];
   reactions?: ReactionCount[];
   [label: string]: any;
 }
@@ -102,8 +97,11 @@ function addReactions(reactions: ReactionSeries, inputReactions: ReactionCount, 
   } else {
     const keys = Object.keys(inputReactions);
     keys.forEach(key => {
-      reactions[bin][key] += inputReactions[key];
+      if (key !== 't' && key !== 'dt') {
+        reactions[bin][key] += inputReactions[key];
+      }
     });
+    console.log('addReactoins t: ', reactions[bin].t);
   }
   return reactions;
 }
@@ -114,16 +112,14 @@ function normalizeReactions(inReactions: ReactionSeries, runs: number): Reaction
   keys.forEach(key => {
     const idx = parseInt(key, 10);
     const dt = reactions[idx].dt;
-    console.log('the dt: ', dt);
     const rxns = Object.keys(reactions[idx]);
     rxns.forEach(rxn => {
       //reactions[idx].dt = dt;
+      console.log('Normalize t: ', reactions[idx].t);
       if (rxn !== 'dt' && rxn !== 't') {
         reactions[idx][rxn] = reactions[idx][rxn] / (dt * runs);
       }
     });
-    console.log('t (norm): ', reactions[idx].t);
-    console.log('dt (norm: ', reactions[idx].dt);
   });
   return reactions;
 }
@@ -135,6 +131,7 @@ function datifyReactions(reactions: ReactionSeries): ReactionCount[] {
     const idx = parseInt(key, 10);
     const rcount: ReactionCount = {};
     const rxns = Object.keys(reactions[idx]);
+    console.log('Datify reactions: ', reactions[idx].t);
     rxns.forEach(rxn => {
       if (rxn !== 't' && rxn !== 'dt') {
         rcount[rxn] = reactions[idx][rxn];
@@ -142,11 +139,17 @@ function datifyReactions(reactions: ReactionSeries): ReactionCount[] {
     });
     data[idx] = rcount;
     data[idx].t = reactions[idx].t;
-    console.log('t (datify): ', data[idx].t);
     data[idx].dt = reactions[idx].dt;
-    console.log('dt (datify): ', data[idx].dt);
   });
   return data;
+}
+
+function returnZerosObject(keys: string[]): { [keys: string]: number } {
+  let obj = {};
+  keys.forEach(key => {
+    obj = { ...obj, key: 0 };
+  });
+  return obj;
 }
 
 function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): Solution {
@@ -160,21 +163,36 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
   let t = 0;
   let idx = 0;
 
+  const keys = Object.keys(newReactions[1]);
+
   for (let i = 0; i < bins; i++) {
     fillBin(data, newData[idx], i);
-    data[i].t = t;
+    data[i].t = dt * i;
+
+    if (!reactions[i + 1]) {
+      reactions[i + 1] = deepClone(newReactions[idx + 1]);
+      reactions[i + 1].t = dt * i;
+      reactions[i + 1].dt = dt;
+    } else {
+      keys.forEach(key => {
+        if (key !== 't' && key !== 'dt') {
+          reactions[i + 1][key] += newReactions[idx + 1][key];
+        }
+      });
+    }
     // go to next state
     idx = idx + 1;
-    addReactions(reactions, newReactions[idx], i);
-    reactions[i].t = t;
-    reactions[i].dt = dt;
     // check if next state is still in the same bin
     while (newData[idx].t < t + dt) {
+      console.log('reac: ', reactions[i + 1]);
+      console.log('newReac: ', newReactions[idx + 1]);
+      keys.forEach(key => {
+        if (key !== 't' && key !== 'dt') {
+          reactions[i + 1][key] += newReactions[idx + 1][key];
+        }
+      });
       // step through until current bin is exited
       idx = idx + 1;
-      if (newData[idx].t < t + 2 * dt) {
-        addReactions(reactions, newReactions[idx], i);
-      }
     }
     // check if next state is more than one bin later
     if (newData[idx].t > t + 2 * dt) {
@@ -462,9 +480,6 @@ export function simulate(payload: SamplePayload): Data {
   // Average data
   data.series = averageData(sol.data, runs);
   data.variance = splitSpecies(getVariance(sol.data, runs));
-  data.mass = massSeries(data.series);
-  data.number = numberSeries(data.series);
-  data.length = lengthSeries(data.series);
   data.species = splitSpecies(data.series);
   data.histograms = histSeries(data.series);
   data.moments = calculateMomentDevs(averageMoments(data.moments, runs));
