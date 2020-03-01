@@ -18,6 +18,7 @@ function Species(props: VizProps) {
     data.species
   ]);
   const [variance, setVariance] = useState(false);
+
   const [speciesOptions, setSpeciesOptions] = useState<SpeciesOptions>({});
   useEffect(() => {
     const newSpeciesOptions = speciesKeys.reduce<SpeciesOptions>((mapped, key) => {
