@@ -11,7 +11,7 @@ import Runs from './Runs';
 import Page from 'src/components/common/Page';
 import RawSampleData from './RawSampleData';
 import { useLocation } from 'react-router-dom';
-import Reactions from './reactions';
+import Reactions from './ReactionsComponent';
 
 interface VisualizationProps {
   allSamples?: SampleDoc[];

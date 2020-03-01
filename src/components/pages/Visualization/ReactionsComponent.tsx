@@ -18,10 +18,9 @@ function Reactions(props: VizProps) {
     () => Object.keys(data.reactions[0]).filter(key => key !== 't' && key !== 'dt'),
     [data.reactions]
   );
-  const [variance, setVariance] = useState(false);
-  const [ReactionsOptions, setReactionsOptions] = useState<ReactionsOptions>({});
+  const [reactionsOptions, setReactionsOptions] = useState<ReactionsOptions>({});
   useEffect(() => {
-    const newReactionsOptions = reactionKeys.reduce<typeof ReactionsOptions>((mapped, key) => {
+    const newReactionsOptions = reactionKeys.reduce<ReactionsOptions>((mapped, key) => {
       mapped[key] = false;
       return mapped;
     }, {});
@@ -29,25 +28,23 @@ function Reactions(props: VizProps) {
   }, [reactionKeys]);
 
   const dataKeys = useMemo(
-    () => (ReactionsOptions ? reactionKeys.filter(key => ReactionsOptions[key]) : []),
-    [reactionKeys, ReactionsOptions]
+    () => (reactionsOptions ? reactionKeys.filter(key => reactionsOptions[key]) : []),
+    [reactionKeys, reactionsOptions]
   );
-
   return (
     <TimeSeriesChart
       dataKeys={dataKeys}
       vizName="Reactions"
       sampleName={name}
-      data={variance ? (data.variance as any) : (data.reactions as any)}
+      data={data.reactions as any}
       controlElement={
-        <>
+        <Box direction="row" gap="large" align="start">
           <ControlField
-            flex={{ grow: 1 }}
             label="Select Reactions"
             input={
-              <Box>
+              <Box overflow="auto" height={{ min: '0px', max: '160px' }}>
                 {reactionKeys.map(key => {
-                  const display = !!ReactionsOptions[key];
+                  const display = !!reactionsOptions[key];
                   return (
                     <CheckBox
                       key={key}
@@ -55,7 +52,7 @@ function Reactions(props: VizProps) {
                       label={key}
                       onChange={event => {
                         setReactionsOptions({
-                          ...ReactionsOptions,
+                          ...reactionsOptions,
                           [key]: event.target.checked
                         });
                       }}
@@ -65,14 +62,7 @@ function Reactions(props: VizProps) {
               </Box>
             }
           />
-          <CheckBox
-            checked={variance}
-            label="Variance"
-            onChange={(event: any) => {
-              setVariance(event.target.checked);
-            }}
-          />
-        </>
+        </Box>
       }
     />
   );

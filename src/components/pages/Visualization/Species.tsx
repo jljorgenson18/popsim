@@ -20,13 +20,12 @@ function Species(props: VizProps) {
   const [variance, setVariance] = useState(false);
   const [speciesOptions, setSpeciesOptions] = useState<SpeciesOptions>({});
   useEffect(() => {
-    const newSpeciesOptions = speciesKeys.reduce<typeof speciesOptions>((mapped, key) => {
+    const newSpeciesOptions = speciesKeys.reduce<SpeciesOptions>((mapped, key) => {
       mapped[key] = false;
       return mapped;
     }, {});
     setSpeciesOptions(newSpeciesOptions);
   }, [speciesKeys]);
-
   const dataKeys = useMemo(
     () => (speciesOptions ? speciesKeys.filter(key => speciesOptions[key]) : []),
     [speciesKeys, speciesOptions]
