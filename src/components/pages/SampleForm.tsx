@@ -77,6 +77,7 @@ function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
       name={name}
       type="number"
       required={required}
+      step="any"
       help={help}
       error={(formik.touched[name] || submitted) && formik.errors[name]}
       value={formik.values[name] || ''}
@@ -384,7 +385,7 @@ function SampleForm(props: SampleFormProps) {
   return (
     <Page data-testid="sampleForm">
       <Heading level={2}>Create New Sample</Heading>
-      <Form onSubmit={formik.handleSubmit} style={{ maxWidth: 900, width: '100%' }}>
+      <Form onSubmit={formik.handleSubmit} style={{ maxWidth: 900, width: '100%' }} noValidate>
         <Grid rows="auto" columns={['1/2', '1/2']} gap="small" fill>
           <FormFieldLabel
             label="Name"

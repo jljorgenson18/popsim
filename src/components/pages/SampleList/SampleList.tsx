@@ -37,6 +37,7 @@ function SampleList(props: SampleListProps): JSX.Element {
     <Page>
       <Heading level={2}>Sample List</Heading>
       <DataTable
+        border
         primaryKey="_id"
         sortable
         columns={[
