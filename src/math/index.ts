@@ -14,13 +14,17 @@ export const getSampleData = async (payload: SamplePayload): Promise<SampleData>
   };
   worker.postMessage(messageData);
 
-  return await new Promise(resolve => {
+  return await new Promise((resolve, reject) => {
     const handleMessage = (evt: MessageEvent) => {
       if (!evt.data) return;
-      const response: PostMessageData<SampleData> = evt.data;
+      const response: PostMessageData<SampleData | string> = evt.data;
       if (response.messageId === messageId) {
         worker.removeEventListener('message', handleMessage);
-        resolve(response.body as SampleData);
+        if (response.state === 'error') {
+          reject(new Error(response.body as string));
+        } else {
+          resolve(response.body as SampleData);
+        }
       }
     };
     worker.addEventListener('message', handleMessage);

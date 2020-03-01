@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Box, Button, Form, FormField, Heading, Select, Text, Grid, Layer } from 'grommet';
+import {
+  Box,
+  Button,
+  Form,
+  FormField,
+  Heading,
+  Select,
+  Text,
+  Grid,
+  Layer,
+  Paragraph
+} from 'grommet';
 import { useFormik } from 'formik';
 import {
   SamplePayload,
@@ -355,6 +366,7 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
 
 function SampleForm(props: SampleFormProps) {
   const [showingLoadingModal, setShowingLoadingModal] = useState<LoadingProps | null>(null);
+  const [showingErrorModal, setShowingErrorModal] = useState<Error | null>(null);
   const history = useHistory();
   async function handleNewSampleSubmit(values: SamplePayload) {
     try {
@@ -365,8 +377,8 @@ function SampleForm(props: SampleFormProps) {
       setShowingLoadingModal(null);
       history.push('/sample-list');
     } catch (err) {
-      // TODO: Add an error message
-      console.error(err);
+      setShowingLoadingModal(null);
+      setShowingErrorModal(err);
     }
   }
   const initialValues: Partial<SamplePayload> = {
@@ -512,6 +524,20 @@ function SampleForm(props: SampleFormProps) {
       {showingLoadingModal ? (
         <Layer position="center" modal responsive={false} animation="fadeIn">
           <Loading message={showingLoadingModal.message} progress={showingLoadingModal.progress} />
+        </Layer>
+      ) : null}
+      {showingErrorModal ? (
+        <Layer
+          position="center"
+          modal
+          responsive={false}
+          animation="fadeIn"
+          onClickOutside={() => setShowingErrorModal(false)}
+          onEsc={() => setShowingErrorModal(false)}>
+          <Box pad="large">
+            <Heading level={3}>Something went wrong</Heading>
+            <Paragraph>{`Error: ${showingErrorModal.message}`}</Paragraph>
+          </Box>
         </Layer>
       ) : null}
     </Page>
