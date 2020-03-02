@@ -102,7 +102,6 @@ function addReactions(reactions: ReactionSeries, inputReactions: ReactionCount, 
         reactions[bin][key] += inputReactions[key];
       }
     });
-    console.log('addReactoins t: ', reactions[bin].t);
   }
   return reactions;
 }
@@ -116,7 +115,6 @@ function normalizeReactions(inReactions: ReactionSeries, runs: number): Reaction
     const rxns = Object.keys(reactions[idx]);
     rxns.forEach(rxn => {
       //reactions[idx].dt = dt;
-      console.log('Normalize t: ', reactions[idx].t);
       if (rxn !== 'dt' && rxn !== 't') {
         reactions[idx][rxn] = reactions[idx][rxn] / (dt * runs);
       }
@@ -132,7 +130,6 @@ function datifyReactions(reactions: ReactionSeries): ReactionCount[] {
     const idx = parseInt(key, 10);
     const rcount: ReactionCount = {};
     const rxns = Object.keys(reactions[idx]);
-    console.log('Datify reactions: ', reactions[idx].t);
     rxns.forEach(rxn => {
       if (rxn !== 't' && rxn !== 'dt') {
         rcount[rxn] = reactions[idx][rxn];
@@ -185,8 +182,6 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
     idx = idx + 1;
     // check if next state is still in the same bin
     while (newData[idx].t < t + dt) {
-      console.log('reac: ', reactions[i + 1]);
-      console.log('newReac: ', newReactions[idx + 1]);
       keys.forEach(key => {
         if (key !== 't' && key !== 'dt') {
           reactions[i][key] += newReactions[idx + 1][key];
@@ -264,7 +259,6 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
       addReactions(reactions, newReactions[idx + 1], i);
       reactions[i].t = t;
       reactions[i].dt = tLogDiff(i + 1, x, dt);
-      console.log(tLogDiff(i + 1, x, dt));
     }
   }
   return { data: data, reactions: reactions };
