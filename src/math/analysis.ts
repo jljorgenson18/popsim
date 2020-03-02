@@ -139,12 +139,12 @@ export function histSeries(series: TimeSeries, ignore?: number[]): Histogram[] {
   return histSer;
 }
 
-function polymerMass(state: ModelState, order = 1): number {
+export function polymerMass(state: ModelState, order = 1, min = 1): number {
   const keys = Object.keys(state.s);
   let mass = 0;
   keys.forEach(key => {
     const id = parseInt(key, 10);
-    if (id > 1) {
+    if (id > min) {
       mass = mass + Math.pow(id * state.s[id], order);
     }
   });

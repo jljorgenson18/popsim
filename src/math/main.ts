@@ -15,6 +15,7 @@ import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
 import { buildModel as smoluchowskiCrowdersBuildModel } from './models/smoluchowskicrowders';
+import { buildModel as smoluchowskiSecondaryBuildModel } from './models/smolsecondarynucleation';
 import { buildModel as bdCrowdersBuildModel } from './models/bdcrowders';
 import {
   DataPoint,
@@ -435,6 +436,9 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
       break;
     case 'BD-crowders':
       getProbabilities = bdCrowdersBuildModel(payload);
+      break;
+    case 'Smoluchowski-secondary-nucleation':
+      getProbabilities = smoluchowskiSecondaryBuildModel(payload);
       break;
     default:
       throw new Error('Invalid model type!');
