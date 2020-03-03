@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Heading, Box, Text, DataTable, Button, CheckBox } from 'grommet';
 import { useHistory } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
@@ -24,6 +24,9 @@ function SampleList(props: SampleListProps): JSX.Element {
   function handleShowVisualization() {
     history.push(`/visualize?samples=${selectedIds.join(',')}`);
   }
+  useEffect(() => {
+    setSelected({});
+  }, [allSamples]);
 
   async function handleDeleteSample() {
     setDeletingSample(true);
@@ -78,7 +81,6 @@ function SampleList(props: SampleListProps): JSX.Element {
           header: 'dark-3',
           body: ['light-1', 'light-3']
         }}
-        border={{ body: 'bottom' }}
         columns={[
           {
             property: 'selected',
