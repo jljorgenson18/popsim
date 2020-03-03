@@ -364,9 +364,9 @@ function getVariance(data: TimeSeries, runs: number): TimeSeries {
 function updateState(state: ModelState, reaction: ReactionElement[]): ModelState {
   let newState = deepClone(state);
   for (const rxn of reaction) {
-    newState[rxn.id] += rxn.delta;
-    if (newState[rxn.id]===0 && rxn.id > 1){
-      newState = removeSpecies(newState, rxn.id);)
+    newState.s[rxn.id] += rxn.delta;
+    if (newState.s[rxn.id] === 0 && rxn.id > 1) {
+      newState = removeSpecies(newState, rxn.id);
     }
   }
   return newState;
@@ -379,22 +379,23 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   const possibleStates = getProbabilities(iState);
   const summedProbabilities: number[] = [0];
   let PP = 0; // Probability amplitude
-  possibleStates.forEach((state, index) => {
-    summedProbabilities[index] = PP + state.P;
-    PP += state.P;
+  possibleStates.forEach((rxn, index) => {
+    summedProbabilities[index] = PP + rxn.P;
+    PP += rxn.P;
   });
   const R = u1 * PP; // Determines which state is selected
   const dt = (1 / PP) * Math.log(1 / u2); // Generate the time step
   //console.log(initialState);
-  const newState = possibleStates.find((state, index) => {
+  const chosenReaction = possibleStates.find((rxn, index) => {
     return R < summedProbabilities[index];
   });
 
-  if (!newState) {
+  if (!chosenReaction) {
     // if it makes it here its broken dawg
     throw new Error('Shits broken homie. Somehow a fraction of PP isnt less than PP');
   }
-  const solStep: SolutionStep = { state: advanceTime(newState.s, dt), reactions: newState.R };
+  const newState = updateState(iState, chosenReaction.s);
+  const solStep: SolutionStep = { state: advanceTime(newState, dt), reactions: chosenReaction.R };
   return solStep;
 }
 
