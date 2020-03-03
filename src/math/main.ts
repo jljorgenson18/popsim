@@ -364,7 +364,11 @@ function getVariance(data: TimeSeries, runs: number): TimeSeries {
 function updateState(state: ModelState, reaction: ReactionElement[]): ModelState {
   let newState = deepClone(state);
   for (const rxn of reaction) {
-    newState.s[rxn.id] += rxn.delta;
+    if (newState.s[rxn.id]) {
+      newState.s[rxn.id] += rxn.delta;
+    } else {
+      newState.s[rxn.id] = rxn.delta;
+    }
     if (newState.s[rxn.id] === 0 && rxn.id > 1) {
       newState = removeSpecies(newState, rxn.id);
     }

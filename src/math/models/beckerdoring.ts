@@ -16,7 +16,7 @@ function reactionName(name: string): ReactionCount {
   return reactions;
 }
 
-function nucleate(state: ModelState, nc: number): Step {
+function nucleate(nc: number): Step {
   const reaction: ReactionElement[] = [
     { id: 1, delta: -1 * nc },
     { id: nc, delta: 1 }
@@ -25,7 +25,7 @@ function nucleate(state: ModelState, nc: number): Step {
   return step;
 }
 
-function addition(state: ModelState, id: number): Step {
+function addition(id: number): Step {
   const reaction: ReactionElement[] = [
     { id: 1, delta: -1 },
     { id: id, delta: -1 },
@@ -35,7 +35,7 @@ function addition(state: ModelState, id: number): Step {
   return step;
 }
 
-function subtraction(state: ModelState, id: number, nc: number): Step {
+function subtraction(id: number, nc: number): Step {
   // Check if the polymer is bigger than a nucleus
   if (id > nc) {
     const reaction: ReactionElement[] = [
@@ -78,7 +78,7 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }
-      const nuc = nucleate(state, nc);
+      const nuc = nucleate(nc);
       possibleStates.push({ P: P, s: nuc.reaction, R: nuc.reactions });
     }
     Object.keys(state.s).forEach(key => {
@@ -87,11 +87,11 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
       if (speciesIdx !== 1) {
         if (state.s[1] !== 0) {
           const Pa = a * state.s[1] * state.s[speciesIdx];
-          const add = addition(state, speciesIdx);
+          const add = addition(speciesIdx);
           possibleStates.push({ P: Pa, s: add.reaction, R: add.reactions });
         }
         const Pb = b * state.s[speciesIdx];
-        const sub = subtraction(state, speciesIdx, nc);
+        const sub = subtraction(speciesIdx, nc);
         possibleStates.push({ P: Pb, s: sub.reaction, R: sub.reactions });
       }
     });

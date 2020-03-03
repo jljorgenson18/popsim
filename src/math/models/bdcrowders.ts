@@ -1,8 +1,8 @@
 import { BeckerDoringCrowderPayload } from 'src/db/sample';
 import { removeSpecies, deepClone, factorial, calculateBDFrequencies } from 'src/math/common';
-import { ModelState, GetProbabilitiesFunc, ReactionCount, Step } from '../types';
+import { ModelState, GetProbabilitiesFunc, ReactionCount, Step, ReactionElement } from '../types';
 
-function reaction(name: string): ReactionCount {
+function reactionName(name: string): ReactionCount {
   const reactions: ReactionCount = {
     nucleation: 0,
     addition: 0,
@@ -16,62 +16,44 @@ function reaction(name: string): ReactionCount {
   return reactions;
 }
 
-function nucleate(state: ModelState, nc: number): Step {
-  const newState = deepClone(state);
-  newState.s[1] = newState.s[1] - nc;
-  if (!newState.s[nc]) {
-    newState.s[nc] = 1;
-  } else {
-    newState.s[nc] = newState.s[nc] + 1;
-  }
-  const step: Step = { state: newState, reactions: reaction('nucleation') };
+function nucleate(nc: number): Step {
+  const reaction: ReactionElement[] = [
+    { id: 1, delta: -1 * nc },
+    { id: nc, delta: 1 }
+  ];
+  const step: Step = { reaction: reaction, reactions: reactionName('nucleation') };
   return step;
 }
 
-function addition(state: ModelState, id: number): Step {
-  let newState = deepClone(state);
-  newState.s[1] = newState.s[1] - 1;
-  newState.s[id] = newState.s[id] - 1;
-  if (newState.s[id] === 0) {
-    newState = removeSpecies(newState, id);
-  }
-
-  if (newState.s[id + 1] != null) {
-    newState.s[id + 1] = newState.s[id + 1] + 1;
-  } else {
-    newState.s[id + 1] = 1;
-  }
-  const step: Step = { state: newState, reactions: reaction('addition') };
+function addition(id: number): Step {
+  const reaction: ReactionElement[] = [
+    { id: 1, delta: -1 },
+    { id: id, delta: -1 },
+    { id: id + 1, delta: 1 }
+  ];
+  const step: Step = { reaction: reaction, reactions: reactionName('addition') };
   return step;
 }
 
-function subtraction(state: ModelState, id: number, nc: number): Step {
-  let newState = deepClone(state);
+function subtraction(id: number, nc: number): Step {
   // Check if the polymer is bigger than a nucleus
   if (id > nc) {
-    newState.s[1] = newState.s[1] + 1; // Add monomer back
-    if (newState.s[id - 1] != null) {
-      // Gain one (r-1)-mer
-      newState.s[id - 1] = newState.s[id - 1] + 1;
-    } else {
-      newState.s[id - 1] = 1;
-    }
-    newState.s[id] = newState.s[id] - 1; // Lost one r-mer
-    if (newState.s[id] === 0) {
-      // Handle if population hits 0
-      newState = removeSpecies(newState, id);
-    }
-    const step: Step = { state: newState, reactions: reaction('subtraction') };
+    const reaction: ReactionElement[] = [
+      { id: 1, delta: 1 },
+      { id: id - 1, delta: 1 },
+      { id: id, delta: -1 }
+    ];
+    const step: Step = { reaction: reaction, reactions: reactionName('subtraction') };
+    return step;
+  } else if (id === nc) {
+    const reaction: ReactionElement[] = [
+      { id: 1, delta: nc },
+      { id: id, delta: -1 }
+    ];
+    const step: Step = { reaction: reaction, reactions: reactionName('subtraction') };
     return step;
   } else {
-    // If polymer is a nucleus, it dissolves
-    newState.s[1] = newState.s[1] + nc;
-    newState.s[nc] = newState.s[nc] - 1;
-    if (newState.s[nc] === 0) {
-      newState = removeSpecies(newState, nc);
-    }
-    const step: Step = { state: newState, reactions: reaction('subtraction') };
-    return step;
+    throw new Error('ID should never be less than nc in subtraction');
   }
 }
 
@@ -113,15 +95,15 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
   const goanc = Math.pow(goa, params.nc - 1);
   console.log(goa, goanc);
   return function(state: ModelState) {
-    const possibleStates: { P: number; s: ModelState; R: ReactionCount }[] = [];
+    const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     // nucleate
     if (state.s[1] >= nc) {
       let P = (goanc * kn) / factorial(nc);
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }
-      const nuc = nucleate(state, nc);
-      possibleStates.push({ P: P, s: nuc.state, R: nuc.reactions });
+      const nuc = nucleate(nc);
+      possibleStates.push({ P: P, s: nuc.reaction, R: nuc.reactions });
     }
     Object.keys(state.s).forEach(key => {
       const speciesIdx = parseInt(key, 10);
@@ -129,12 +111,12 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
       if (speciesIdx !== 1) {
         if (state.s[1] !== 0) {
           const Pa = goa * a * state.s[1] * state.s[speciesIdx];
-          const add = addition(state, speciesIdx);
-          possibleStates.push({ P: Pa, s: add.state, R: add.reactions });
+          const add = addition(speciesIdx);
+          possibleStates.push({ P: Pa, s: add.reaction, R: add.reactions });
         }
         const Pb = b * state.s[speciesIdx];
-        const sub = subtraction(state, speciesIdx, nc);
-        possibleStates.push({ P: Pb, s: sub.state, R: sub.reactions });
+        const sub = subtraction(speciesIdx, nc);
+        possibleStates.push({ P: Pb, s: sub.reaction, R: sub.reactions });
       }
     });
     return possibleStates;
