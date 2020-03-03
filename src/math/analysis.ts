@@ -215,7 +215,6 @@ export function averageMoments(inMoments: Moments[], runs: number): Moments[] {
   idxs.forEach(idx => {
     const id = parseInt(idx, 10);
     const keys = Object.keys(moments[id]);
-    console.log(keys);
     keys.forEach(key => {
       if (key !== 't') {
         moments[id][key] = moments[id][key] / runs;
