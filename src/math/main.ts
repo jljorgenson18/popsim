@@ -9,7 +9,8 @@ import {
   ReactionSeries,
   Solution,
   SolutionStep,
-  Step
+  Step,
+  ReactionElement
 } from './types';
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
@@ -32,7 +33,7 @@ import {
   calculateMomentDevs
 } from './analysis';
 
-import { deepClone } from './common';
+import { deepClone, removeSpecies } from './common';
 
 export interface TimeSeries {
   [state: number]: ModelState;
@@ -358,6 +359,17 @@ function getVariance(data: TimeSeries, runs: number): TimeSeries {
     });
   });
   return avgData;
+}
+
+function updateState(state: ModelState, reaction: ReactionElement[]): ModelState {
+  let newState = deepClone(state);
+  for (const rxn of reaction) {
+    newState[rxn.id] += rxn.delta;
+    if (newState[rxn.id]===0 && rxn.id > 1){
+      newState = removeSpecies(newState, rxn.id);)
+    }
+  }
+  return newState;
 }
 
 function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFunc): SolutionStep {
