@@ -1,5 +1,7 @@
-import { ModelState } from './types';
+import { ModelState, Moments } from './types';
+import { SpeciesData } from './analysis';
 import { BDNucleationPayload, SmoluchowskiPayload, BeckerDoringPayload } from 'src/db/sample';
+import { TimeSeries } from './main';
 
 export const deepClone = (s: any): any => {
   return JSON.parse(JSON.stringify(s));
@@ -111,4 +113,30 @@ export function calculateBDNFrequencies(payload: BDNucleationPayload): BDNucleat
   outload.ka = (payload.Co / payload.N) * payload.ka;
   outload.na = (payload.Co / payload.N) * payload.na;
   return outload;
+}
+
+export function reduceIndividualRun(inputSeries: SpeciesData[], bins: number): SpeciesData[] {
+  const len = inputSeries.length;
+  const outSeries: SpeciesData[] = [];
+  if (bins < len) {
+    const delta = Math.floor((len - 1) / bins);
+    for (let i = 1; i < len; i = i + delta) {
+      outSeries.push(inputSeries[i]);
+    }
+    return outSeries;
+  }
+  return inputSeries;
+}
+
+export function reduceIndividualMoments(inputSeries: Moments[], bins: number): Moments[] {
+  const len = inputSeries.length;
+  const outSeries: Moments[] = [];
+  if (bins < len) {
+    const delta = Math.floor((len - 1) / bins);
+    for (let i = 1; i < len; i = i + delta) {
+      outSeries.push(inputSeries[i]);
+    }
+    return outSeries;
+  }
+  return inputSeries;
 }

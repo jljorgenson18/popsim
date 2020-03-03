@@ -33,7 +33,7 @@ import {
   calculateMomentDevs
 } from './analysis';
 
-import { deepClone, removeSpecies } from './common';
+import { deepClone, removeSpecies, reduceIndividualRun, reduceIndividualMoments } from './common';
 
 export interface TimeSeries {
   [state: number]: ModelState;
@@ -228,13 +228,12 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
   const t_end = payload.tstop;
   let dt = 0;
   const length = Object.keys(newReactions).length;
-  const otherlength = Object.keys(newData).length;
   if (!data[1]) {
-    dt = newData[1].t / 10.0;
+    dt = newData[1].t / 100.0;
   } else {
     dt = data[1].t;
   }
-  const x = Math.pow(t_end / dt, 1 / bins);
+  const x = Math.pow(t_end / dt, 1 / (bins - 1));
   let idx = 0;
   fillBin(data, newData[idx], 0);
   data[0].t = 0;
@@ -265,11 +264,17 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
   return { data: data, reactions: reactions };
 }
 
-function logBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
+function logBinSeries(nData: TimeSeries, payload: SamplePayload, d_t?: number): TimeSeries {
+  const newData = deepClone(nData);
   const bins = payload.bins;
   const t_end = payload.tstop;
-  const dt = newData[1].t;
-  const x = Math.pow(t_end / dt, 1 / bins);
+  let dt: number;
+  if (!d_t) {
+    dt = newData[1].t / 10.0;
+  } else {
+    dt = d_t;
+  }
+  const x = Math.pow(t_end / dt, 1 / (bins - 1));
   const data: TimeSeries = {};
   let t = 0;
   let idx = 0;
@@ -319,9 +324,9 @@ function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSerie
   return data;
 }
 
-function binSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
+function binSeries(newData: TimeSeries, payload: SamplePayload, dt?: number): TimeSeries {
   if (payload.bin_scale === 'linear') return linearBinSeries(newData, payload);
-  if (payload.bin_scale === 'log') return logBinSeries(newData, payload);
+  if (payload.bin_scale === 'log') return logBinSeries(newData, payload, dt);
 }
 
 function binData(data: Solution, newData: Solution, payload: SamplePayload): Solution {
@@ -482,9 +487,8 @@ export function simulate(payload: SamplePayload): Data {
     const tSeries = run.data;
     // Store individual runs if desired
     if (i < payload.ind_runs) {
-      data.runs[i] = splitSpecies(tSeries);
-      data.runMoments[i] = [];
-      data.runMoments[i] = addToMoments(data.runMoments[i], tSeries);
+      data.runs[i] = reduceIndividualRun(splitSpecies(tSeries), payload.bins);
+      data.runMoments[i] = reduceIndividualMoments(addToMoments([], tSeries), payload.bins);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
