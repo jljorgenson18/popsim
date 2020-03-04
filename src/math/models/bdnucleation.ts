@@ -140,6 +140,8 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   let b: number;
   if (params.b) {
     b = params.b;
+  } else if (params.b === 0) {
+    b = 0.0;
   } else {
     b = kb;
   }
@@ -150,6 +152,8 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   let a: number;
   if (params.a) {
     a = params.a * (params.Co / params.N);
+  } else if (params.a === 0) {
+    a = 0.0;
   } else {
     a = ka;
   }

@@ -121,12 +121,16 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
   let a: number;
   if (params.a) {
     a = params.a * (params.Co / params.N);
+  } else if (params.a === 0) {
+    a = 0.0;
   } else {
     a = ka;
   }
   let b: number;
   if (params.b) {
     b = params.b;
+  } else if (params.b === 0) {
+    b = 0.0;
   } else {
     b = kb;
   }

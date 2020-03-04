@@ -133,10 +133,14 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
   let a = params.ka;
   if (params.a) {
     a = params.a * (params.Co / params.N);
+  } else if (params.a === 0) {
+    a = 0.0;
   }
   let b = params.kb;
   if (params.b) {
     b = params.b;
+  } else if (params.b === 0) {
+    b = 0.0;
   }
   let nc = 2;
   if (params.nc) {
