@@ -106,6 +106,12 @@ export interface BDNucleationPayload extends BaseSample {
   nc: number; // Critical nucleus size. Defines nucleation vs growth phase
   a?: number; // Growth-phase addition. Not sure if defaults to na or ka
   b?: number; // Growth-phase subtraction. ditto nb or kb
+  r1?: number;
+  rc?: number;
+  rsc?: number;
+  phi?: number;
+  alpha?: number;
+  gamma?: number;
 }
 
 export type SamplePayload =

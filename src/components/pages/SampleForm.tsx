@@ -432,6 +432,30 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
         required
         help="Defines nucleation vs growth phase"
       />
+      <InitialConditionField
+        formik={formik}
+        label="Crowder volume fraction (phi)"
+        name="phi"
+        //help="Defaults to phi = 0"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Monomer radius (r1)"
+        name="r1"
+        //help="Defaults to r1 = 1"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Crowder radius (rc)"
+        name="rc"
+        //help="Defaults to rc = 1"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Spherocylinder radius (rsc)"
+        name="rsc"
+        //help="Defaults to rsc = 1"
+      />
       <InitialConditionField formik={formik} label="Growth-phase addition (a)" name="a" />
       <InitialConditionField formik={formik} label="Growth-phase addition (b)" name="b" />
     </>

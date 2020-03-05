@@ -157,6 +157,27 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   } else {
     a = ka;
   }
+  if (params.phi) {
+    const R = params.r1 / params.rc;
+    // const L = params.r1 / params.rsc;
+    const A1 = R * R * R + 3 * R * R + 3 * R;
+    const A2 = 3 * R * R * R + 4.5 * R * R;
+    const A3 = 3 * R * R * R;
+    const z = params.phi / (1 - params.phi);
+    const lng = Math.log(1 - params.phi) + A1 * z + A2 * z * z + A3 * z * z * z;
+    const gamma = Math.exp(lng);
+    const lna =
+      (2 / 3) *
+      Math.pow(params.r1 / params.rsc, 3) *
+      (1.5 * (R * R + R + 1) * z + 4.5 * (R * R + R) * z * z + 4.5 * R * R * z * z * z);
+    const alpha = Math.exp(lna);
+    params.alpha = alpha;
+    params.gamma = gamma;
+  } else {
+    params.gamma = 1.0;
+    params.alpha = 1.0;
+  }
+  const goa = params.gamma / params.alpha;
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
@@ -166,12 +187,12 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
       const speciesIdx = parseInt(key, 10);
       if (Number.isNaN(speciesIdx)) return;
       if (speciesIdx === 1 && state.s[1] > 1) {
-        const Pan = 0.5 * na * state.s[1] * (state.s[1] - 1);
+        const Pan = 0.5 * goa * na * state.s[1] * (state.s[1] - 1);
         const add = nAddition(1);
         possibleStates.push({ P: Pan, s: add.reaction, R: add.reactions });
       } else if (speciesIdx > 1 && speciesIdx < nc) {
         if (state.s[1] !== 0) {
-          const Pan = a * state.s[1] * state.s[speciesIdx];
+          const Pan = goa * a * state.s[1] * state.s[speciesIdx];
           const add = nAddition(speciesIdx);
           possibleStates.push({ P: Pan, s: add.reaction, R: add.reactions });
         }
@@ -181,7 +202,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
       } else if (speciesIdx >= nc) {
         // add
         if (state.s[1] !== 0) {
-          const Pag = a * state.s[1] * state.s[speciesIdx];
+          const Pag = goa * a * state.s[1] * state.s[speciesIdx];
           const add = gAddition(speciesIdx);
           possibleStates.push({ P: Pag, s: add.reaction, R: add.reactions });
         }
@@ -203,12 +224,12 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
           if (subKey === key) {
             // adding to self. must be at least 2 polymers of same size
             if (state.s[speciesIdx] > 1) {
-              const Pco = 0.5 * ka * state.s[speciesIdx] * (state.s[speciesIdx] - 1);
+              const Pco = 0.5 * goa * ka * state.s[speciesIdx] * (state.s[speciesIdx] - 1);
               const coag = coagulate(speciesIdx, speciesIdx);
               possibleStates.push({ P: Pco, s: coag.reaction, R: coag.reactions });
             }
           } else {
-            const Pco = ka * state.s[speciesIdx] * state.s[subIdx];
+            const Pco = goa * ka * state.s[speciesIdx] * state.s[subIdx];
             const coag = coagulate(speciesIdx, subIdx);
             possibleStates.push({ P: Pco, s: coag.reaction, R: coag.reactions });
           }

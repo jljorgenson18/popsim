@@ -14,7 +14,7 @@ function Histogram(props: VizProps) {
 
   // Each key contains t and the histogram. User should select which histogram to use
   // based on the t value.
-  const plot_data = data.histograms[selectedBin].h;
+  const plot_data = data.histograms[selectedBin].h.slice(1);
   // LINES should be generated based on one or more selected values from keys
   return (
     <>
