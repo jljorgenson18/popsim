@@ -131,16 +131,12 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
   const ka = params.ka * (params.Co / params.N);
   const kb = params.kb;
   let a = params.ka;
-  if (params.a) {
+  if (params.a != null) {
     a = params.a * (params.Co / params.N);
-  } else if (params.a === 0) {
-    a = 0.0;
   }
   let b = params.kb;
-  if (params.b) {
+  if (params.b != null) {
     b = params.b;
-  } else if (params.b === 0) {
-    b = 0.0;
   }
   let nc = 2;
   if (params.nc) {
@@ -156,7 +152,7 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
   }
   let k2 = 0;
   if (params.k2) {
-    k2 = params.k2;
+    k2 = params.k2 * Math.pow(params.Co, n2);
   }
   if (params.phi) {
     const R = params.r1 / params.rc;
