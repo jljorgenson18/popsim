@@ -427,9 +427,20 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
       />
       <InitialConditionField
         formik={formik}
+        label="Secondary nucleation rate constant (k2)"
+        name="k2"
+      />
+      <InitialConditionField
+        formik={formik}
         label="Critical nucleus size (nc)"
         name="nc"
         required
+        help="Defines nucleation vs growth phase"
+      />
+      <InitialConditionField
+        formik={formik}
+        label="Secondary nucleus size (n2)"
+        name="n2"
         help="Defines nucleation vs growth phase"
       />
       <InitialConditionField

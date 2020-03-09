@@ -4,8 +4,10 @@ import {
   deepClone,
   catchNull,
   catchNeg,
-  calculateBDNFrequencies
+  calculateBDNFrequencies,
+  factorial
 } from 'src/math/common';
+import { polymerMass } from 'src/math/analysis';
 import { ModelState, GetProbabilitiesFunc, ReactionCount, Step, ReactionElement } from '../types';
 
 function reactionName(name: string): ReactionCount {
@@ -14,6 +16,7 @@ function reactionName(name: string): ReactionCount {
     'n-phase subtraction': 0,
     'g-phase addition': 0,
     'g-phase subtraction': 0,
+    'secondary-nucleation': 0,
     coagulation: 0,
     fragmentation: 0
   };
@@ -23,6 +26,16 @@ function reactionName(name: string): ReactionCount {
     throw new Error('reaction not labelled correctly');
   }
   return reactions;
+}
+
+function secondaryNucleation(n2: number): Step {
+  const reaction = [
+    { id: 1, delta: -1 * n2 },
+    { id: n2, delta: 1 }
+  ];
+  // checkConserved(newState, 100);
+  const step: Step = { reaction: reaction, reactions: reactionName('secondary-nucleation') };
+  return step;
 }
 
 function nAddition(id: number): Step {
@@ -149,6 +162,10 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   const nb = params.nb;
   const ka = params.ka * (params.Co / params.N);
   const na = params.na * (params.Co / params.N);
+  let n2 = 0;
+  if (params.n2) n2 = params.n2;
+  let k2 = 0;
+  if (params.k2) k2 = params.k2 * Math.pow(params.Co / params.N, n2);
   let a: number;
   if (params.a) {
     a = params.a * (params.Co / params.N);
@@ -157,6 +174,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
   } else {
     a = ka;
   }
+  let gamma = 1;
   if (params.phi) {
     const R = params.r1 / params.rc;
     // const L = params.r1 / params.rsc;
@@ -165,7 +183,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
     const A3 = 3 * R * R * R;
     const z = params.phi / (1 - params.phi);
     const lng = Math.log(1 - params.phi) + A1 * z + A2 * z * z + A3 * z * z * z;
-    const gamma = Math.exp(lng);
+    gamma = Math.exp(lng);
     const lna =
       (2 / 3) *
       Math.pow(params.r1 / params.rsc, 3) *
@@ -182,6 +200,17 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
     catchNeg(state, 'buildModel');
+    if (state.s[1] >= n2 && n2 > 1) {
+      const M_n2 = polymerMass(state, 1, n2);
+      let P = (Math.pow(gamma, n2) * k2 * M_n2) / factorial(n2);
+      if (P > 0) {
+        for (let j = 0; j < n2; j++) {
+          P = P * (state.s[1] - j);
+        }
+        const nuc2 = secondaryNucleation(n2);
+        possibleStates.push({ P: P, s: nuc2.reaction, R: nuc2.reactions });
+      }
+    }
     const keys = Object.keys(state.s);
     keys.forEach((key, idx) => {
       const speciesIdx = parseInt(key, 10);

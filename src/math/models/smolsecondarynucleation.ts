@@ -130,13 +130,17 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
   // const { ka, kb, a = ka, b = kb, nc = 2, kn = a } = calculateSmoluchowskiFrequencies(params);
   const ka = params.ka * (params.Co / params.N);
   const kb = params.kb;
-  let a = params.ka;
+  let a: number;
   if (params.a != null) {
     a = params.a * (params.Co / params.N);
+  } else {
+    a = ka;
   }
-  let b = params.kb;
+  let b: number;
   if (params.b != null) {
     b = params.b;
+  } else {
+    b = kb;
   }
   let nc = 2;
   if (params.nc) {
@@ -190,7 +194,7 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
       possibleStates.push({ P: P, s: nuc.reaction, R: nuc.reactions });
     }
     if (state.s[1] >= n2) {
-      const M_n2 = polymerMass(state, 1, n2 - nc + 1);
+      const M_n2 = polymerMass(state, 1, n2);
       let P = (Math.pow(gamma, n2) * k2 * M_n2) / factorial(n2);
       if (P > 0) {
         for (let j = 0; j < n2; j++) {
