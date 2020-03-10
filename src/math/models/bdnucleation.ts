@@ -183,7 +183,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
     const A2 = 3 * R * R * R + 4.5 * R * R;
     const A3 = 3 * R * R * R;
     const z = params.phi / (1 - params.phi);
-    const lng = Math.log(1 - params.phi) + A1 * z + A2 * z * z + A3 * z * z * z;
+    const lng = -1.0 * Math.log(1 - params.phi) + A1 * z + A2 * z * z + A3 * z * z * z;
     gamma = Math.exp(lng);
     const lna =
       (2 / 3) *
