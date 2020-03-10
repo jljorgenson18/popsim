@@ -1,6 +1,10 @@
+import { SamplePayload } from 'src/db/sample';
+
 export type GetProbabilitiesFunc = (
   s: ModelState
 ) => { P: number; s: ReactionElement[]; R: ReactionCount }[];
+
+export type InitialStateFunc = (payload: SamplePayload) => ModelState;
 
 export interface Species {
   [species: number]: number; // Species

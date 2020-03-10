@@ -1,5 +1,11 @@
-import { BeckerDoringPayload } from 'src/db/sample';
-import { removeSpecies, deepClone, factorial, calculateBDFrequencies } from 'src/math/common';
+import { BeckerDoringPayload, SamplePayload } from 'src/db/sample';
+import {
+  removeSpecies,
+  deepClone,
+  factorial,
+  calculateBDFrequencies,
+  createInitialState
+} from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc, ReactionCount, Step, ReactionElement } from '../types';
 
 function reactionName(name: string): ReactionCount {
@@ -97,4 +103,10 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
     });
     return possibleStates;
   };
+}
+
+export function initialConditions(payload: BeckerDoringPayload) {
+  const N = payload.N;
+  const t = 0;
+  return createInitialState([{ id: 1, n: N }]);
 }

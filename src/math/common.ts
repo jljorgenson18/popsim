@@ -1,4 +1,4 @@
-import { ModelState, Moments } from './types';
+import { ModelState, Moments, SpeciesPair, Species } from './types';
 import { SpeciesData } from './analysis';
 import { BDNucleationPayload, SmoluchowskiPayload, BeckerDoringPayload } from 'src/db/sample';
 import { TimeSeries } from './main';
@@ -45,6 +45,19 @@ export function stateMoment(state: ModelState, moment = 1): number {
     sum = sum + Math.pow(id, moment) * state.s[id];
   });
   return sum;
+}
+
+function fillSpecies(s: SpeciesPair[]): Species {
+  const spec: Species = {};
+  s.forEach(pair => {
+    spec[pair.id] = pair.n;
+  });
+  return spec;
+}
+
+export function createInitialState(N: SpeciesPair[]): ModelState {
+  const state: ModelState = { t: 0, s: fillSpecies(N) };
+  return state;
 }
 
 export function checkConserved(

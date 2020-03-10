@@ -1,4 +1,4 @@
-import { SmoluchowskiPayload } from 'src/db/sample';
+import { SmoluchowskiPayload, SamplePayload } from 'src/db/sample';
 import {
   removeSpecies,
   deepClone,
@@ -6,7 +6,8 @@ import {
   catchNull,
   catchNeg,
   checkConserved,
-  calculateSmoluchowskiFrequencies
+  calculateSmoluchowskiFrequencies,
+  createInitialState
 } from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc, Step, ReactionCount, ReactionElement } from '../types';
 
@@ -202,4 +203,10 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
 
     return possibleStates;
   };
+}
+
+export function initialConditions(payload: SmoluchowskiPayload) {
+  const N = payload.N;
+  const t = 0;
+  return createInitialState([{ id: 1, n: N }]);
 }

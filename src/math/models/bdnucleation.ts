@@ -1,11 +1,12 @@
-import { BDNucleationPayload } from 'src/db/sample';
+import { BDNucleationPayload, SamplePayload } from 'src/db/sample';
 import {
   removeSpecies,
   deepClone,
   catchNull,
   catchNeg,
   calculateBDNFrequencies,
-  factorial
+  factorial,
+  createInitialState
 } from 'src/math/common';
 import { polymerMass } from 'src/math/analysis';
 import { ModelState, GetProbabilitiesFunc, ReactionCount, Step, ReactionElement } from '../types';
@@ -268,4 +269,10 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
 
     return possibleStates;
   };
+}
+
+export function initialConditions(payload: BDNucleationPayload) {
+  const N = payload.N;
+  const t = 0;
+  return createInitialState([{ id: 1, n: N }]);
 }

@@ -4,6 +4,7 @@ import {
   SpeciesPair,
   Species,
   GetProbabilitiesFunc,
+  InitialStateFunc,
   Moments,
   ReactionCount,
   ReactionSeries,
@@ -13,11 +14,17 @@ import {
   ReactionElement
 } from './types';
 import { buildModel as bdNucleationBuildModel } from './models/bdnucleation';
+import { initialConditions as bdnInitialConditions } from './models/bdnucleation';
 import { buildModel as beckerDoringBuildModel } from './models/beckerdoring';
+import { initialConditions as bdInitialConditions } from './models/beckerdoring';
 import { buildModel as smoluchowskiBuildModel } from './models/smoluchowski';
+import { initialConditions as smolInitialConditions } from './models/smoluchowski';
 import { buildModel as smoluchowskiCrowdersBuildModel } from './models/smoluchowskicrowders';
+import { initialConditions as smolCrowdersInitialConditions } from './models/smoluchowskicrowders';
 import { buildModel as smoluchowskiSecondaryBuildModel } from './models/smolsecondarynucleation';
+import { initialConditions as smolSecondaryInitialConditions } from './models/smolsecondarynucleation';
 import { buildModel as bdCrowdersBuildModel } from './models/bdcrowders';
+import { initialConditions as bdCrowdersInitialConditions } from './models/bdcrowders';
 import {
   DataPoint,
   SpeciesData,
@@ -51,18 +58,18 @@ export interface Data {
   [label: string]: any;
 }
 
-function fillSpecies(s: SpeciesPair[]): Species {
-  const spec: Species = {};
-  s.forEach(pair => {
-    spec[pair.id] = pair.n;
-  });
-  return spec;
-}
+// function fillSpecies(s: SpeciesPair[]): Species {
+//   const spec: Species = {};
+//   s.forEach(pair => {
+//     spec[pair.id] = pair.n;
+//   });
+//   return spec;
+// }
 
-function createInitialState(N: SpeciesPair[]): ModelState {
-  const state: ModelState = { t: 0, s: fillSpecies(N) };
-  return state;
-}
+// function createInitialState(N: SpeciesPair[]): ModelState {
+//   const state: ModelState = { t: 0, s: fillSpecies(N) };
+//   return state;
+// }
 
 function advanceTime(initialState: ModelState, dt: number): ModelState {
   return {
@@ -168,31 +175,39 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
     fillBin(data, newData[idx], i);
     data[i].t = dt * i;
 
-    if (!reactions[i]) {
-      reactions[i] = deepClone(newReactions[idx + 1]);
-      reactions[i].t = dt * i;
-      reactions[i].dt = dt;
-    } else {
-      keys.forEach(key => {
-        if (key !== 't' && key !== 'dt') {
-          reactions[i][key] += newReactions[idx + 1][key];
-        }
-      });
+    if (i < bins - 1) {
+      if (!reactions[i]) {
+        reactions[i] = deepClone(newReactions[idx + 1]);
+        reactions[i].t = dt * i;
+        reactions[i].dt = dt;
+      } else {
+        keys.forEach(key => {
+          if (key !== 't' && key !== 'dt') {
+            reactions[i][key] += newReactions[idx + 1][key];
+          }
+        });
+      }
     }
     // go to next state
     idx = idx + 1;
     // check if next state is still in the same bin
     while (newData[idx].t < t + dt) {
-      keys.forEach(key => {
-        if (key !== 't' && key !== 'dt') {
-          reactions[i][key] += newReactions[idx + 1][key];
-        }
-      });
+      if (newReactions[idx + 1] && i < bins - 1) {
+        keys.forEach(key => {
+          if (key !== 't' && key !== 'dt') {
+            reactions[i][key] += newReactions[idx + 1][key];
+          }
+        });
+      }
       // step through until current bin is exited
       idx = idx + 1;
+      if (!newData[idx]) {
+        idx = idx - 1;
+        break;
+      }
     }
     // check if next state is more than one bin later
-    if (newData[idx].t > t + 2 * dt) {
+    if (newData[idx].t >= t + 2 * dt) {
       // if step is bigger than a bin, use the last state
       idx = idx - 1;
     }
@@ -242,7 +257,7 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
   addReactions(reactions, newReactions[idx], 0);
   reactions[0].t = t;
   reactions[0].dt = tLogDiff(1, x, dt);
-  for (let i = 1; i < bins - 1; i++) {
+  for (let i = 1; i < bins; i++) {
     while (newData[idx].t < t * x) {
       idx = idx + 1;
       if (newData[idx].t < t * x * x) {
@@ -282,9 +297,13 @@ function logBinSeries(nData: TimeSeries, payload: SamplePayload, d_t?: number): 
   data[0].t = 0;
   idx = 1;
   t = dt;
-  for (let i = 1; i < bins - 1; i++) {
+  for (let i = 1; i < bins; i++) {
     while (newData[idx].t < t * x) {
       idx = idx + 1;
+      if (!newData[idx]) {
+        idx = idx - 1;
+        break;
+      }
     }
     if (newData[idx].t > t * x * x) {
       idx = idx - 1;
@@ -299,7 +318,7 @@ function logBinSeries(nData: TimeSeries, payload: SamplePayload, d_t?: number): 
 function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
   const bins = payload.bins;
   const t_end = payload.tstop;
-  const dt = t_end / bins;
+  const dt = t_end / (bins - 1);
   let t = 0;
   let idx = 0;
   const data: TimeSeries = {};
@@ -310,14 +329,16 @@ function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSerie
     // go to next state
     idx = idx + 1;
     // check if next state is still in the same bin
-    while (newData[idx].t < t + dt) {
-      // step through until current bin is exited
-      idx = idx + 1;
-    }
-    // check if next state is more than one bin later
-    if (newData[idx].t > t + 2 * dt) {
-      // if step is bigger than a bin, use the last state
-      idx = idx - 1;
+    if (newData[idx]) {
+      while (newData[idx].t < t + dt) {
+        // step through until current bin is exited
+        idx = idx + 1;
+      }
+      // check if next state is more than one bin later
+      if (newData[idx].t > t + 2 * dt) {
+        // if step is bigger than a bin, use the last state
+        idx = idx - 1;
+      }
     }
     t = t + dt;
   }
@@ -408,6 +429,17 @@ function simStep(initialState: ModelState, getProbabilities: GetProbabilitiesFun
   return solStep;
 }
 
+function reactionZeros(reactions: ReactionCount, t_end: number, dt: number): ReactionCount {
+  const zeroedReactions = deepClone(reactions);
+  const rKeys = Object.keys(zeroedReactions).filter(key => key !== 't' && key !== 'dt');
+  rKeys.forEach(key => {
+    zeroedReactions[key] = 0;
+  });
+  zeroedReactions.t = t_end;
+  zeroedReactions.dt = dt;
+  return zeroedReactions;
+}
+
 function simRun(
   initialState: ModelState,
   t_end: number,
@@ -429,6 +461,12 @@ function simRun(
     t_series[idx] = step.state;
     r_series[idx] = step.reactions;
     t = step.state.t;
+    if (t > t_end) {
+      t_series[idx] = deepClone(t_series[idx - 1]);
+      t_series[idx].t = t_end;
+      const dt = t_end - t_series[idx - 1].t;
+      r_series[idx] = reactionZeros(r_series[idx], t_end, dt);
+    }
     // gotta have some kind of break here or maybe not idk
   }
   return { data: t_series, reactions: r_series };
@@ -462,6 +500,33 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
   return getProbabilities;
 };
 
+export const createInitialState = (payload: SamplePayload): ModelState => {
+  let initialState: ModelState;
+  switch (payload.model) {
+    case 'BD-nucleation':
+      initialState = bdnInitialConditions(payload);
+      break;
+    case 'Becker-Doring':
+      initialState = bdInitialConditions(payload);
+      break;
+    case 'Smoluchowski':
+      initialState = smolInitialConditions(payload);
+      break;
+    case 'Smoluchowski-crowders':
+      initialState = smolCrowdersInitialConditions(payload);
+      break;
+    case 'BD-crowders':
+      initialState = bdCrowdersInitialConditions(payload);
+      break;
+    case 'Smoluchowski-secondary-nucleation':
+      initialState = smolSecondaryInitialConditions(payload);
+      break;
+    default:
+      throw new Error('Invalid model type!');
+  }
+  return initialState;
+};
+
 export function simulate(payload: SamplePayload): Data {
   console.log('Simulating...', payload);
   // const initialState = createInitialState([{ id: 1, n: payload.N }]);
@@ -482,7 +547,7 @@ export function simulate(payload: SamplePayload): Data {
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     // Generate new time series
-    const iState = createInitialState([{ id: 1, n: payload.N }]);
+    const iState = createInitialState(payload);
     const run = simRun(iState, t_end, getProbabilities);
     const tSeries = run.data;
     // Store individual runs if desired
