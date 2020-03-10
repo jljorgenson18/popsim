@@ -316,17 +316,17 @@ function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSerie
     data[i].t = t;
     // go to next state
     idx = idx + 1;
+    t = t + dt;
     // check if next state is still in the same bin
-    while (newData[idx].t < t + dt) {
+    while (newData[idx].t < t) {
       // step through until current bin is exited
       idx = idx + 1;
     }
     // check if next state is more than one bin later
-    if (newData[idx].t > t + 2 * dt) {
+    if (newData[idx].t >= t + dt) {
       // if step is bigger than a bin, use the last state
       idx = idx - 1;
     }
-    t = t + dt;
   }
   return data;
 }
@@ -449,6 +449,8 @@ function simRun(
     t = step.state.t;
     // gotta have some kind of break here or maybe not idk
   }
+  // t_series[idx] = t_series[idx - 1];
+  // t_series[idx].t = t_end;
   return { data: t_series, reactions: r_series };
 }
 
@@ -532,7 +534,7 @@ export function simulate(payload: SamplePayload): Data {
     const tSeries = run.data;
     // Store individual runs if desired
     if (i < payload.ind_runs) {
-      data.runs[i] = reduceIndividualRun(splitSpecies(tSeries), payload.bins);
+      data.runs[i] = reduceIndividualRun(splitSpecies(tSeries), payload.bins, t_end);
       data.runMoments[i] = reduceIndividualMoments(addToMoments([], tSeries), payload.bins);
     }
     // console.log(JSON.stringify(tSeries, null, '  '));

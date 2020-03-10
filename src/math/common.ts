@@ -128,17 +128,25 @@ export function calculateBDNFrequencies(payload: BDNucleationPayload): BDNucleat
   return outload;
 }
 
-export function reduceIndividualRun(inputSeries: SpeciesData[], bins: number): SpeciesData[] {
+export function reduceIndividualRun(
+  inputSeries: SpeciesData[],
+  bins: number,
+  t_end: number
+): SpeciesData[] {
   const len = inputSeries.length;
   const outSeries: SpeciesData[] = [];
   if (bins < len) {
     const delta = Math.floor((len - 1) / bins);
-    for (let i = 1; i < len; i = i + delta) {
+    for (let i = 1; i < len - 1; i = i + delta) {
+      outSeries.push(inputSeries[i]);
+    }
+    return outSeries;
+  } else {
+    for (let i = 1; i < len - 1; i++) {
       outSeries.push(inputSeries[i]);
     }
     return outSeries;
   }
-  return inputSeries;
 }
 
 export function reduceIndividualMoments(inputSeries: Moments[], bins: number): Moments[] {
@@ -146,10 +154,14 @@ export function reduceIndividualMoments(inputSeries: Moments[], bins: number): M
   const outSeries: Moments[] = [];
   if (bins < len) {
     const delta = Math.floor((len - 1) / bins);
-    for (let i = 1; i < len; i = i + delta) {
+    for (let i = 1; i < len - 1; i = i + delta) {
+      outSeries.push(inputSeries[i]);
+    }
+    return outSeries;
+  } else {
+    for (let i = 1; i < len - 1; i++) {
       outSeries.push(inputSeries[i]);
     }
     return outSeries;
   }
-  return inputSeries;
 }
