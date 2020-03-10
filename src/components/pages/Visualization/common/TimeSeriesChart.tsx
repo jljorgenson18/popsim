@@ -57,6 +57,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
             name="Time"
             tickFormatter={sciNotationTickFormatter}
             scale={scaleX}
+            tickCount={5}
             allowDataOverflow
           />
           <YAxis

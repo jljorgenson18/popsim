@@ -175,39 +175,31 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
     fillBin(data, newData[idx], i);
     data[i].t = dt * i;
 
-    if (i < bins - 1) {
-      if (!reactions[i]) {
-        reactions[i] = deepClone(newReactions[idx + 1]);
-        reactions[i].t = dt * i;
-        reactions[i].dt = dt;
-      } else {
-        keys.forEach(key => {
-          if (key !== 't' && key !== 'dt') {
-            reactions[i][key] += newReactions[idx + 1][key];
-          }
-        });
-      }
+    if (!reactions[i]) {
+      reactions[i] = deepClone(newReactions[idx + 1]);
+      reactions[i].t = dt * i;
+      reactions[i].dt = dt;
+    } else {
+      keys.forEach(key => {
+        if (key !== 't' && key !== 'dt') {
+          reactions[i][key] += newReactions[idx + 1][key];
+        }
+      });
     }
     // go to next state
     idx = idx + 1;
     // check if next state is still in the same bin
     while (newData[idx].t < t + dt) {
-      if (newReactions[idx + 1] && i < bins - 1) {
-        keys.forEach(key => {
-          if (key !== 't' && key !== 'dt') {
-            reactions[i][key] += newReactions[idx + 1][key];
-          }
-        });
-      }
+      keys.forEach(key => {
+        if (key !== 't' && key !== 'dt') {
+          reactions[i][key] += newReactions[idx + 1][key];
+        }
+      });
       // step through until current bin is exited
       idx = idx + 1;
-      if (!newData[idx]) {
-        idx = idx - 1;
-        break;
-      }
     }
     // check if next state is more than one bin later
-    if (newData[idx].t >= t + 2 * dt) {
+    if (newData[idx].t > t + 2 * dt) {
       // if step is bigger than a bin, use the last state
       idx = idx - 1;
     }
@@ -257,7 +249,7 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
   addReactions(reactions, newReactions[idx], 0);
   reactions[0].t = t;
   reactions[0].dt = tLogDiff(1, x, dt);
-  for (let i = 1; i < bins; i++) {
+  for (let i = 1; i < bins - 1; i++) {
     while (newData[idx].t < t * x) {
       idx = idx + 1;
       if (newData[idx].t < t * x * x) {
@@ -297,13 +289,9 @@ function logBinSeries(nData: TimeSeries, payload: SamplePayload, d_t?: number): 
   data[0].t = 0;
   idx = 1;
   t = dt;
-  for (let i = 1; i < bins; i++) {
+  for (let i = 1; i < bins - 1; i++) {
     while (newData[idx].t < t * x) {
       idx = idx + 1;
-      if (!newData[idx]) {
-        idx = idx - 1;
-        break;
-      }
     }
     if (newData[idx].t > t * x * x) {
       idx = idx - 1;
@@ -318,7 +306,7 @@ function logBinSeries(nData: TimeSeries, payload: SamplePayload, d_t?: number): 
 function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSeries {
   const bins = payload.bins;
   const t_end = payload.tstop;
-  const dt = t_end / (bins - 1);
+  const dt = t_end / bins;
   let t = 0;
   let idx = 0;
   const data: TimeSeries = {};
@@ -329,16 +317,14 @@ function linearBinSeries(newData: TimeSeries, payload: SamplePayload): TimeSerie
     // go to next state
     idx = idx + 1;
     // check if next state is still in the same bin
-    if (newData[idx]) {
-      while (newData[idx].t < t + dt) {
-        // step through until current bin is exited
-        idx = idx + 1;
-      }
-      // check if next state is more than one bin later
-      if (newData[idx].t > t + 2 * dt) {
-        // if step is bigger than a bin, use the last state
-        idx = idx - 1;
-      }
+    while (newData[idx].t < t + dt) {
+      // step through until current bin is exited
+      idx = idx + 1;
+    }
+    // check if next state is more than one bin later
+    if (newData[idx].t > t + 2 * dt) {
+      // if step is bigger than a bin, use the last state
+      idx = idx - 1;
     }
     t = t + dt;
   }
@@ -461,12 +447,6 @@ function simRun(
     t_series[idx] = step.state;
     r_series[idx] = step.reactions;
     t = step.state.t;
-    if (t > t_end) {
-      t_series[idx] = deepClone(t_series[idx - 1]);
-      t_series[idx].t = t_end;
-      const dt = t_end - t_series[idx - 1].t;
-      r_series[idx] = reactionZeros(r_series[idx], t_end, dt);
-    }
     // gotta have some kind of break here or maybe not idk
   }
   return { data: t_series, reactions: r_series };
