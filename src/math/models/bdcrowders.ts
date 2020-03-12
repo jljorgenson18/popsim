@@ -104,7 +104,7 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     // nucleate
     if (state.s[1] >= nc) {
-      let P = (goanc * kn) / factorial(nc);
+      let P = goanc * kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }

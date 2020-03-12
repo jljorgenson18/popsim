@@ -152,7 +152,7 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
     const state = deepClone(initialState);
     // nucleate
     if (state.s[1] >= nc) {
-      let P = kn / factorial(nc);
+      let P = kn;
       for (let j = 0; j < nc; j++) {
         P = P * (state.s[1] - j);
       }

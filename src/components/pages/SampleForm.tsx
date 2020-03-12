@@ -21,6 +21,7 @@ import {
   SmoluchowskiCrowderPayload,
   BeckerDoringCrowderPayload,
   SmoluchowskiSecondaryPayload,
+  MPPayload,
   createSample
 } from 'src/db/sample';
 import Loading, { LoadingProps } from '../common/Loading';
@@ -393,6 +394,78 @@ function SmoluchowskiSecondaryFields(props: { formik: SmoluchowskiSecondaryFormi
     </>
   );
 }
+
+// const MPFormikFunc = (params: any) => useFormik<MPPayload>(params);
+// type MPFormik = ReturnType<typeof MPFormikFunc>;
+// function MPFields(props: { formik: MPFormik }) {
+//   const { formik } = props;
+//   return (
+//     <>
+//       <InitialConditionField formik={formik} label="Association (ka)" name="ka" required />
+//       <InitialConditionField formik={formik} label="Dissociation (kb)" name="kb" required />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Addition (a)"
+//         name="a"
+//         help="Defaults to a = ka"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Addition (b)"
+//         name="b"
+//         help="Defaults to b = kb"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Critical nucleus size (nc)"
+//         name="nc"
+//         help="Defaults to 2"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Secondary nucleus size (n2)"
+//         name="n2"
+//         help="Defaults to nc"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Nucleation rate constant (kn)"
+//         name="kn"
+//         help="Defaults to kn = a"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Secondary nucleation rate constant (k2)"
+//         name="k2"
+//         help="Defaults to kn = 0"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Crowder volume fraction (phi)"
+//         name="phi"
+//         //help="Defaults to phi = 0"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Monomer radius (r1)"
+//         name="r1"
+//         //help="Defaults to r1 = 1"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Crowder radius (rc)"
+//         name="rc"
+//         //help="Defaults to rc = 1"
+//       />
+//       <InitialConditionField
+//         formik={formik}
+//         label="Spherocylinder radius (rsc)"
+//         name="rsc"
+//         //help="Defaults to rsc = 1"
+//       />
+//     </>
+//   );
+// }
 
 // Just here for the types
 const BDNucleationFormikFunc = (params: any) => useFormik<BDNucleationPayload>(params);

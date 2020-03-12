@@ -51,12 +51,12 @@ export function splitSpecies(series: TimeSeries, ignore?: number[]): SpeciesData
     const idx = parseInt(key, 10);
     const dat: SpeciesData = { t: series[idx].t };
     //dat.t = series[1].t;
-    for (let i = 1; i < numSets; i++) {
+    for (let i = 1; i < numSets + 1; i++) {
       if (!ignore.includes(i)) {
         if (!series[idx].s[i]) {
           dat[i] = 0;
         } else {
-          dat[i] = i * series[idx].s[i];
+          dat[i] = series[idx].s[i];
         }
       }
     }
@@ -161,6 +161,34 @@ function polymerNumber(state: ModelState, order = 1): number {
     }
   });
   return num;
+}
+
+export function mpAddToMoments(inMoments: Moments[], inputData: TimeSeries): Moments[] {
+  const moments = deepClone(inMoments);
+  const keys = Object.keys(inputData);
+  keys.forEach(key => {
+    const idx = parseInt(key, 10);
+    const M = inputData[idx].s[3];
+    const P = inputData[idx].s[2];
+    let L = 0;
+    if (P !== 0) {
+      L = M / P;
+    }
+    const M2 = M * M;
+    const P2 = P * P;
+    const L2 = L * L;
+    if (!moments[idx]) {
+      moments[idx] = { t: inputData[idx].t, M: M, M2: M2, P: P, P2: P2, L: L, L2: L2 };
+    } else {
+      moments[idx].M = moments[idx].M + M;
+      moments[idx].M2 = moments[idx].M2 + M2;
+      moments[idx].P = moments[idx].P + P;
+      moments[idx].P2 = moments[idx].P2 + P2;
+      moments[idx].L = moments[idx].L + L;
+      moments[idx].L2 = moments[idx].L2 + L2;
+    }
+  });
+  return moments;
 }
 
 export function addToMoments(inMoments: Moments[], inputData: TimeSeries): Moments[] {

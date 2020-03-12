@@ -23,6 +23,8 @@ import { buildModel as smoluchowskiCrowdersBuildModel } from './models/smoluchow
 import { initialConditions as smolCrowdersInitialConditions } from './models/smoluchowskicrowders';
 import { buildModel as smoluchowskiSecondaryBuildModel } from './models/smolsecondarynucleation';
 import { initialConditions as smolSecondaryInitialConditions } from './models/smolsecondarynucleation';
+import { buildModel as mpBuildModel } from './models/MP';
+import { initialConditions as mpInitialConditions } from './models/MP';
 import { buildModel as bdCrowdersBuildModel } from './models/bdcrowders';
 import { initialConditions as bdCrowdersInitialConditions } from './models/bdcrowders';
 import {
@@ -36,6 +38,7 @@ import {
   DataSet,
   Histogram,
   addToMoments,
+  mpAddToMoments,
   averageMoments,
   calculateMomentDevs
 } from './analysis';
@@ -476,6 +479,9 @@ export const buildModel = (payload: SamplePayload): GetProbabilitiesFunc => {
     case 'Smoluchowski-secondary-nucleation':
       getProbabilities = smoluchowskiSecondaryBuildModel(payload);
       break;
+    case 'MP':
+      getProbabilities = mpBuildModel(payload);
+      break;
     default:
       throw new Error('Invalid model type!');
   }
@@ -502,6 +508,9 @@ export const createInitialState = (payload: SamplePayload): ModelState => {
       break;
     case 'Smoluchowski-secondary-nucleation':
       initialState = smolSecondaryInitialConditions(payload);
+      break;
+    case 'MP':
+      initialState = mpInitialConditions(payload);
       break;
     default:
       throw new Error('Invalid model type!');
@@ -535,13 +544,21 @@ export function simulate(payload: SamplePayload): Data {
     // Store individual runs if desired
     if (i < payload.ind_runs) {
       data.runs[i] = reduceIndividualRun(splitSpecies(tSeries), payload.bins, t_end);
-      data.runMoments[i] = reduceIndividualMoments(addToMoments([], tSeries), payload.bins);
+      if (payload.model === 'MP') {
+        data.runMoments[i] = reduceIndividualMoments(mpAddToMoments([], tSeries), payload.bins);
+      } else {
+        data.runMoments[i] = reduceIndividualMoments(addToMoments([], tSeries), payload.bins);
+      }
     }
     // console.log(JSON.stringify(tSeries, null, '  '));
     // Bin the new time series
     sol = binData(sol, run, payload);
     const singleBinnedSeries = binSeries(tSeries, payload);
-    data.moments = addToMoments(data.moments, singleBinnedSeries);
+    if (payload.model === 'MP') {
+      data.moments = mpAddToMoments(data.moments, singleBinnedSeries);
+    } else {
+      data.moments = addToMoments(data.moments, singleBinnedSeries);
+    }
   }
   // Average data
   data.series = averageData(sol.data, runs);
