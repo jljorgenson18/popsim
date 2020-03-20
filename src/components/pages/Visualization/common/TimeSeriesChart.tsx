@@ -6,7 +6,9 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Legend,
+  RechartsFunction
 } from 'recharts';
 import randomColor from 'randomcolor';
 import memoize from 'lodash/memoize';
@@ -34,6 +36,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
   const { options: optionsY, scale: scaleY, onChange: onScaleYChange } = useScaleInputField(
     'scaleY'
   );
+  const [currentLegendDataKey, setCurrentLegendDataKey] = useState<string>(null);
   const filteredData = useFilteredData(data, ['t']);
   const chartRef = useRef(null);
   // So each dataKey will get their own color and it will be remembered
@@ -45,6 +48,17 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
     });
   }, []);
   const sciNotationTickFormatter = (val: number) => val.toExponential(2);
+
+  const handleLegendMouseEnter: RechartsFunction = o => {
+    setCurrentLegendDataKey(o.dataKey);
+  };
+
+  const handleLegendMouseLeave: RechartsFunction = o => {
+    const dataKey = o.dataKey as string;
+    if (currentLegendDataKey === dataKey) {
+      setCurrentLegendDataKey(null);
+    }
+  };
   return (
     <>
       <ResponsiveContainer id={'timeseries-chart-' + vizName} height={350} width="100%">
@@ -65,6 +79,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
             domain={scaleY === 'log' ? ['auto', 'auto'] : [0, 'auto']}
             tickFormatter={scaleY === 'log' ? sciNotationTickFormatter : null}
           />
+          <Legend onMouseEnter={handleLegendMouseEnter} onMouseLeave={handleLegendMouseLeave} />
           <Tooltip
             labelStyle={{ marginBottom: 8 }}
             labelFormatter={(time: number) => `Time: ${time.toExponential(2)}`}
@@ -73,12 +88,13 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
           {dataKeys.map(dataKey => {
             return (
               <Line
+                id={`${vizName}-${dataKey}-line`}
                 key={dataKey}
                 type="monotone"
                 dataKey={dataKey}
                 stroke={getColorFromDataKey(dataKey)}
                 dot={false}
-                strokeWidth={3}
+                strokeWidth={currentLegendDataKey === dataKey ? 5 : 3}
               />
             );
           })}
