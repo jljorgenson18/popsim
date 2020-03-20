@@ -83,7 +83,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
           <Tooltip
             labelStyle={{ marginBottom: 8 }}
             labelFormatter={(time: number) => `Time: ${time.toExponential(2)}`}
-            formatter={(value, name, props) => `${name}: ${Number(value).toExponential(2)}`}
+            formatter={(value, name, props) => `${Number(value).toExponential(2)}`}
           />
           {dataKeys.map(dataKey => {
             return (
