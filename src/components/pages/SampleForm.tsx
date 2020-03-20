@@ -24,7 +24,7 @@ import {
   MPPayload,
   createSample
 } from 'src/db/sample';
-import Loading, { LoadingProps } from '../common/Loading';
+import Loading from '../common/Loading';
 import Page from '../common/Page';
 import { useHistory } from 'react-router-dom';
 
@@ -547,19 +547,23 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
 }
 
 function SampleForm(props: SampleFormProps) {
-  const [showingLoadingModal, setShowingLoadingModal] = useState<LoadingProps | null>(null);
+  const [creatingSample, setCreatingSample] = useState<boolean>(false);
   const [showingErrorModal, setShowingErrorModal] = useState<Error | null>(null);
+  const [progress, setProgress] = useState<number>(null);
   const history = useHistory();
   async function handleNewSampleSubmit(values: SamplePayload) {
     try {
-      setShowingLoadingModal({
-        message: 'Creating sample...'
+      setCreatingSample(true);
+      await createSample(values, newProgress => {
+        setProgress(newProgress);
+        console.log(newProgress);
       });
-      await createSample(values);
-      setShowingLoadingModal(null);
+      setCreatingSample(false);
+      setProgress(null);
       history.push('/sample-list');
     } catch (err) {
-      setShowingLoadingModal(null);
+      setCreatingSample(false);
+      setProgress(null);
       setShowingErrorModal(err);
     }
   }
@@ -706,9 +710,9 @@ function SampleForm(props: SampleFormProps) {
           </Box>
         </Grid>
       </Form>
-      {showingLoadingModal ? (
+      {creatingSample ? (
         <Layer position="center" modal responsive={false} animation="fadeIn">
-          <Loading message={showingLoadingModal.message} progress={showingLoadingModal.progress} />
+          <Loading message={'Creating samples...'} progress={progress} />
         </Layer>
       ) : null}
       {showingErrorModal ? (

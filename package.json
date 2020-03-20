@@ -91,6 +91,7 @@
     "polished": "^3.4.4",
     "pouchdb": "^7.2.1",
     "randomcolor": "^0.5.4",
+    "rc-progress": "^2.5.2",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-dropzone": "^10.2.1",

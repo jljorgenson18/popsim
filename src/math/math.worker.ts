@@ -1,5 +1,5 @@
 import { SamplePayload } from 'src/db/sample';
-
+import throttle from 'lodash/throttle';
 import { simulate } from './main';
 
 const ctx: Worker = self as any;
@@ -36,7 +36,13 @@ ctx.addEventListener('message', evt => {
     let responseBody;
     let state: PostMessageState;
     try {
-      responseBody = simulate(messageData.body as SamplePayload);
+      responseBody = simulate(
+        messageData.body as SamplePayload,
+        // Need to throttle it or else the main thread can't keep up
+        throttle(progress => {
+          respondToMain(messageData, null, 'pending', progress);
+        }, 50)
+      );
       state = 'success';
     } catch (err) {
       responseBody = err.message;

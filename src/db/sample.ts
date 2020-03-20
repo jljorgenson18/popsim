@@ -161,9 +161,12 @@ export const modelTypes = [
   'BD-nucleation'
 ];
 
-export async function createSample(payload: SamplePayload): Promise<SampleDoc> {
+export async function createSample(
+  payload: SamplePayload,
+  onProgress?: (progress?: number) => void
+): Promise<SampleDoc> {
   const id = uuid();
-  const sampleData = await getSampleData(payload);
+  const sampleData = await getSampleData(payload, onProgress);
 
   // Call to math goes here
   await db.put<PartialBy<SampleDoc, '_rev'>>({

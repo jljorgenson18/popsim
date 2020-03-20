@@ -518,8 +518,7 @@ export const createInitialState = (payload: SamplePayload): ModelState => {
   return initialState;
 };
 
-export function simulate(payload: SamplePayload): Data {
-  console.log('Simulating...', payload);
+export function simulate(payload: SamplePayload, onProgress?: (progress: number) => void): Data {
   // const initialState = createInitialState([{ id: 1, n: payload.N }]);
   const getProbabilities = buildModel(payload);
   const t_end = payload.tstop;
@@ -537,6 +536,7 @@ export function simulate(payload: SamplePayload): Data {
   sol = { data: binnedSeries, reactions: reactions };
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
+    if (onProgress) onProgress(i / runs);
     // Generate new time series
     const iState = createInitialState(payload);
     const run = simRun(iState, t_end, getProbabilities);
