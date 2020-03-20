@@ -1,6 +1,5 @@
 import { useState, useMemo, ChangeEvent, useEffect } from 'react';
 import flatten from 'lodash/flatten';
-import { Moments } from 'src/math/types';
 
 import { DataPoint, SpeciesData } from 'src/math/analysis';
 import { Data } from 'src/math/main';
@@ -43,6 +42,9 @@ export function useTimeSeriesDataWithIndividualRuns(data: Data, mainDataKey: 'M'
   const combinedMoments = useMemo<TimeSeriesData[]>(() => {
     const mappedRunMoments = flatten<TimeSeriesData>(
       data.runMoments.map((runs, idx) => {
+        // Don't include the data if it isn't part of the run options.
+        // Otherwise, you get gaps
+        if (!runOptions[idx]) return [];
         return runs.map(run => {
           return Object.keys(run).reduce((mapped: any, key) => {
             if (key === 't') {
@@ -56,7 +58,7 @@ export function useTimeSeriesDataWithIndividualRuns(data: Data, mainDataKey: 'M'
       })
     );
     return [...(data.moments as any), ...mappedRunMoments];
-  }, [data.moments, data.runMoments]);
+  }, [runOptions, data.moments, data.runMoments]);
   const runMomentIndices = useMemo(() => {
     return data.runMoments.map((m, idx) => idx);
   }, [data.runMoments]);
