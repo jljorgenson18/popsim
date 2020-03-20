@@ -242,7 +242,7 @@ function SmoluchowskiFields(props: { formik: SmoluchowsiFormik }) {
       />
       <InitialConditionField
         formik={formik}
-        label="Addition (b)"
+        label="Subtraction (b)"
         name="b"
         help="Defaults to b = kb"
       />
@@ -278,7 +278,7 @@ function SmoluchowskiCrowderFields(props: { formik: SmoluchowskiCrowderFormik })
       />
       <InitialConditionField
         formik={formik}
-        label="Addition (b)"
+        label="Subtraction (b)"
         name="b"
         help="Defaults to b = kb"
       />
