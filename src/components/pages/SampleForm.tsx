@@ -339,7 +339,7 @@ function SmoluchowskiSecondaryFields(props: { formik: SmoluchowskiSecondaryFormi
       />
       <InitialConditionField
         formik={formik}
-        label="Addition (b)"
+        label="Subtraction (b)"
         name="b"
         help="Defaults to b = kb"
       />
@@ -541,7 +541,7 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
         //help="Defaults to rsc = 1"
       />
       <InitialConditionField formik={formik} label="Growth-phase addition (a)" name="a" />
-      <InitialConditionField formik={formik} label="Growth-phase addition (b)" name="b" />
+      <InitialConditionField formik={formik} label="Growth-phase subtraction (b)" name="b" />
     </>
   );
 }
