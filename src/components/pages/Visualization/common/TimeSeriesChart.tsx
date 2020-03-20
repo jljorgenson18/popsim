@@ -12,9 +12,8 @@ import randomColor from 'randomcolor';
 import memoize from 'lodash/memoize';
 
 import { useScaleInputField, useFilteredData } from '../hooks';
-import { RadioButtonGroup, CheckBox, Box } from 'grommet';
+import { RadioButtonGroup, Box } from 'grommet';
 import SaveChart from './SaveChart';
-import Controls from './Controls';
 import ControlField from './ControlField';
 import { TimeSeriesData } from '../types';
 
@@ -48,7 +47,7 @@ function TimeSeriesChart(props: TimeSeriesChartProps) {
   const sciNotationTickFormatter = (val: number) => val.toExponential(2);
   return (
     <>
-      <ResponsiveContainer minHeight={300} width="100%">
+      <ResponsiveContainer id={'timeseries-chart-' + vizName} height={350} width="100%">
         <LineChart data={filteredData} ref={chartRef}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
