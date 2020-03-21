@@ -94,6 +94,7 @@ export interface SmoluchowskiSecondaryPayload extends BaseSample {
   rsc?: number; // Sphero-cylinder radius
   gamma?: number; // Chemical activity of monomer
   alpha?: number; // Activity modifier
+  Gamma?: number; // Secondary nucleation factor
 }
 
 export interface MPPayload extends BaseSample {

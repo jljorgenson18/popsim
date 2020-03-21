@@ -11,6 +11,7 @@ import {
 } from 'src/math/common';
 import { ModelState, ReactionCount, GetProbabilitiesFunc, Step, ReactionElement } from '../types';
 import { polymerMass } from 'src/math/analysis';
+import { math } from 'polished';
 
 function reactionName(name: string): ReactionCount {
   const reactions: ReactionCount = {
@@ -127,6 +128,17 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function bigGamma(n2: number, r1: number, rsc: number, rc: number, phi: number): number {
+  if (phi === 0) return 1;
+  const R = rsc / rc;
+  const z = phi / (1 - phi);
+  const L = (2 / 3) * ((n2 * r1 * r1 * r1) / (rsc * rsc * rsc) - 1);
+  const B1 = R * R * (3 * (1 + L) + R * (1 + 1.5 * L));
+  const B2 = 3 * R * R * R * (1 + 1.5 * L);
+  const lnG = B1 * z + B2 * z * z + B2 * z * z * z;
+  return Math.exp(lnG);
+}
+
 export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabilitiesFunc {
   // const { ka, kb, a = ka, b = kb, nc = 2, kn = a } = calculateSmoluchowskiFrequencies(params);
   const ka = params.ka * (params.Co / params.N);
@@ -175,13 +187,16 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
     const alpha = Math.exp(lna);
     params.alpha = alpha;
     params.gamma = gamma;
+    params.Gamma = bigGamma(n2, params.r1, params.rsc, params.rc, params.phi);
   } else {
     params.gamma = 1.0;
     params.alpha = 1.0;
+    params.Gamma = 1.0;
   }
   const goa = params.gamma / params.alpha;
   const goanc = Math.pow(goa, params.nc - 1);
   const gamma = params.gamma;
+  const Gamma = params.Gamma;
   return function(initialState: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
@@ -194,9 +209,10 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
       const nuc = nucleate(nc);
       possibleStates.push({ P: P, s: nuc.reaction, R: nuc.reactions });
     }
+    // secondary nucleate
     if (state.s[1] >= n2) {
       const M_n2 = polymerMass(state, 1, n2);
-      let P = (Math.pow(gamma, n2) * k2 * M_n2) / factorial(n2);
+      let P = Math.pow(gamma, n2) * Gamma * k2 * M_n2;
       if (P > 0) {
         for (let j = 0; j < n2; j++) {
           P = P * (state.s[1] - j);
