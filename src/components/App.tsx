@@ -4,12 +4,13 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { normalize } from 'polished';
 import Sidebar from 'react-sidebar';
 
+import 'katex/dist/katex.css';
 import db from 'src/db';
 import { getAllSamples, SampleDoc } from 'src/db/sample';
 import SampleList from './pages/SampleList/SampleList';
 import SampleForm from './pages/SampleForm';
 import Visualization from './pages/Visualization';
-
+import Guide from './pages/Guide.mdx';
 import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import AnchorLink from './common/AnchorLink';
 import UploadSamples from './pages/UploadSamples';
@@ -122,6 +123,9 @@ function App(): JSX.Element {
             </Route>
             <Route path="/upload-samples">
               <UploadSamples />
+            </Route>
+            <Route path="/guide">
+              <Guide />
             </Route>
             <Route exact path="/">
               <Redirect to="/sample-list" />

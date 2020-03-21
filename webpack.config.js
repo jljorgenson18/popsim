@@ -4,6 +4,8 @@ const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const remarkMath = require('remark-math');
+const rehypeKatex = require('rehype-katex');
 const ImageminPlugin = require('imagemin-webpack-plugin').default;
 //const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
@@ -25,6 +27,23 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.mdx?$/,
+        use: [
+          'babel-loader',
+          {
+            loader: '@mdx-js/loader',
+            options: {
+              remarkPlugins: [remarkMath],
+              rehypePlugins: [rehypeKatex]
+            }
+          }
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }]
+      },
+      {
         test: /\.worker\.(ts|js)$/,
         use: {
           loader: 'worker-loader',
@@ -42,7 +61,7 @@ module.exports = {
         }
       },
       {
-        test: /\.(png|jpg|gif|svg)$/,
+        test: /\.(png|jpg|gif|svg|woff(2)?|ttf|eot)$/,
         use: [
           {
             loader: 'url-loader',
