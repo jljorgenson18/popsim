@@ -11,6 +11,10 @@ import SampleList from './pages/SampleList/SampleList';
 import SampleForm from './pages/SampleForm';
 import Visualization from './pages/Visualization';
 import Guide from './pages/Guide.mdx';
+import BD from './pages/models/Becker-Doring.mdx';
+import Smol from './pages/models/Smoluchowski.mdx';
+import SmolBDN from './pages/models/SmoluchowskiBDN.mdx';
+import Algorithm from './pages/Algorithm.mdx';
 import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import AnchorLink from './common/AnchorLink';
 import UploadSamples from './pages/UploadSamples';
@@ -126,6 +130,18 @@ function App(): JSX.Element {
             </Route>
             <Route path="/guide">
               <Guide />
+            </Route>
+            <Route path="/beckerdoring">
+              <BD />
+            </Route>
+            <Route path="/smoluchowski">
+              <Smol />
+            </Route>
+            <Route path="/smolushowski-bdm">
+              <SmolBDN />
+            </Route>
+            <Route path="/algorithm">
+              <Algorithm />
             </Route>
             <Route exact path="/">
               <Redirect to="/sample-list" />

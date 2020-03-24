@@ -1,0 +1,29 @@
+# Gillespie Algorithm
+
+Popsim uses an implementation of the Next Reaction form of the Gillespie Algorithm to generate
+statistically accurate stochastic trajectories. It is qualitatively similar to both Kinetic
+and Dynamic Monte Carlo simulations. To begin, the algorithm is given an initial state, $$\psi_0$$ at 
+$$t = 0$$ and the transition rates of all $$k$$ possible reactions, $$r_i$$, are identified. Next, the 
+cumulative transition rate, $$R_i$$, for each reaction is calculated:
+$$
+R_{i} = \sum_{j=1}^{i} r_j
+$$
+and the total transition rate is defined as
+$$
+Q = \sum_{j=1}^{k} r_j.
+$$
+A uniform random number, $$u\in(0,1]$$, is then generated and the next reaction is selected by finding 
+the cumulative transition rate which satisifies the relation
+$$
+R_{i-1} < uQ \leq R_i.
+$$
+The state is then updated based on the selected reaction, $$\psi_0\to\psi_1$$. Lastly, a new uniform 
+random number, $$u'\in(0,1]$$, is drawn and the the time is updated, $$t=t+\Delta t$$, where
+$$
+\Delta t = Q^{-1}ln\bigg(\frac{1}{u'}\bigg).
+$$
+This process is then repeated until the user-given end time is reached. A major benefit of this approach is that 
+one only needs to know the possible transitions from the current state, rather than all of the possible next states.
+In general many trajectories are generated, binned and averaged to produce a time series of species populations. In 
+Popsim, the first two moments of the distribution, excluding the monomers, as well as their standard deviations are 
+also calculated. These represent the number of polymers and the mumber of monomers contained within them. 
