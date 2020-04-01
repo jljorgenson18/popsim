@@ -1,0 +1,18 @@
+# Smoluchowski Model
+
+The Smoluchowski model is similar to the Oosawa model, with the modification that polymers
+may break and merge with each other, otherwise reffered to as dissociation (or fragmentation)
+and coagulation. The model is defined by the equations
+$$
+[N_1] + [N_{r>n_c}] \iff [N_{r+1}]\\
+[N_r] + [N_s] \iff [N_{r+s}]\\
+[N_{r<n_c}] \implies n_c[N_1]\\
+n_c[N_1] \iff [N_{n_c}],
+$$
+where $$N_r$$ represents a polymer composed of $$r$$ monomers and $$n_c$$ is
+the critical nucleus size. It is assumed that polymers smaller than the critical
+nucleus effectively do not exist. Monomer addition and subtraction proceed with bulk 
+rate constants $$a$$ and $$b$$, merging and breaking with rate constants $$k_a$$ and $$k_b$$, and nucleation 
+with rate constant $$k_n$$, respecively. If a monomer is subtracted from a critical nucleus, or one or both fragments
+of a broken polymer are smaller than the crtical nucleus, it assumed the polymer immediately dissolves 
+into monomers.

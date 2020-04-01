@@ -1,0 +1,33 @@
+# Coagulation and Fragmentation
+
+Coagulation and fragmentation are the processes by which a single polymer can break into 
+two smaller polymers, or two polymers may merge into one larger polymer, respectively. 
+The process is defined by the equation
+
+$$
+N_r + N_s \iff N_{r+s}.
+$$
+
+Coagulation occurs with bulk rate constant $$k_a$$ and breaking with rate constant $$k_b$$. 
+If a system obeys the principle of detailed balance, it must allow both mechanisms
+or neither. The rate of change of the concentration of polymers of size $$r$$ due to 
+coagulation is given by 
+
+$$
+\frac{dc_r}{dt} = \sum_{s=2}^{r-2}k_ac_sc_{r-s} - \sum_{s=2}^{\infty}k_ac_sc_r,
+$$
+
+which is the rate that any two smaller polymers combine to make one of size $$r$$
+minus the rate that polymers of size $$r$$ combine with any other polymer.
+The rate due to fragmentation is 
+
+$$
+\frac{dc_r}{dt} = 2\sum_{s=r+2}^{\infty}k_bc_s - (r-3)k_bc_r,
+$$
+
+which is the rate at which larger polymers break into a polymer of size $$r$$ minus 
+the rate at which $$r$$-mers break. The factor of $$2$$ in the first term on the RHS
+is due to the fact that there are either two sites at which an $$r$$-mer can break 
+from an$$(r+s)$$-mer or a $$2r$$-mer can break into two $$r$$-mers. The factor of $$r-3$$ 
+in the second term is due to the fact that an $$r$$-mer has $$r-1$$ connections between 
+monomers, with the two at the end being included in monomer subtraction.

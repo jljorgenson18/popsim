@@ -55,6 +55,7 @@ export interface Data {
   runs?: SpeciesData[][];
   runMoments?: Moments[][];
   species?: SpeciesData[];
+  speciessq?: SpeciesData[];
   histograms?: Histogram[];
   moments?: Moments[];
   reactions?: ReactionCount[];
@@ -81,7 +82,7 @@ function advanceTime(initialState: ModelState, dt: number): ModelState {
   };
 }
 
-function fillBin(data: TimeSeries, inputState: ModelState, bin: number): TimeSeries {
+function fillBin(data: TimeSeries, inputState: ModelState, bin: number, power=1): TimeSeries {
   const state = deepClone(inputState);
   if (!data[bin]) {
     // check if that bin exists
@@ -92,10 +93,10 @@ function fillBin(data: TimeSeries, inputState: ModelState, bin: number): TimeSer
       const id = parseInt(key, 10);
       if (!data[bin].s[id]) {
         // if bin does not have that species
-        data[bin].s[id] = state.s[id];
+        data[bin].s[id] = Math.pow(state.s[id], power);
       } else {
         // if bin does have that species
-        data[bin].s[id] += state.s[id];
+        data[bin].s[id] += Math.pow(state.s[id], power);
       }
     });
   }
@@ -163,6 +164,7 @@ function returnZerosObject(keys: string[]): { [keys: string]: number } {
 
 function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): Solution {
   const data = inData.data;
+  const datasq = inData.datasq;
   const newData = nData.data;
   const reactions = inData.reactions;
   const newReactions = nData.reactions;
@@ -176,6 +178,7 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
 
   for (let i = 0; i < bins; i++) {
     fillBin(data, newData[idx], i);
+    fillBin(datasq, newData[idx], i, 2);
     data[i].t = dt * i;
 
     if (!reactions[i]) {
@@ -208,7 +211,7 @@ function linearBin(inData: Solution, nData: Solution, payload: SamplePayload): S
     }
     t = t + dt;
   }
-  return { data: data, reactions: reactions };
+  return { data: data, datasq: datasq, reactions: reactions };
 }
 
 function tLogBin(bin: number, x: number, dt: number): number {
@@ -231,6 +234,7 @@ function tLogDiff(bin: number, x: number, dt: number): number {
 
 function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solution {
   const data = inData.data;
+  const datasq = inData.datasq;
   const newData = nData.data;
   const reactions = inData.reactions;
   const newReactions = nData.reactions;
@@ -246,6 +250,7 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
   const x = Math.pow(t_end / dt, 1 / (bins - 1));
   let idx = 0;
   fillBin(data, newData[idx], 0);
+  fillBin(datasq, newData[idx], 0, 2);
   data[0].t = 0;
   idx = 1;
   let t = dt;
@@ -263,6 +268,7 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
       idx = idx - 1;
     }
     fillBin(data, newData[idx], i);
+    fillBin(datasq, newData[idx], i, 2);
     data[i].t = t;
     t = tLogBin(i + 1, x, dt);
     if (idx < length - 1) {
@@ -271,7 +277,7 @@ function logBin(inData: Solution, nData: Solution, payload: SamplePayload): Solu
       reactions[i].dt = tLogDiff(i + 1, x, dt);
     }
   }
-  return { data: data, reactions: reactions };
+  return { data: data, datasq: datasq, reactions: reactions };
 }
 
 function logBinSeries(nData: TimeSeries, payload: SamplePayload, d_t?: number): TimeSeries {
@@ -361,9 +367,9 @@ function averageData(inputData: TimeSeries, runs: number, moment = 1): TimeSerie
   return data;
 }
 
-function getVariance(data: TimeSeries, runs: number): TimeSeries {
-  const avgData = averageData(data, runs);
-  const avgDataSq = averageData(data, runs, 2);
+function getVariance(data: Solution, runs: number): TimeSeries {
+  const avgData = averageData(data.data, runs);
+  const avgDataSq = averageData(data.datasq, runs);
   const keys = Object.keys(avgData);
   keys.forEach(key => {
     const bin = parseInt(key, 10);
@@ -531,9 +537,10 @@ export function simulate(payload: SamplePayload, onProgress?: (progress: number)
   data.moments = [];
   data.runMoments = [];
   const binnedSeries: TimeSeries = {};
+  const binnedSquaredSeries: TimeSeries = {};
   const reactions: ReactionSeries = {};
   let sol: Solution;
-  sol = { data: binnedSeries, reactions: reactions };
+  sol = { data: binnedSeries, datasq: binnedSquaredSeries, reactions: reactions };
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     if (onProgress) onProgress(i / runs);
@@ -562,8 +569,9 @@ export function simulate(payload: SamplePayload, onProgress?: (progress: number)
   }
   // Average data
   data.series = averageData(sol.data, runs);
-  data.variance = splitSpecies(getVariance(sol.data, runs));
+  data.variance = splitSpecies(getVariance(sol, runs));
   data.species = splitSpecies(data.series);
+  data.speciessq = splitSpecies(averageData(sol.datasq, runs));
   data.histograms = histSeries(data.series);
   data.moments = calculateMomentDevs(averageMoments(data.moments, runs));
   data.reactions = datifyReactions(normalizeReactions(sol.reactions, runs));

@@ -14,6 +14,10 @@ import Guide from './pages/Guide.mdx';
 import BD from './pages/models/Becker-Doring.mdx';
 import Smol from './pages/models/Smoluchowski.mdx';
 import SmolBDN from './pages/models/SmoluchowskiBDN.mdx';
+import AddSub from './pages/models/addsub.mdx';
+import CoagFrag from './pages/models/coagfrag.mdx';
+import Primary from './pages/models/PrimaryNucleation.mdx';
+import Secondary from './pages/models/SecondaryNucleation.mdx';
 import Algorithm from './pages/Algorithm.mdx';
 import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import AnchorLink from './common/AnchorLink';
@@ -137,11 +141,23 @@ function App(): JSX.Element {
             <Route path="/smoluchowski">
               <Smol />
             </Route>
-            <Route path="/smolushowski-bdm">
+            <Route path="/smolushowski-bdn">
               <SmolBDN />
             </Route>
             <Route path="/algorithm">
               <Algorithm />
+            </Route>
+            <Route path="/addition-subtraction">
+              <AddSub />
+            </Route>
+            <Route path="/coagulation-fragmentation">
+              <CoagFrag />
+            </Route>
+            <Route path="/primary">
+              <Primary />
+            </Route>
+            <Route path="/secondary">
+              <Secondary />
             </Route>
             <Route exact path="/">
               <Redirect to="/sample-list" />

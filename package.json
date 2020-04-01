@@ -88,6 +88,7 @@
   },
   "dependencies": {
     "@mdx-js/react": "^1.5.7",
+    "@types/mdx-js__react": "^1.5.1",
     "core-js": "^3.6.4",
     "file-saver": "^2.0.2",
     "formik": "^2.1.4",

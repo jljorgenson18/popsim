@@ -27,6 +27,7 @@ export interface ReactionElement {
 
 export interface Solution {
   data: TimeSeries;
+  datasq?: TimeSeries;
   reactions: ReactionSeries;
 }
 
