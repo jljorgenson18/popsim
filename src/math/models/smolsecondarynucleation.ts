@@ -11,7 +11,6 @@ import {
 } from 'src/math/common';
 import { ModelState, ReactionCount, GetProbabilitiesFunc, Step, ReactionElement } from '../types';
 import { polymerMass } from 'src/math/analysis';
-import { math } from 'polished';
 
 function reactionName(name: string): ReactionCount {
   const reactions: ReactionCount = {
