@@ -31,7 +31,7 @@ function useStableYDomain(data: SampleData): [AxisDomain, AxisDomain] {
       return current;
     }, -Infinity);
   }, [data.histograms]);
-  return [0, Math.round(highestPValue)];
+  return [0, Math.ceil(highestPValue)];
 }
 function Histogram(props: VizProps) {
   const {
