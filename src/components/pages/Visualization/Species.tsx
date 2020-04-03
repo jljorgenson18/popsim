@@ -4,6 +4,7 @@ import { CheckBox, Box } from 'grommet';
 import { VizProps } from './types';
 import ControlField from './common/ControlField';
 import TimeSeriesChart from './common/TimeSeriesChart';
+import OverflowBox from './common/OverflowBox';
 
 interface SpeciesOptions {
   [speciesKey: string]: boolean;
@@ -43,7 +44,7 @@ function Species(props: VizProps) {
           <ControlField
             label="Select Species"
             input={
-              <Box overflow="auto" height={{ min: '0px', max: '160px' }}>
+              <OverflowBox>
                 {speciesKeys.map(key => {
                   const display = !!speciesOptions[key];
                   return (
@@ -60,7 +61,7 @@ function Species(props: VizProps) {
                     />
                   );
                 })}
-              </Box>
+              </OverflowBox>
             }
           />
           <CheckBox

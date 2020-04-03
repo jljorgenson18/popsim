@@ -4,6 +4,7 @@ import TimeSeriesChart from './common/TimeSeriesChart';
 import { CheckBox, Box } from 'grommet';
 import { useTimeSeriesDataWithIndividualRuns } from './hooks';
 import ControlField from './common/ControlField';
+import OverflowBox from './common/OverflowBox';
 
 function Length(props: VizProps) {
   const {
@@ -32,7 +33,7 @@ function Length(props: VizProps) {
           <ControlField
             label="Select Individual Runs"
             input={
-              <Box overflow="auto" height={{ min: '0px', max: '160px' }}>
+              <OverflowBox>
                 {runMomentIndices.map(runIdx => {
                   const display = !!runOptions[runIdx];
                   return (
@@ -49,7 +50,7 @@ function Length(props: VizProps) {
                     />
                   );
                 })}
-              </Box>
+              </OverflowBox>
             }
           />
           <CheckBox

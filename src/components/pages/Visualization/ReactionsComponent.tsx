@@ -4,6 +4,7 @@ import { CheckBox, Box } from 'grommet';
 import { VizProps } from './types';
 import ControlField from './common/ControlField';
 import TimeSeriesChart from './common/TimeSeriesChart';
+import OverflowBox from './common/OverflowBox';
 
 interface ReactionsOptions {
   [reactionsKey: string]: boolean;
@@ -42,7 +43,7 @@ function Reactions(props: VizProps) {
           <ControlField
             label="Select Reactions"
             input={
-              <Box overflow="auto" height={{ min: '0px', max: '160px' }}>
+              <OverflowBox>
                 {reactionKeys.map(key => {
                   const display = !!reactionsOptions[key];
                   return (
@@ -59,7 +60,7 @@ function Reactions(props: VizProps) {
                     />
                   );
                 })}
-              </Box>
+              </OverflowBox>
             }
           />
         </Box>
