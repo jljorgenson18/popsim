@@ -7,7 +7,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const remarkMath = require('remark-math');
 const rehypeKatex = require('rehype-katex');
 const ImageminPlugin = require('imagemin-webpack-plugin').default;
-//const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isTest = process.env.NODE_ENV === 'test';
@@ -95,6 +95,13 @@ module.exports = {
     // TODO: Add favicon plugin
     new CaseSensitivePathsPlugin(),
     !isDev ? new ImageminPlugin({ test: /\.(png|jpg|gif|svg)$/ }) : null,
+    !isDev || true
+      ? new FaviconsWebpackPlugin({
+          logo: './src/Drexel.png',
+          inject: true,
+          outputPath: './static'
+        })
+      : null,
     new HtmlWebpackPlugin({
       template: './src/index.html'
     })
