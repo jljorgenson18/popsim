@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { Heading, Box, ThemeType } from 'grommet';
-import styled, { createGlobalStyle } from 'styled-components';
+import { Menu as MenuIcon } from 'grommet-icons';
+import styled, { createGlobalStyle, ThemeContext } from 'styled-components';
 import { normalize } from 'polished';
 import Sidebar from 'react-sidebar';
 
@@ -41,7 +42,9 @@ const MainHeading = styled(Heading)`
 `;
 
 function useIsMobile() {
-  const mql = useMemo(() => window.matchMedia(`(max-width: 800px)`), []);
+  const theme = useContext<ThemeType>(ThemeContext);
+  const largeScreenSizeMaxSize = theme.global.size.large;
+  const mql = useMemo(() => window.matchMedia(`(max-width: ${largeScreenSizeMaxSize})`), []);
   const [isMobile, setIsMobile] = useState(mql.matches);
   useEffect(() => {
     const handleMediaQueryChange = () => {
@@ -118,6 +121,20 @@ function App(): JSX.Element {
             </Box>
           </Box>
         }>
+        {isMobile ? (
+          <Box
+            pad={{ top: 'large', horizontal: 'large', bottom: 'small' }}
+            align="center"
+            direction="row">
+            <MenuIcon
+              style={{ height: 36, width: 36, cursor: 'pointer' }}
+              onClick={() => {
+                console.log('Sidebar toggle click?');
+                setSidebarIsOpen(!sidebarIsOpen);
+              }}
+            />
+          </Box>
+        ) : null}
         <Box>
           <Switch>
             <Route path="/sample-list">
