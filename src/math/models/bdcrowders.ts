@@ -8,11 +8,18 @@ import {
 } from 'src/math/common';
 import { ModelState, GetProbabilitiesFunc, ReactionCount, Step, ReactionElement } from '../types';
 
+interface PossibleStates {
+  P: number;
+  s: ReactionElement[];
+  R: ReactionCount;
+}
+
 function reactionName(name: string): ReactionCount {
   const reactions: ReactionCount = {
     nucleation: 0,
     addition: 0,
-    subtraction: 0
+    subtraction: 0,
+    'secondary-nucleation': 0
   };
   if (name in reactions) {
     reactions[name] = 1;
@@ -22,6 +29,16 @@ function reactionName(name: string): ReactionCount {
   return reactions;
 }
 
+function secondaryNucleation(n2: number): Step {
+  const reaction = [
+    { id: 1, delta: -1 * n2 },
+    { id: n2, delta: 1 }
+  ];
+  // checkConserved(newState, 100);
+  const step: Step = { reaction: reaction, reactions: reactionName('secondary-nucleation') };
+  return step;
+}
+
 function nucleate(nc: number): Step {
   const reaction: ReactionElement[] = [
     { id: 1, delta: -1 * nc },
@@ -29,6 +46,25 @@ function nucleate(nc: number): Step {
   ];
   const step: Step = { reaction: reaction, reactions: reactionName('nucleation') };
   return step;
+}
+
+function possibleNucleation(
+  state: ModelState,
+  nc: number,
+  goanc: number,
+  kn: number
+): PossibleStates[] {
+  const possibleStates: PossibleStates[] = [];
+  if (state.s[1] >= nc) {
+    let P = goanc * kn;
+    for (let j = 0; j < nc; j++) {
+      P = P * (state.s[1] - j);
+    }
+    const nuc = nucleate(nc);
+    possibleStates.push({ P: P, s: nuc.reaction, R: nuc.reactions });
+  }
+  console.log(possibleStates);
+  return possibleStates;
 }
 
 function addition(id: number): Step {
@@ -61,6 +97,31 @@ function subtraction(id: number, nc: number): Step {
   } else {
     throw new Error('ID should never be less than nc in subtraction');
   }
+}
+
+function additionSubtraction(
+  state: ModelState,
+  nc: number,
+  a: number,
+  b: number,
+  goa: number
+): PossibleStates[] {
+  const possibleStates: PossibleStates[] = [];
+  Object.keys(state.s).forEach(key => {
+    const speciesIdx = parseInt(key, 10);
+    if (Number.isNaN(speciesIdx)) return;
+    if (speciesIdx !== 1) {
+      if (state.s[1] !== 0) {
+        const Pa = goa * a * state.s[1] * state.s[speciesIdx];
+        const add = addition(speciesIdx);
+        possibleStates.push({ P: Pa, s: add.reaction, R: add.reactions });
+      }
+      const Pb = b * state.s[speciesIdx];
+      const sub = subtraction(speciesIdx, nc);
+      possibleStates.push({ P: Pb, s: sub.reaction, R: sub.reactions });
+    }
+  });
+  return possibleStates;
 }
 
 export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilitiesFunc {
@@ -101,30 +162,14 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
   const goanc = Math.pow(goa, params.nc - 1);
   console.log(goa, goanc);
   return function (state: ModelState) {
-    const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
-    // nucleate
-    if (state.s[1] >= nc) {
-      let P = goanc * kn;
-      for (let j = 0; j < nc; j++) {
-        P = P * (state.s[1] - j);
-      }
-      const nuc = nucleate(nc);
-      possibleStates.push({ P: P, s: nuc.reaction, R: nuc.reactions });
-    }
-    Object.keys(state.s).forEach(key => {
-      const speciesIdx = parseInt(key, 10);
-      if (Number.isNaN(speciesIdx)) return;
-      if (speciesIdx !== 1) {
-        if (state.s[1] !== 0) {
-          const Pa = goa * a * state.s[1] * state.s[speciesIdx];
-          const add = addition(speciesIdx);
-          possibleStates.push({ P: Pa, s: add.reaction, R: add.reactions });
-        }
-        const Pb = b * state.s[speciesIdx];
-        const sub = subtraction(speciesIdx, nc);
-        possibleStates.push({ P: Pb, s: sub.reaction, R: sub.reactions });
-      }
-    });
+    let possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
+    // Nucleation
+    console.log(possibleNucleation(state, nc, goanc, kn));
+    possibleStates = possibleStates.concat(possibleNucleation(state, nc, goanc, kn));
+    console.log(possibleStates);
+    // Addition and Subtraction
+    possibleStates = possibleStates.concat(additionSubtraction(state, nc, a, b, goa));
+    console.log(possibleStates);
     return possibleStates;
   };
 }
