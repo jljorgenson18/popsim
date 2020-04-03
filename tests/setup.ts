@@ -19,6 +19,6 @@ jest.mock('src/math/index', () => {
 // Mock matchMedia
 (window as any).matchMedia =
   window.matchMedia ||
-  function() {
-    return { matches: false, addListener: function() {}, removeListener: function() {} };
+  function () {
+    return { matches: false, addListener: function () {}, removeListener: function () {} };
   };

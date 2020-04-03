@@ -135,7 +135,7 @@ export function buildModel(params: MPPayload): GetProbabilitiesFunc {
   const goa = params.gamma / params.alpha;
   const goanc = Math.pow(goa, params.nc - 1);
   const gamma = params.gamma;
-  return function(initialState: ModelState) {
+  return function (initialState: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
     // nucleate

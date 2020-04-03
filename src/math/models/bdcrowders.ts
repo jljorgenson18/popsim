@@ -100,7 +100,7 @@ export function buildModel(params: BeckerDoringCrowderPayload): GetProbabilities
   const goa = params.gamma / params.alpha;
   const goanc = Math.pow(goa, params.nc - 1);
   console.log(goa, goanc);
-  return function(state: ModelState) {
+  return function (state: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     // nucleate
     if (state.s[1] >= nc) {

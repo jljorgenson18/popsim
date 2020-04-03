@@ -147,7 +147,7 @@ export function buildModel(params: SmoluchowskiPayload): GetProbabilitiesFunc {
   } else {
     kn = a / nc;
   }
-  return function(initialState: ModelState) {
+  return function (initialState: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
     // nucleate

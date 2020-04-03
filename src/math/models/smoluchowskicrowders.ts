@@ -171,7 +171,7 @@ export function buildModel(params: SmoluchowskiCrowderPayload): GetProbabilities
   const goanc = Math.pow(goa, params.nc - 1);
   console.log(goa);
   console.log(goanc);
-  return function(initialState: ModelState) {
+  return function (initialState: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
     // nucleate

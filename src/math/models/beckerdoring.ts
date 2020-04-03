@@ -77,7 +77,7 @@ export function buildModel(params: BeckerDoringPayload): GetProbabilitiesFunc {
   }
   const b = params.b;
 
-  return function(state: ModelState) {
+  return function (state: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     if (state.s[1] >= nc) {
       let P = kn;

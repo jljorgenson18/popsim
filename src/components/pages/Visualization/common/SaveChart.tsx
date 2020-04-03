@@ -39,14 +39,14 @@ function downloadSVG(ele: SVGSVGElement, fileName = 'export'): Promise<void> {
   const svgUrl = URL.createObjectURL(svgBlob);
   const tempImg = new Image();
   return new Promise((resolve, reject) => {
-    tempImg.onload = function() {
+    tempImg.onload = function () {
       tempCanvas.getContext('2d').drawImage(tempImg, 0, 0);
       URL.revokeObjectURL(svgUrl);
       const dataUrl = tempCanvas.toDataURL('image/png', 1);
       triggerDownload(dataUrl, fileName);
       resolve();
     };
-    tempImg.onerror = function() {
+    tempImg.onerror = function () {
       reject(new Error('Failed to load image'));
     };
     tempImg.src = svgUrl;

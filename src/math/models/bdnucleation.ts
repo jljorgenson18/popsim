@@ -197,7 +197,7 @@ export function buildModel(params: BDNucleationPayload): GetProbabilitiesFunc {
     params.alpha = 1.0;
   }
   const goa = params.gamma / params.alpha;
-  return function(initialState: ModelState) {
+  return function (initialState: ModelState) {
     const possibleStates: { P: number; s: ReactionElement[]; R: ReactionCount }[] = [];
     const state = deepClone(initialState);
     catchNeg(state, 'buildModel');
