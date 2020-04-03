@@ -1,7 +1,8 @@
-import { SampleDoc } from 'src/db/sample';
+import { SampleDoc, SampleData } from 'src/db/sample';
 
 export interface VizProps {
   sample: SampleDoc;
+  data: SampleData;
 }
 
 export interface TimeSeriesData {

@@ -43,7 +43,7 @@ const MainHeading = styled(Heading)`
 
 function useIsMobile() {
   const theme = useContext<ThemeType>(ThemeContext);
-  const largeScreenSizeMaxSize = theme.global.size.large;
+  const largeScreenSizeMaxSize = theme?.global?.size?.large || '800px';
   const mql = useMemo(() => window.matchMedia(`(max-width: ${largeScreenSizeMaxSize})`), []);
   const [isMobile, setIsMobile] = useState(mql.matches);
   useEffect(() => {

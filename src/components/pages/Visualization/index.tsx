@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormField, Select, Heading } from 'grommet';
 import { FormEdit } from 'grommet-icons';
 
-import { SampleDoc } from 'src/db/sample';
+import { SampleDoc, SampleData, getSampleDataFromSample } from 'src/db/sample';
 import Mass from './Mass';
 import NumberChart from './Number';
 import Length from './Length';
@@ -43,10 +43,15 @@ function Visualization(props: VisualizationProps) {
   const query = useQuery();
   const [hoveringOverTitle, setHoveringOverTitle] = useState<boolean>(false);
   const [showingUpdateSampleName, setShowingUpdateSampleName] = useState<boolean>(false);
+  const [sampleData, setSampleData] = useState<SampleData>(null);
   const [currentViz, setCurrentViz] = useState<string>(VizOptionTypes[0]);
   const sampleIds = query.get('samples').split(',');
   const sample = (allSamples || []).find(sample => sample._id === sampleIds[0]);
-  if (!sample) return null;
+  useEffect(() => {
+    if (!sample) return;
+    getSampleDataFromSample(sample._id).then(sampleData => setSampleData(sampleData));
+  }, [sample]);
+  if (!sample || !sampleData) return null;
   return (
     <Page>
       <Heading
@@ -75,7 +80,8 @@ function Visualization(props: VisualizationProps) {
           value={currentViz || ''}></Select>
       </FormField>
       {React.createElement(VizOptions[currentViz], {
-        sample
+        sample,
+        data: sampleData
       })}
     </Page>
   );

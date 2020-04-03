@@ -8,7 +8,8 @@ import OverflowBox from './common/OverflowBox';
 
 function Mass(props: VizProps) {
   const {
-    sample: { data, name }
+    sample: { name },
+    data
   } = props;
   const {
     combinedMoments,

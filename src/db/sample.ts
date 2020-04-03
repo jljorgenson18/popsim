@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import db from './index';
 import { getSampleData } from 'src/math/index';
 import { Data } from 'src/math/main';
+import isString from 'lodash/isString';
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -145,13 +146,18 @@ export type SamplePayload =
   | BeckerDoringCrowderPayload;
 
 export type SampleDoc = SamplePayload & {
+  _attachments?: PouchDB.Core.Attachments;
   _id: string;
   _rev: string;
-  data: SampleData;
   createdAt: number;
 };
 
 export type SampleData = Data;
+
+// For uploads and old school samples
+export type SampleDocWithData = SampleDoc & {
+  data: SampleData;
+};
 
 export const modelTypes = [
   'Becker-Doring',
@@ -170,12 +176,13 @@ export async function createSample(
   const sampleData = await getSampleData(payload, onProgress);
 
   // Call to math goes here
-  await db.put<PartialBy<SampleDoc, '_rev'>>({
+  const response = await db.put<PartialBy<SampleDoc, '_rev'>>({
     ...payload,
-    data: sampleData,
     createdAt: Date.now(),
     _id: id
   });
+  const sampleDataBlob = new Blob([JSON.stringify(sampleData)], { type: 'application/json' });
+  await db.putAttachment(response.id, 'sampleData', response.rev, sampleDataBlob, 'text/plain');
   return await db.get<SampleDoc>(id);
 }
 
@@ -184,14 +191,18 @@ export async function updateSample(updatedDoc: SampleDoc) {
   return await db.get<SampleDoc>(updatedDoc._id);
 }
 
-export async function cloneSample(payload: SampleDoc): Promise<SampleDoc> {
+export async function cloneSample(payload: SampleDocWithData): Promise<SampleDoc> {
   const id = uuid();
-  await db.put<PartialBy<SampleDoc, '_rev'>>({
-    ...payload,
-    _rev: null,
+  const { data, ...rest } = payload;
+  const response = await db.put<PartialBy<SampleDoc, '_rev'>>({
+    ...rest,
+    _attachments: undefined,
+    _rev: undefined,
     createdAt: Date.now(),
     _id: id
   });
+  const sampleDataBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  await db.putAttachment(response.id, 'sampleData', response.rev, sampleDataBlob, 'text/plain');
   return await db.get<SampleDoc>(id);
 }
 
@@ -213,6 +224,19 @@ export function getSamplesFromIds(sampleIds: string[]) {
 export async function getSample(id: string): Promise<SampleDoc> {
   return await db.get<SampleDoc>(id);
 }
+
+export async function getSampleDataFromSample(sampleOrId: string | SampleDoc): Promise<SampleData> {
+  try {
+    const sample = isString(sampleOrId) ? await db.get<SampleDoc>(sampleOrId) : sampleOrId;
+    // If it was an old sample that just had the data there, use that
+    if (isSampleDocWithData(sample)) return sample.data;
+    const blob = (await db.getAttachment(sample._id, 'sampleData')) as Blob;
+    return JSON.parse(await blob.text());
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
 export async function getAllSamples(): Promise<SampleDoc[]> {
   const result = await db.allDocs<SampleDoc>({
     include_docs: true,
@@ -220,3 +244,7 @@ export async function getAllSamples(): Promise<SampleDoc[]> {
   });
   return result.rows.map(row => row.doc as SampleDoc).sort((a, b) => b.createdAt - a.createdAt);
 }
+
+const isSampleDocWithData = (sample: SampleDoc): sample is SampleDocWithData => {
+  return !!(sample as SampleDocWithData).data;
+};

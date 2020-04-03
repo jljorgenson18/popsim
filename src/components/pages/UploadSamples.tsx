@@ -3,12 +3,12 @@ import { useDropzone } from 'react-dropzone';
 import { Box, Heading, Paragraph } from 'grommet';
 
 import Page from '../common/Page';
-import { SampleDoc, cloneSample } from 'src/db/sample';
+import { SampleDocWithData, cloneSample } from 'src/db/sample';
 import { useHistory } from 'react-router-dom';
 
 interface UploadSamplesProps {}
 
-const getSampleDataFile = async (file: File): Promise<SampleDoc> => {
+const getSampleDataFile = async (file: File): Promise<SampleDocWithData> => {
   const jsonString = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onabort = () => reject(new Error('file reading was aborted'));
@@ -18,12 +18,12 @@ const getSampleDataFile = async (file: File): Promise<SampleDoc> => {
     };
     reader.readAsText(file);
   });
-  return JSON.parse(jsonString) as SampleDoc;
+  return JSON.parse(jsonString) as SampleDocWithData;
 };
 
 function UploadSamples(props: UploadSamplesProps) {
   const history = useHistory();
-  async function handleUploadSamples(uploadedSamples: SampleDoc[]) {
+  async function handleUploadSamples(uploadedSamples: SampleDocWithData[]) {
     console.log('Uploading samples...');
     await Promise.all(uploadedSamples.map(doc => cloneSample(doc)));
     console.log('Samples uploaded!!');

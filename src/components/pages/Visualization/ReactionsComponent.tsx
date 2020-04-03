@@ -12,7 +12,8 @@ interface ReactionsOptions {
 
 function Reactions(props: VizProps) {
   const {
-    sample: { data, name }
+    sample: { name },
+    data
   } = props;
   // We can get the species keys from just looking at the first species data
   const reactionKeys = useMemo(

@@ -7,7 +7,8 @@ import Controls from './common/Controls';
 
 function Histogram(props: VizProps) {
   const {
-    sample: { data, name }
+    sample: { name },
+    data
   } = props;
   const [selectedBin, setSelectedBin] = useState<number>(0);
   const chartRef = useRef(null);

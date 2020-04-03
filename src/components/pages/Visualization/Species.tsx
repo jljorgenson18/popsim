@@ -12,14 +12,14 @@ interface SpeciesOptions {
 
 function Species(props: VizProps) {
   const {
-    sample: { data, name }
+    sample: { name },
+    data
   } = props;
   // We can get the species keys from just looking at the first species data
   const speciesKeys = useMemo(() => Object.keys(data.species[0]).filter(key => key !== 't'), [
     data.species
   ]);
   const [variance, setVariance] = useState(false);
-
   const [speciesOptions, setSpeciesOptions] = useState<SpeciesOptions>({});
   useEffect(() => {
     const newSpeciesOptions = speciesKeys.reduce<SpeciesOptions>((mapped, key) => {

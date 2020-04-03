@@ -30,7 +30,8 @@ interface RunsOption {
 }
 function Runs(props: VizProps) {
   const {
-    sample: { data, name }
+    sample: { name },
+    data
   } = props;
 
   const [RunsOptions, setRunsOptions] = useState<{
