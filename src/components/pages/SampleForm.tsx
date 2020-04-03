@@ -27,6 +27,7 @@ import {
 import Loading from '../common/Loading';
 import Page from '../common/Page';
 import { useHistory } from 'react-router-dom';
+import FormFieldLabel from '../common/FormFieldLabel';
 
 interface SampleFormProps {}
 
@@ -54,25 +55,6 @@ const validate = (values: Partial<SamplePayload>) => {
     errors.nc = 'Must be greater than or equal to 2';
   }
   return errors;
-};
-
-const FormFieldLabel = (props: React.ComponentProps<typeof FormField>) => {
-  const { required, label, ...rest } = props as any; // TODO, Figure out why this is causing problems
-  return (
-    <FormField
-      label={
-        required ? (
-          <Box direction="row">
-            <Text>{label}</Text>
-            <Text color="status-critical">*</Text>
-          </Box>
-        ) : (
-          label
-        )
-      }
-      {...rest}
-    />
-  );
 };
 
 function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
@@ -706,7 +688,7 @@ function SampleForm(props: SampleFormProps) {
               primary
               gap="small"
               type="submit"
-              disabled={!formik.isValid && formik.submitCount > 0}></Button>
+              disabled={!formik.isValid && submitted}></Button>
           </Box>
         </Grid>
       </Form>

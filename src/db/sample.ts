@@ -179,6 +179,11 @@ export async function createSample(
   return await db.get<SampleDoc>(id);
 }
 
+export async function updateSample(updatedDoc: SampleDoc) {
+  await db.put<PartialBy<SampleDoc, '_rev'>>(updatedDoc);
+  return await db.get<SampleDoc>(updatedDoc._id);
+}
+
 export async function cloneSample(payload: SampleDoc): Promise<SampleDoc> {
   const id = uuid();
   await db.put<PartialBy<SampleDoc, '_rev'>>({

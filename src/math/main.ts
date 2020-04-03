@@ -82,7 +82,7 @@ function advanceTime(initialState: ModelState, dt: number): ModelState {
   };
 }
 
-function fillBin(data: TimeSeries, inputState: ModelState, bin: number, power=1): TimeSeries {
+function fillBin(data: TimeSeries, inputState: ModelState, bin: number, power = 1): TimeSeries {
   const state = deepClone(inputState);
   if (!data[bin]) {
     // check if that bin exists
