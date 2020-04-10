@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Form, Heading, Select, Grid, Layer, Paragraph } from 'grommet';
 import { useFormik } from 'formik';
+import * as yup from 'yup';
 import memoize from 'lodash/memoize';
 
-import {
-  modelTypes,
-  BeckerDoringPayload,
-  SmoluchowskiPayload,
-  BDNucleationPayload,
-  SmoluchowskiCrowderPayload,
-  BeckerDoringCrowderPayload,
-  SmoluchowskiSecondaryPayload,
-  createSample,
-  SamplePayload
-} from 'src/db/sample';
+import { modelTypes, createSample, SamplePayload, BaseSample } from 'src/db/sample';
 import Loading from '../common/Loading';
 import Page from '../common/Page';
 import { useHistory } from 'react-router-dom';
@@ -24,8 +15,8 @@ interface SampleFormProps {}
 const parseInitialConditionField = memoize((inputVal: string) => {
   return (inputVal || '')
     .split(',')
-    .map(val => parseFloat(val.trim()))
-    .filter(num => num != null && !Number.isNaN(num));
+    .map(val => (val.trim() ? Number(val.trim()) : null))
+    .filter(num => num != null);
 });
 
 const getAllSamplePayloadsFromValues = (values: Values): SamplePayload[] => {
@@ -53,7 +44,7 @@ const getAllSamplePayloadsFromValues = (values: Values): SamplePayload[] => {
   // Generate a sample for each possible combination
   const allPayloads: SamplePayload[] = [];
   for (let mainIdx = 0; mainIdx < totalPayloadSize; mainIdx++) {
-    const payload = { ...restOfValues };
+    const payload = { ...restOfValues } as any;
     payload.name = `${values.name} (${mainIdx + 1})`;
     payload.group = values.name;
     let currentFieldIdx = mainIdx;
@@ -71,51 +62,41 @@ const getAllSamplePayloadsFromValues = (values: Values): SamplePayload[] => {
   return allPayloads;
 };
 
-const validateRequiredInitialField = (val: string) => {
-  return val != null && parseInitialConditionField(val).length > 0;
-};
-
-const validate = (values: Values) => {
-  const errors: { [fieldName: string]: string } = {};
-  if (!values.model) errors.model = 'Required';
-  if (!values.name) errors.name = 'Required';
-  if (values.N == null) errors.N = 'Required';
-  if (values.tstop == null) errors.tstop = 'Required';
-  if (values.Co == null) errors.Co = 'Required';
-  if (values.model === 'Becker-Doring') {
-    if (!validateRequiredInitialField(values.a)) errors.a = 'Required';
-    if (!validateRequiredInitialField(values.b)) errors.b = 'Required';
-  } else if (values.model === 'Smoluchowski') {
-    if (!validateRequiredInitialField(values.ka)) errors.ka = 'Required';
-    if (!validateRequiredInitialField(values.kb)) errors.kb = 'Required';
-  } else if (values.model === 'BD-nucleation') {
-    if (!validateRequiredInitialField(values.ka)) errors.ka = 'Required';
-    if (!validateRequiredInitialField(values.kb)) errors.kb = 'Required';
-    if (!validateRequiredInitialField(values.na)) errors.na = 'Required';
-    if (!validateRequiredInitialField(values.nb)) errors.nb = 'Required';
-    if (!validateRequiredInitialField(values.nc)) errors.nc = 'Required';
-  }
-  if (!errors.nc && parseInitialConditionField(values.nc).some(nc => nc < 2)) {
-    errors.nc = 'Values must be greater than or equal to 2';
-  }
-  return errors;
-};
-
 function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
   formik: T;
   label: string;
   name: string;
   required?: boolean;
   help?: string;
+  customValidate?: (values: number[]) => string | null;
 }) {
-  const { formik, label, name, required, help } = props;
+  const { formik, label, name, required, help, customValidate } = props;
   const submitted = formik.submitCount > 0;
   useEffect(() => {
-    formik.setFieldValue(`initialConditionFields.${name}`, true);
+    formik.setFieldValue(`initialConditionFields.${name}`, {
+      required
+    });
+    formik.registerField(name, {
+      validate: (value: string) => {
+        if (required && !value) {
+          return 'Required';
+        }
+        const parsedValue = parseInitialConditionField(value);
+        if (required && parsedValue.length === 0) {
+          return 'Required';
+        }
+        if (parsedValue.some(num => Number.isNaN(num))) {
+          return 'All values must be numeric';
+        }
+        if (customValidate) return customValidate(parsedValue);
+        return null;
+      }
+    });
     return () => {
       formik.setFieldValue(`initialConditionFields.${name}`, undefined);
+      formik.unregisterField(name);
     };
-  }, []);
+  }, [name, required]);
   return (
     <FormFieldLabel
       label={label}
@@ -130,10 +111,7 @@ function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
   );
 }
 
-// Just here for the types
-const BeckerDoringFormikFunc = (params: any) => useFormik<BeckerDoringPayload>(params);
-type BeckerDoringFormik = ReturnType<typeof BeckerDoringFormikFunc>;
-function BeckerDoringFields(props: { formik: BeckerDoringFormik }) {
+function BeckerDoringFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
@@ -149,6 +127,12 @@ function BeckerDoringFields(props: { formik: BeckerDoringFormik }) {
         label="Critical nucleus size (nc)"
         name="nc"
         help="Defaults to 2"
+        customValidate={values => {
+          if (values.some(nc => nc < 2)) {
+            return 'Values must be greater than or equal to 2';
+          }
+          return null;
+        }}
       />
       <InitialConditionField
         formik={formik}
@@ -160,10 +144,7 @@ function BeckerDoringFields(props: { formik: BeckerDoringFormik }) {
   );
 }
 
-const BeckerDoringCrowderFormikFunc = (params: any) =>
-  useFormik<BeckerDoringCrowderPayload>(params);
-type BeckerDoringCrowderFormik = ReturnType<typeof BeckerDoringCrowderFormikFunc>;
-function BeckerDoringCrowderFields(props: { formik: BeckerDoringCrowderFormik }) {
+function BeckerDoringCrowderFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
@@ -255,10 +236,7 @@ function BeckerDoringCrowderFields(props: { formik: BeckerDoringCrowderFormik })
 //   );
 // }
 
-// Just here for the types
-const SmoluchowsiFormikFunc = (params: any) => useFormik<SmoluchowskiPayload>(params);
-type SmoluchowsiFormik = ReturnType<typeof SmoluchowsiFormikFunc>;
-function SmoluchowskiFields(props: { formik: SmoluchowsiFormik }) {
+function SmoluchowskiFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
@@ -292,9 +270,7 @@ function SmoluchowskiFields(props: { formik: SmoluchowsiFormik }) {
   );
 }
 
-const SmoluchowsiCrowderFormikFunc = (params: any) => useFormik<SmoluchowskiCrowderPayload>(params);
-type SmoluchowskiCrowderFormik = ReturnType<typeof SmoluchowsiCrowderFormikFunc>;
-function SmoluchowskiCrowderFields(props: { formik: SmoluchowskiCrowderFormik }) {
+function SmoluchowskiCrowderFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
@@ -352,10 +328,7 @@ function SmoluchowskiCrowderFields(props: { formik: SmoluchowskiCrowderFormik })
   );
 }
 
-const SmoluchowsiSecondaryFormikFunc = (params: any) =>
-  useFormik<SmoluchowskiSecondaryPayload>(params);
-type SmoluchowskiSecondaryFormik = ReturnType<typeof SmoluchowsiSecondaryFormikFunc>;
-function SmoluchowskiSecondaryFields(props: { formik: SmoluchowskiSecondaryFormik }) {
+function SmoluchowskiSecondaryFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
@@ -497,10 +470,7 @@ function SmoluchowskiSecondaryFields(props: { formik: SmoluchowskiSecondaryFormi
 //   );
 // }
 
-// Just here for the types
-const BDNucleationFormikFunc = (params: any) => useFormik<BDNucleationPayload>(params);
-type BDNucleationFormik = ReturnType<typeof BDNucleationFormikFunc>;
-function BDNucleationFields(props: { formik: BDNucleationFormik }) {
+function BDNucleationFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
@@ -576,7 +546,30 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
   );
 }
 
-type Values = any;
+type Values = BaseSample & {
+  model: string;
+  initialConditionFields: {
+    [field: string]: true;
+  };
+} & {
+  [icField: string]: string;
+};
+
+const SampleFormSchema = yup.object().shape({
+  name: yup.string().max(50, 'Max characters is 50').required('Required'),
+  model: yup.string().oneOf(modelTypes).required('Required'),
+  N: yup.number().required('Required'),
+  tstop: yup.number().required('Required'),
+  runs: yup.number().required('Required'),
+  Co: yup.number().required('Required'),
+  ind_runs: yup.number(),
+  bins: yup.number(),
+  bin_scale: yup.string().oneOf(['log', 'linear'])
+});
+
+const SampleFormFormikFunc = (params: any) => useFormik<Partial<Values>>(params);
+type SampleFormFormik = ReturnType<typeof SampleFormFormikFunc>;
+
 function SampleForm(props: SampleFormProps) {
   const [creatingSample, setCreatingSample] = useState<
     { creating: false } | { creating: true; message: string }
@@ -623,13 +616,9 @@ function SampleForm(props: SampleFormProps) {
       setShowingErrorModal(err);
     }
   }
-  const initialValues: Partial<Values> = {
-    name: '',
-    initialConditionFields: {}
-  };
-  const formik = useFormik({
-    initialValues,
-    validate,
+  const formik = useFormik<Partial<Values>>({
+    initialValues: {},
+    validationSchema: SampleFormSchema,
     // Assumes that the values are populated correctly
     onSubmit(values: Values) {
       handleNewSampleSubmit(values);
@@ -714,15 +703,16 @@ function SampleForm(props: SampleFormProps) {
           />
           <FormFieldLabel
             label="Bin Scale"
-            name="bin_scale"
-            type="string"
-            help="log or linear (default)"
-            placeholder="linear"
-            error={(formik.touched.bin_scale || submitted) && formik.errors.bin_scale}
-            value={formik.values.bin_scale || ''}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
+            error={(formik.touched.bin_scale || submitted) && formik.errors.bin_scale}>
+            <Select
+              id="bin_scale"
+              options={['linear', 'log']}
+              name="bin_scale"
+              onChange={evt => {
+                formik.setFieldValue('bin_scale', evt.value as string, true);
+              }}
+              value={formik.values.bin_scale || ''}></Select>
+          </FormFieldLabel>
           <FormFieldLabel
             label="Model"
             htmlFor="model-select"
@@ -738,23 +728,17 @@ function SampleForm(props: SampleFormProps) {
               }}
               value={formik.values.model || ''}></Select>
           </FormFieldLabel>
-          {formik.values.model === 'Becker-Doring' ? (
-            <BeckerDoringFields formik={formik as BeckerDoringFormik} />
-          ) : null}
+          {formik.values.model === 'Becker-Doring' ? <BeckerDoringFields formik={formik} /> : null}
           {formik.values.model === 'BD-crowders' ? (
-            <BeckerDoringCrowderFields formik={formik as BeckerDoringCrowderFormik} />
+            <BeckerDoringCrowderFields formik={formik} />
           ) : null}
-          {formik.values.model === 'Smoluchowski' ? (
-            <SmoluchowskiFields formik={formik as SmoluchowsiFormik} />
-          ) : null}
-          {formik.values.model === 'BD-nucleation' ? (
-            <BDNucleationFields formik={formik as BDNucleationFormik} />
-          ) : null}
+          {formik.values.model === 'Smoluchowski' ? <SmoluchowskiFields formik={formik} /> : null}
+          {formik.values.model === 'BD-nucleation' ? <BDNucleationFields formik={formik} /> : null}
           {formik.values.model === 'Smoluchowski-crowders' ? (
-            <SmoluchowskiCrowderFields formik={formik as SmoluchowskiCrowderFormik} />
+            <SmoluchowskiCrowderFields formik={formik} />
           ) : null}
           {formik.values.model === 'Smoluchowski-secondary-nucleation' ? (
-            <SmoluchowskiSecondaryFields formik={formik as SmoluchowskiSecondaryFormik} />
+            <SmoluchowskiSecondaryFields formik={formik} />
           ) : null}
           <Box direction="row" gap="medium" gridArea="auto / 1 / auto / 3">
             <Button

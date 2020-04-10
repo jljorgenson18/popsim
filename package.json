@@ -53,6 +53,7 @@
     "@types/styled-components": "^5.0.1",
     "@types/uuid": "^7.0.2",
     "@types/webpack-env": "^1.15.1",
+    "@types/yup": "^0.26.35",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "babel-jest": "^25.2.6",
@@ -113,6 +114,7 @@
     "recharts": "^2.0.0-beta.1",
     "regenerator-runtime": "^0.13.5",
     "styled-components": "^5.0.1",
-    "uuid": "^7.0.3"
+    "uuid": "^7.0.3",
+    "yup": "^0.28.3"
   }
 }
