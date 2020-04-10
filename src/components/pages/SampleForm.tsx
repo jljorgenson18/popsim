@@ -1,19 +1,9 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Form,
-  FormField,
-  Heading,
-  Select,
-  Text,
-  Grid,
-  Layer,
-  Paragraph
-} from 'grommet';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Button, Form, Heading, Select, Grid, Layer, Paragraph, CheckBox } from 'grommet';
 import { useFormik } from 'formik';
+import memoize from 'lodash/memoize';
+
 import {
-  SamplePayload,
   modelTypes,
   BeckerDoringPayload,
   SmoluchowskiPayload,
@@ -21,8 +11,8 @@ import {
   SmoluchowskiCrowderPayload,
   BeckerDoringCrowderPayload,
   SmoluchowskiSecondaryPayload,
-  MPPayload,
-  createSample
+  createSample,
+  SamplePayload
 } from 'src/db/sample';
 import Loading from '../common/Loading';
 import Page from '../common/Page';
@@ -31,7 +21,61 @@ import FormFieldLabel from '../common/FormFieldLabel';
 
 interface SampleFormProps {}
 
-const validate = (values: Partial<SamplePayload>) => {
+const parseInitialConditionField = memoize((inputVal: string) => {
+  return (inputVal || '')
+    .split(',')
+    .map(val => parseFloat(val.trim()))
+    .filter(num => num != null && !Number.isNaN(num));
+});
+
+const getAllSamplePayloadsFromValues = (values: Values): SamplePayload[] => {
+  const initialConditionValues = Object.keys(values.initialConditionFields).reduce<{
+    [field: string]: number[];
+  }>((mapped, field) => {
+    const parsed = parseInitialConditionField(values[field]);
+    if (parsed && parsed.length > 0) {
+      mapped[field] = parsed;
+    }
+    return mapped;
+  }, {});
+  // We need to get the fields this way in case there were blank IC's because of default values
+  const initialConditionFieldsWithValues = Object.keys(initialConditionValues);
+  const totalPayloadSize = Object.values(initialConditionValues).reduce<number>(
+    (totalSize, values) => totalSize * values.length,
+    1
+  );
+  const restOfValues = {
+    ...values
+  };
+  initialConditionFieldsWithValues.forEach(field => delete restOfValues[field]);
+  delete restOfValues.initialConditionFields;
+
+  // Generate a sample for each possible combination
+  const allPayloads: SamplePayload[] = [];
+  for (let mainIdx = 0; mainIdx < totalPayloadSize; mainIdx++) {
+    const payload = { ...restOfValues };
+    payload.name = `${values.name} (${mainIdx + 1})`;
+    payload.group = values.name;
+    let currentFieldIdx = mainIdx;
+    initialConditionFieldsWithValues.forEach(field => {
+      const parsedField = initialConditionValues[field];
+      payload[field] = parsedField[currentFieldIdx % parsedField.length];
+      currentFieldIdx = Math.floor(currentFieldIdx / parsedField.length);
+    });
+    allPayloads.push(payload);
+  }
+  if (allPayloads.length === 1) {
+    allPayloads[0].name = values.name;
+    allPayloads[0].group = undefined;
+  }
+  return allPayloads;
+};
+
+const validateRequiredInitialField = (val: string) => {
+  return val != null && parseInitialConditionField(val).length > 0;
+};
+
+const validate = (values: Values) => {
   const errors: { [fieldName: string]: string } = {};
   if (!values.model) errors.model = 'Required';
   if (!values.name) errors.name = 'Required';
@@ -39,20 +83,20 @@ const validate = (values: Partial<SamplePayload>) => {
   if (values.tstop == null) errors.tstop = 'Required';
   if (values.Co == null) errors.Co = 'Required';
   if (values.model === 'Becker-Doring') {
-    if (values.a == null) errors.a = 'Required';
-    if (values.b == null) errors.b = 'Required';
+    if (!validateRequiredInitialField(values.a)) errors.a = 'Required';
+    if (!validateRequiredInitialField(values.b)) errors.b = 'Required';
   } else if (values.model === 'Smoluchowski') {
-    if (values.ka == null) errors.ka = 'Required';
-    if (values.kb == null) errors.kb = 'Required';
+    if (!validateRequiredInitialField(values.ka)) errors.ka = 'Required';
+    if (!validateRequiredInitialField(values.kb)) errors.kb = 'Required';
   } else if (values.model === 'BD-nucleation') {
-    if (values.ka == null) errors.ka = 'Required';
-    if (values.kb == null) errors.kb = 'Required';
-    if (values.na == null) errors.na = 'Required';
-    if (values.nb == null) errors.nb = 'Required';
-    if (values.nc == null) errors.nc = 'Required';
+    if (!validateRequiredInitialField(values.ka)) errors.ka = 'Required';
+    if (!validateRequiredInitialField(values.kb)) errors.kb = 'Required';
+    if (!validateRequiredInitialField(values.na)) errors.na = 'Required';
+    if (!validateRequiredInitialField(values.nb)) errors.nb = 'Required';
+    if (!validateRequiredInitialField(values.nc)) errors.nc = 'Required';
   }
-  if (!errors.nc && values.nc != null && values.nc < 2) {
-    errors.nc = 'Must be greater than or equal to 2';
+  if (!errors.nc && parseInitialConditionField(values.nc).some(nc => nc < 2)) {
+    errors.nc = 'Values must be greater than or equal to 2';
   }
   return errors;
 };
@@ -66,16 +110,20 @@ function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
 }) {
   const { formik, label, name, required, help } = props;
   const submitted = formik.submitCount > 0;
+  useEffect(() => {
+    formik.setFieldValue(`initialConditionFields.${name}`, true);
+    return () => {
+      formik.setFieldValue(`initialConditionFields.${name}`, undefined);
+    };
+  }, []);
   return (
     <FormFieldLabel
       label={label}
       name={name}
-      type="number"
       required={required}
-      step="any"
       help={help}
       error={(formik.touched[name] || submitted) && formik.errors[name]}
-      value={formik.values[name] || ''}
+      value={formik.values[name]}
       onChange={formik.handleChange}
       onBlur={formik.handleBlur}
     />
@@ -528,39 +576,65 @@ function BDNucleationFields(props: { formik: BDNucleationFormik }) {
   );
 }
 
+type Values = any;
 function SampleForm(props: SampleFormProps) {
-  const [creatingSample, setCreatingSample] = useState<boolean>(false);
+  const [creatingSample, setCreatingSample] = useState<
+    { creating: false } | { creating: true; message: string }
+  >({
+    creating: false
+  });
   const [showingErrorModal, setShowingErrorModal] = useState<Error | null>(null);
   const [progress, setProgress] = useState<number>(null);
   const history = useHistory();
-  async function handleNewSampleSubmit(values: SamplePayload) {
+  async function handleNewSampleSubmit(values: Values) {
     try {
-      setCreatingSample(true);
-      await createSample(values, newProgress => {
-        setProgress(newProgress);
-        console.log(newProgress);
+      const payloads = getAllSamplePayloadsFromValues(values);
+      console.log('Submitting payloads', payloads);
+      const payloadSize = payloads.length;
+      const createSampleProgressRatio = 1 / payloadSize;
+      for (let idx = 0; idx < payloadSize; idx++) {
+        setCreatingSample({
+          creating: true,
+          message:
+            payloadSize === 1
+              ? 'Creating sample...'
+              : `Creating sample ${idx + 1} of ${payloadSize}...`
+        });
+        const sampleProgress = idx / payloadSize;
+        await createSample(payloads[idx], newProgress => {
+          console.log('Creating sample progress', idx, newProgress);
+          /**
+           * We measure the overall sample progress first, then add the individual sample progress
+           * proportional to a single sample progress length
+           */
+          setProgress(sampleProgress + newProgress * createSampleProgressRatio);
+        });
+      }
+      setCreatingSample({
+        creating: false
       });
-      setCreatingSample(false);
       setProgress(null);
       history.push('/sample-list');
     } catch (err) {
-      setCreatingSample(false);
+      setCreatingSample({
+        creating: false
+      });
       setProgress(null);
       setShowingErrorModal(err);
     }
   }
-  const initialValues: Partial<SamplePayload> = {
-    name: ''
+  const initialValues: Partial<Values> = {
+    name: '',
+    initialConditionFields: {}
   };
   const formik = useFormik({
     initialValues,
     validate,
     // Assumes that the values are populated correctly
-    onSubmit(values: SamplePayload) {
+    onSubmit(values: Values) {
       handleNewSampleSubmit(values);
     }
   });
-
   const submitted = formik.submitCount > 0;
   return (
     <Page data-testid="sampleForm">
@@ -692,9 +766,9 @@ function SampleForm(props: SampleFormProps) {
           </Box>
         </Grid>
       </Form>
-      {creatingSample ? (
+      {creatingSample.creating ? (
         <Layer position="center" modal responsive={false} animation="fadeIn">
-          <Loading message={'Creating samples...'} progress={progress} />
+          <Loading message={creatingSample.message} progress={progress} />
         </Layer>
       ) : null}
       {showingErrorModal ? (

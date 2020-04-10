@@ -128,6 +128,11 @@ function SampleList(props: SampleListProps): JSX.Element {
             }
           },
           {
+            property: 'group',
+            search: true,
+            header: <Text>Group</Text>
+          },
+          {
             property: 'model',
             header: <Text>Model</Text>
           },
