@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Button, Form, Heading, Select, Grid, Layer, Paragraph, CheckBox } from 'grommet';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, Form, Heading, Select, Grid, Layer, Paragraph } from 'grommet';
 import { useFormik } from 'formik';
 import memoize from 'lodash/memoize';
 
@@ -763,6 +763,14 @@ function SampleForm(props: SampleFormProps) {
               gap="small"
               type="submit"
               disabled={!formik.isValid && submitted}></Button>
+          </Box>
+          <Box gridArea="auto / 1 / auto / 3">
+            <Heading level={4} margin={{ bottom: '0px' }}>
+              Tips
+            </Heading>
+            <Paragraph>
+              {`For multi-parameter submissions, add multiple model initial condition values by separating numbers with commas. For example, 12,34,56`}
+            </Paragraph>
           </Box>
         </Grid>
       </Form>
