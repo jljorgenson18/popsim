@@ -1,5 +1,4 @@
 const path = require('path');
-const fs = require('fs');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -17,7 +16,7 @@ module.exports = {
   context: __dirname,
   mode: isDev ? 'development' : 'production',
   entry: {
-    index: './src/index.tsx'
+    main: './src/index.tsx'
   },
   output: {
     filename: '[name].[hash].js',
@@ -92,18 +91,17 @@ module.exports = {
         NODE_ENV: JSON.stringify(isDev ? 'development' : 'production')
       }
     }),
-    // TODO: Add favicon plugin
     new CaseSensitivePathsPlugin(),
     !isDev ? new ImageminPlugin({ test: /\.(png|jpg|gif|svg)$/ }) : null,
-    !isDev || true
-      ? new FaviconsWebpackPlugin({
-          logo: './src/Drexel.png',
-          inject: true,
-          outputPath: './static'
-        })
-      : null,
     new HtmlWebpackPlugin({
       template: './src/index.html'
+    }),
+    new FaviconsWebpackPlugin({
+      logo: './src/Drexel.png',
+      inject: true,
+      prefix: '',
+      publicPath: '/static',
+      outputPath: './static'
     })
   ].filter(Boolean),
   resolve: {
