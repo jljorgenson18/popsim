@@ -113,10 +113,27 @@ function InitialConditionField<T extends ReturnType<typeof useFormik>>(props: {
   );
 }
 
+function CommonFields(props: { formik: SampleFormFormik }) {
+  const { formik } = props;
+
+  return (
+    <>
+      <InitialConditionField
+        formik={formik}
+        label="Bulk Concentration"
+        name="Co"
+        required
+        help="Micromolar"
+      />
+      <InitialConditionField formik={formik} label="Number of monomers (N)" name="N" required />
+    </>
+  );
+}
 function BeckerDoringFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
+      <CommonFields formik={formik} />
       <InitialConditionField formik={formik} label="Addition rate constant (a)" name="a" required />
       <InitialConditionField
         formik={formik}
@@ -150,6 +167,7 @@ function BeckerDoringCrowderFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
+      <CommonFields formik={formik} />
       <InitialConditionField formik={formik} label="Addition rate constant (a)" name="a" required />
       <InitialConditionField
         formik={formik}
@@ -242,6 +260,7 @@ function SmoluchowskiFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
+      <CommonFields formik={formik} />
       <InitialConditionField formik={formik} label="Association (ka)" name="ka" required />
       <InitialConditionField formik={formik} label="Dissociation (kb)" name="kb" required />
       <InitialConditionField
@@ -276,6 +295,7 @@ function SmoluchowskiCrowderFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
+      <CommonFields formik={formik} />
       <InitialConditionField formik={formik} label="Association (ka)" name="ka" required />
       <InitialConditionField formik={formik} label="Dissociation (kb)" name="kb" required />
       <InitialConditionField
@@ -334,6 +354,7 @@ function SmoluchowskiSecondaryFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
+      <CommonFields formik={formik} />
       <InitialConditionField formik={formik} label="Association (ka)" name="ka" required />
       <InitialConditionField formik={formik} label="Dissociation (kb)" name="kb" required />
       <InitialConditionField
@@ -476,6 +497,7 @@ function BDNucleationFields(props: { formik: SampleFormFormik }) {
   const { formik } = props;
   return (
     <>
+      <CommonFields formik={formik} />
       <InitialConditionField
         formik={formik}
         label="Growth-phase association (ka)"
@@ -560,10 +582,8 @@ type Values = BaseSample & {
 const SampleFormSchema = yup.object().shape({
   name: yup.string().max(50, 'Max characters is 50').required('Required'),
   model: yup.string().oneOf(modelTypes).required('Required'),
-  N: yup.number().required('Required'),
   tstop: yup.number().required('Required'),
   runs: yup.number().required('Required'),
-  Co: yup.number().required('Required'),
   ind_runs: yup.number(),
   bins: yup.number(),
   bin_scale: yup.string().oneOf(['log', 'linear'])
@@ -642,16 +662,7 @@ function SampleForm(props: SampleFormProps) {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />
-          <FormFieldLabel
-            label="Number of monomers (N)"
-            name="N"
-            type="number"
-            required
-            error={(formik.touched.N || submitted) && formik.errors.N}
-            value={formik.values.N || ''}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
+
           <FormFieldLabel
             label="Time to stop simulation"
             name="tstop"
@@ -672,17 +683,7 @@ function SampleForm(props: SampleFormProps) {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />
-          <FormFieldLabel
-            label="Bulk Concentration"
-            name="Co"
-            type="number"
-            required
-            help="Micromolar"
-            error={(formik.touched.Co || submitted) && formik.errors.Co}
-            value={formik.values.Co || ''}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
+
           <FormFieldLabel
             label="Stored Runs"
             name="ind_runs"
