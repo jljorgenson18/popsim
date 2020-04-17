@@ -151,6 +151,7 @@ export type SampleDoc = SamplePayload & {
   _id: string;
   _rev: string;
   createdAt: number;
+  initialConditionFields?: string[];
 };
 
 export type SampleData = Data;

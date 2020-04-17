@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FormField, Select, Heading } from 'grommet';
+import { FormField, Select, Heading, Box } from 'grommet';
 import { FormEdit } from 'grommet-icons';
 
 import { SampleDoc, SampleData, getSampleDataFromSample } from 'src/db/sample';
@@ -70,15 +70,17 @@ function Visualization(props: VisualizationProps) {
       {showingUpdateSampleName ? (
         <UpdateSampleNameModal sample={sample} onClear={() => setShowingUpdateSampleName(false)} />
       ) : null}
-      <FormField>
-        <Select
-          id="model-select"
-          placeholder="Select a model"
-          options={VizOptionTypes}
-          name="model"
-          onChange={evt => setCurrentViz(evt.value)}
-          value={currentViz || ''}></Select>
-      </FormField>
+      <Box width={{ max: '500px' }} margin={{ vertical: 'medium' }}>
+        <FormField>
+          <Select
+            id="viz-select"
+            placeholder="Select a Visualization"
+            options={VizOptionTypes}
+            name="visualization"
+            onChange={evt => setCurrentViz(evt.value)}
+            value={currentViz || ''}></Select>
+        </FormField>
+      </Box>
       {React.createElement(VizOptions[currentViz], {
         sample,
         data: sampleData

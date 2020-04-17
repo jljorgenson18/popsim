@@ -20,7 +20,8 @@ const parseInitialConditionField = memoize((inputVal: string) => {
 });
 
 const getAllSamplePayloadsFromValues = (values: Values): SamplePayload[] => {
-  const initialConditionValues = Object.keys(values.initialConditionFields).reduce<{
+  const initialConditionFields = Object.keys(values.initialConditionFields);
+  const initialConditionValues = initialConditionFields.reduce<{
     [field: string]: number[];
   }>((mapped, field) => {
     const parsed = parseInitialConditionField(values[field]);
@@ -47,6 +48,7 @@ const getAllSamplePayloadsFromValues = (values: Values): SamplePayload[] => {
     const payload = { ...restOfValues } as any;
     payload.name = `${values.name} (${mainIdx + 1})`;
     payload.group = values.name;
+    payload.initialConditionFields = initialConditionFields;
     let currentFieldIdx = mainIdx;
     initialConditionFieldsWithValues.forEach(field => {
       const parsedField = initialConditionValues[field];

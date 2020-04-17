@@ -33,6 +33,20 @@ function NameRenderer(props: { sample: SampleDoc; onEdit: () => void }) {
     </Box>
   );
 }
+
+function InitialConditionRenderer(props: { sample: SampleDoc }) {
+  const { sample } = props;
+  return (
+    <Text size="small" style={{ fontFamily: 'monospace' }}>
+      {sample.initialConditionFields
+        .map(field =>
+          (sample as any)[field] != null ? `${field}=${(sample as any)[field]}` : null
+        )
+        .filter(Boolean)
+        .join(', ')}
+    </Text>
+  );
+}
 function SampleList(props: SampleListProps): JSX.Element {
   const { fetching, allSamples } = props;
   const history = useHistory();
@@ -101,12 +115,14 @@ function SampleList(props: SampleListProps): JSX.Element {
           header: 'dark-3',
           body: ['light-1', 'light-3']
         }}
+        groupBy="group"
         columns={[
           {
             property: 'selected',
             sortable: false,
             header: <CheckBox checked={allSelected} onChange={handleHeaderSelectedChange} />,
             render(sample: SampleDoc) {
+              if (!sample._id) return null;
               return (
                 <CheckBox
                   checked={!!selected[sample._id]}
@@ -124,6 +140,10 @@ function SampleList(props: SampleListProps): JSX.Element {
             search: true,
             header: <Text>Name</Text>,
             render(sample: SampleDoc) {
+              // If it's the aggregated sample
+              if (!sample.name && sample.group) {
+                return <Text>{sample.group}</Text>;
+              }
               return <NameRenderer sample={sample} onEdit={() => setUpdatingSampleName(sample)} />;
             }
           },
@@ -137,10 +157,21 @@ function SampleList(props: SampleListProps): JSX.Element {
             header: <Text>Model</Text>
           },
           {
+            property: 'initialConditionFields',
+            header: <Text>Initial Conditions</Text>,
+            render(sample: SampleDoc) {
+              if (!Array.isArray(sample.initialConditionFields)) return null;
+              return <InitialConditionRenderer sample={sample} />;
+            }
+          },
+          {
             property: 'createdAt',
+            aggregate: 'avg',
             header: <Text>Created At</Text>,
             render(sample: SampleDoc) {
-              return <Text>{new Date(sample.createdAt).toLocaleString()}</Text>;
+              return sample.createdAt ? (
+                <Text>{new Date(sample.createdAt).toLocaleString()}</Text>
+              ) : null;
             }
           }
         ]}
