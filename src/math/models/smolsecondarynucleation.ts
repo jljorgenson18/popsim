@@ -168,7 +168,7 @@ export function buildModel(params: SmoluchowskiSecondaryPayload): GetProbabiliti
   }
   let k2 = 0;
   if (params.k2) {
-    k2 = params.k2 * Math.pow(params.Co, n2);
+    k2 = params.k2 * Math.pow(params.Co / params.N, n2);
   }
   if (params.phi) {
     const R = params.r1 / params.rc;
