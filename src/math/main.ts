@@ -541,6 +541,14 @@ export function simulate(payload: SamplePayload, onProgress?: (progress: number)
   const reactions: ReactionSeries = {};
   let sol: Solution;
   sol = { data: binnedSeries, datasq: binnedSquaredSeries, reactions: reactions };
+  ////////////////////
+  // shit to be updated later
+  ////////////////////
+  const saveRuns = false;
+  const saveSpecies = false;
+  ////////////////////
+  // end shit to be updated later
+  ////////////////////
   // Run simulation however many times is needed
   for (let i = 0; i < runs; i++) {
     if (onProgress) onProgress(i / runs);
@@ -550,7 +558,9 @@ export function simulate(payload: SamplePayload, onProgress?: (progress: number)
     const tSeries = run.data;
     // Store individual runs if desired
     if (i < payload.ind_runs) {
-      data.runs[i] = reduceIndividualRun(splitSpecies(tSeries), payload.bins, t_end);
+      if (saveRuns) {
+        data.runs[i] = reduceIndividualRun(splitSpecies(tSeries), payload.bins, t_end);
+      }
       if (payload.model === 'MP') {
         data.runMoments[i] = reduceIndividualMoments(mpAddToMoments([], tSeries), payload.bins);
       } else {
@@ -570,8 +580,10 @@ export function simulate(payload: SamplePayload, onProgress?: (progress: number)
   // Average data
   data.series = averageData(sol.data, runs);
   data.variance = splitSpecies(getVariance(sol, runs));
-  data.species = splitSpecies(data.series);
-  data.speciessq = splitSpecies(averageData(sol.datasq, runs));
+  if (saveSpecies) {
+    data.species = splitSpecies(data.series);
+    data.speciessq = splitSpecies(averageData(sol.datasq, runs));
+  }
   data.histograms = histSeries(data.series);
   data.moments = calculateMomentDevs(averageMoments(data.moments, runs));
   data.reactions = datifyReactions(normalizeReactions(sol.reactions, runs));
