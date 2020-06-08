@@ -578,13 +578,14 @@ export function simulate(payload: SamplePayload, onProgress?: (progress: number)
     }
   }
   // Average data
-  data.series = averageData(sol.data, runs);
-  data.variance = splitSpecies(getVariance(sol, runs));
+  //data.series = averageData(sol.data, runs);
+  const seriesData = averageData(sol.data, runs);
+  //data.variance = splitSpecies(getVariance(sol, runs));
   if (saveSpecies) {
-    data.species = splitSpecies(data.series);
+    data.species = splitSpecies(seriesData);
     data.speciessq = splitSpecies(averageData(sol.datasq, runs));
   }
-  data.histograms = histSeries(data.series);
+  data.histograms = histSeries(seriesData);
   data.moments = calculateMomentDevs(averageMoments(data.moments, runs));
   data.reactions = datifyReactions(normalizeReactions(sol.reactions, runs));
   // Below here can be done better but jank is fine for now
