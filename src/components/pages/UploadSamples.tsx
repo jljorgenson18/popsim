@@ -30,6 +30,7 @@ function UploadSamples(props: UploadSamplesProps) {
     history.push('/sample-list');
   }
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
     const sampleDocs = await Promise.all(acceptedFiles.map(getSampleDataFile));
     handleUploadSamples(sampleDocs);
   }, []);
@@ -40,7 +41,15 @@ function UploadSamples(props: UploadSamplesProps) {
   return (
     <Page align="center">
       <Heading level={2}>Upload Samples</Heading>
-      <Box {...getRootProps()} border pad="large" round="medium" elevation="small">
+      <Box
+        {...getRootProps()}
+        border
+        pad="large"
+        round="medium"
+        elevation="small"
+        width="medium"
+        direction="column"
+        align="center">
         <input {...getInputProps()} />
         {isDragActive ? (
           <Paragraph>Drop the files here ...</Paragraph>
