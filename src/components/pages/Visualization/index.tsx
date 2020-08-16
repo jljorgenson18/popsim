@@ -6,9 +6,7 @@ import { SampleDoc, SampleData, getSampleDataFromSample } from 'src/db/sample';
 import Mass from './Mass';
 import NumberChart from './Number';
 import Length from './Length';
-import Species from './Species';
 import Histogram from './Histogram';
-import Runs from './Runs';
 import Page from 'src/components/common/Page';
 import RawSampleData from './RawSampleData';
 import { useLocation } from 'react-router-dom';
@@ -23,9 +21,7 @@ const VizOptions = {
   Mass: Mass,
   Number: NumberChart,
   Length: Length,
-  Species: Species,
   Histogram: Histogram,
-  Runs: Runs,
   Reactions: Reactions,
   'Raw Sample Data': RawSampleData
 } as {
