@@ -441,7 +441,7 @@ function simRun(
   getProbabilities: GetProbabilitiesFunc
 ): Solution {
   let state = deepClone(initialState);
-  console.log('here');
+  console.log('Starting Run...');
   const t_series: TimeSeries = [initialState];
   const r_series: ReactionSeries = {};
   // simulate until end time is reached

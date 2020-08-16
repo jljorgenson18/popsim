@@ -129,7 +129,6 @@ function App(): JSX.Element {
             <MenuIcon
               style={{ height: 36, width: 36, cursor: 'pointer' }}
               onClick={() => {
-                console.log('Sidebar toggle click?');
                 setSidebarIsOpen(!sidebarIsOpen);
               }}
             />
