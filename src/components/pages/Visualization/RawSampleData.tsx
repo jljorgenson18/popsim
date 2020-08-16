@@ -18,6 +18,7 @@ function RawSampleData(props: VizProps) {
       theme="solarized"
       displayDataTypes={false}
       enableClipboard={false}
+      style={{ padding: 8 }}
     />
   );
 }

@@ -126,7 +126,7 @@ function SampleList(props: SampleListProps): JSX.Element {
             body: {
               side: 'bottom',
               size: 'small',
-              color: 'light-4'
+              color: '#BBB'
             }
           }}
           groupBy="groupByValue"

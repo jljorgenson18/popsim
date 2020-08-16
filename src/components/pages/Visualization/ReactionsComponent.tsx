@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { CheckBox, Box } from 'grommet';
 
-import { VizProps } from './types';
+import { VizProps, TimeSeriesData } from './types';
 import ControlField from './common/ControlField';
 import TimeSeriesChart from './common/TimeSeriesChart';
 import OverflowBox from './common/OverflowBox';
@@ -9,6 +9,10 @@ import OverflowBox from './common/OverflowBox';
 interface ReactionsOptions {
   [reactionsKey: string]: boolean;
 }
+
+const capitalize = (s: string) => {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
 
 function Reactions(props: VizProps) {
   const {
@@ -38,7 +42,7 @@ function Reactions(props: VizProps) {
       dataKeys={dataKeys}
       vizName="Reactions"
       sampleName={name}
-      data={data.reactions as any}
+      data={data.reactions as TimeSeriesData[]}
       controlElement={
         <Box direction="row" gap="large" align="start">
           <ControlField
@@ -51,7 +55,7 @@ function Reactions(props: VizProps) {
                     <CheckBox
                       key={key}
                       checked={display}
-                      label={key}
+                      label={capitalize(key)}
                       onChange={event => {
                         setReactionsOptions({
                           ...reactionsOptions,
