@@ -15,7 +15,7 @@ export const useScaleInputField = (name: string) => {
       { id: `${name}-log`, value: 'log', label: 'Log' }
     ],
     scale: scale,
-    onChange: (evt: ChangeEvent) => {
+    onChange: (evt: ChangeEvent<HTMLInputElement>) => {
       setScale((evt.target as any).value);
     }
   };

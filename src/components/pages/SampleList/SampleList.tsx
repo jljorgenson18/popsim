@@ -9,6 +9,7 @@ import Page from 'src/components/common/Page';
 import DeleteSamplePrompt from './DeleteSamplePrompt';
 import { downloadSample } from 'src/utils';
 import UpdateSampleNameModal from 'src/components/common/UpdateSampleNameModal';
+import styled from 'styled-components';
 
 interface SampleListProps {
   allSamples?: SampleDoc[];
@@ -47,6 +48,15 @@ function InitialConditionRenderer(props: { sample: SampleDoc }) {
     </Text>
   );
 }
+
+const DataTableWrapper = styled.div`
+  /* Just grabbing the expander cells to make them better aligned */
+  thead td,
+  tbody td {
+    vertical-align: middle;
+  }
+`;
+
 function SampleList(props: SampleListProps): JSX.Element {
   const { fetching, allSamples } = props;
   const history = useHistory();
@@ -107,75 +117,88 @@ function SampleList(props: SampleListProps): JSX.Element {
           disabled={selectedIds.length === 0}
         />
       </Box>
-      <DataTable
-        primaryKey="_id"
-        sortable
-        pad={{ horizontal: 'medium', vertical: 'small' }}
-        background={{
-          header: 'dark-3',
-          body: ['light-1', 'light-3']
-        }}
-        groupBy="group"
-        columns={[
-          {
-            property: 'selected',
-            sortable: false,
-            header: <CheckBox checked={allSelected} onChange={handleHeaderSelectedChange} />,
-            render(sample: SampleDoc) {
-              if (!sample._id) return null;
-              return (
-                <CheckBox
-                  checked={!!selected[sample._id]}
-                  onChange={event => {
-                    setSelected({
-                      ...selected,
-                      [sample._id]: event.target.checked
-                    });
-                  }}></CheckBox>
-              );
+      <DataTableWrapper>
+        <DataTable
+          primaryKey="_id"
+          sortable
+          pad={{ horizontal: 'medium', vertical: 'small' }}
+          border={{
+            body: {
+              side: 'bottom',
+              size: 'small',
+              color: 'light-4'
             }
-          },
-          {
-            property: 'name',
-            search: true,
-            header: <Text>Name</Text>,
-            render(sample: SampleDoc) {
-              // If it's the aggregated sample
-              if (!sample.name && sample.group) {
-                return <Text>{sample.group}</Text>;
+          }}
+          groupBy="groupByValue"
+          columns={[
+            {
+              property: 'selected',
+              sortable: false,
+              header: <CheckBox checked={allSelected} onChange={handleHeaderSelectedChange} />,
+              render(sample: SampleDoc) {
+                if (!sample._id) return null;
+                return (
+                  <CheckBox
+                    checked={!!selected[sample._id]}
+                    onChange={event => {
+                      setSelected({
+                        ...selected,
+                        [sample._id]: event.target.checked
+                      });
+                    }}></CheckBox>
+                );
               }
-              return <NameRenderer sample={sample} onEdit={() => setUpdatingSampleName(sample)} />;
+            },
+            {
+              property: 'name',
+              search: true,
+              header: <Text>Name</Text>,
+              render(sample) {
+                // If it's the aggregated sample
+                if (!sample._id && (sample.group || sample.groupByValue)) {
+                  return <Text>{sample.group || sample.groupByValue}</Text>;
+                }
+                return (
+                  <NameRenderer sample={sample} onEdit={() => setUpdatingSampleName(sample)} />
+                );
+              }
+            },
+            {
+              property: 'group',
+              search: true,
+              header: <Text>Group</Text>,
+              render(sample: any) {
+                return !sample._id ? sample.groupByValue : sample.group;
+              }
+            },
+            {
+              property: 'model',
+              header: <Text>Model</Text>
+            },
+            {
+              property: 'initialConditionFields',
+              size: 'medium',
+              header: <Text>Initial Conditions</Text>,
+              render(sample: SampleDoc) {
+                if (!Array.isArray(sample.initialConditionFields)) return null;
+                return <InitialConditionRenderer sample={sample} />;
+              }
+            },
+            {
+              property: 'createdAt',
+              aggregate: 'max',
+              size: 'small',
+              header: <Text>Created At</Text>,
+              render(sample: SampleDoc) {
+                return sample.createdAt ? (
+                  <Text>{new Date(sample.createdAt).toLocaleString()}</Text>
+                ) : null;
+              }
             }
-          },
-          {
-            property: 'group',
-            search: true,
-            header: <Text>Group</Text>
-          },
-          {
-            property: 'model',
-            header: <Text>Model</Text>
-          },
-          {
-            property: 'initialConditionFields',
-            header: <Text>Initial Conditions</Text>,
-            render(sample: SampleDoc) {
-              if (!Array.isArray(sample.initialConditionFields)) return null;
-              return <InitialConditionRenderer sample={sample} />;
-            }
-          },
-          {
-            property: 'createdAt',
-            aggregate: 'avg',
-            header: <Text>Created At</Text>,
-            render(sample: SampleDoc) {
-              return sample.createdAt ? (
-                <Text>{new Date(sample.createdAt).toLocaleString()}</Text>
-              ) : null;
-            }
-          }
-        ]}
-        data={allSamples}></DataTable>
+          ]}
+          data={allSamples}></DataTable>
+      </DataTableWrapper>
+
       {deletingSample ? (
         <DeleteSamplePrompt sampleIds={selectedIds} onClear={() => setDeletingSample(null)} />
       ) : null}

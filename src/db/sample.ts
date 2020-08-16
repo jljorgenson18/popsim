@@ -10,6 +10,7 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export interface BaseSample {
   name: string;
   group?: string;
+  groupByValue?: string;
   N: number; // Number of monomers (int)
   tstop: number; // Time to stop simulation. Could also do a total number of steps to generate
   runs: number; // Number of simulation runs
@@ -244,7 +245,12 @@ export async function getAllSamples(): Promise<SampleDoc[]> {
     include_docs: true,
     descending: true
   });
-  return result.rows.map(row => row.doc as SampleDoc).sort((a, b) => b.createdAt - a.createdAt);
+  return result.rows
+    .map(row => {
+      row.doc.groupByValue = row.doc.group || row.doc._id;
+      return row.doc;
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
 }
 
 const isSampleDocWithData = (sample: SampleDoc): sample is SampleDocWithData => {

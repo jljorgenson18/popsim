@@ -776,7 +776,9 @@ function SampleForm(props: SampleFormProps) {
           onEsc={() => setShowingErrorModal(null)}>
           <Box pad="large">
             <Heading level={3}>Something went wrong</Heading>
-            <Paragraph>{`Error: ${showingErrorModal.message}`}</Paragraph>
+            {process.env.NODE_ENV === 'development' ? (
+              <Paragraph>{`Error: ${showingErrorModal.message}`}</Paragraph>
+            ) : null}
           </Box>
         </Layer>
       ) : null}
