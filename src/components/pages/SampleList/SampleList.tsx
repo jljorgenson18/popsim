@@ -26,7 +26,7 @@ function NameRenderer(props: { sample: SampleDoc; onEdit: () => void }) {
       justify="stretch"
       onMouseEnter={() => setHoveringOverName(true)}
       onMouseLeave={() => setHoveringOverName(false)}>
-      <Text>{sample.name}</Text>
+      <Text wordBreak="break-word">{sample.name}</Text>
       <FormEdit
         style={{ cursor: 'pointer', visibility: hoveringOverName ? 'visible' : 'hidden' }}
         onClick={() => onEdit()}
@@ -152,11 +152,12 @@ function SampleList(props: SampleListProps): JSX.Element {
             {
               property: 'name',
               search: true,
+              size: 'small',
               header: <Text>Name</Text>,
               render(sample) {
                 // If it's the aggregated sample
                 if (!sample._id && (sample.group || sample.groupByValue)) {
-                  return <Text>{sample.group || sample.groupByValue}</Text>;
+                  return <Text wordBreak="break-word">{sample.group || sample.groupByValue}</Text>;
                 }
                 return (
                   <NameRenderer sample={sample} onEdit={() => setUpdatingSampleName(sample)} />
@@ -166,9 +167,14 @@ function SampleList(props: SampleListProps): JSX.Element {
             {
               property: 'group',
               search: true,
+              size: 'small',
               header: <Text>Group</Text>,
               render(sample: any) {
-                return !sample._id ? sample.groupByValue : sample.group;
+                return (
+                  <Text wordBreak="break-word">
+                    {!sample._id ? sample.groupByValue : sample.group}
+                  </Text>
+                );
               }
             },
             {
@@ -177,7 +183,6 @@ function SampleList(props: SampleListProps): JSX.Element {
             },
             {
               property: 'initialConditionFields',
-              size: 'medium',
               header: <Text>Initial Conditions</Text>,
               render(sample: SampleDoc) {
                 if (!Array.isArray(sample.initialConditionFields)) return null;
